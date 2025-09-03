@@ -1,30 +1,57 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminGate from '@/components/auth/AdminGate';
 import AdminHeader from '@/components/layout/AdminHeader';
 import EventTabs from '@/components/admin/EventTabs';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend } from 'recharts';
+import {
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  BarChart, Bar, PieChart, Pie, Legend
+} from 'recharts';
 import { toast } from 'sonner';
+
+// ---- Types ----------
+type Totals = {
+  orders: number;
+  drinks: number;
+  unique_customers: number;
+  period?: { from: string | null; to: string | null } | null;
+};
+
+type ItemRow = { item_id: string; item_name: string; qty: number };
+type CatRow  = { category_id: string; category_name: string; qty: number };
+type OptRow  = { option_name: string; qty: number };
+type Point   = { ts: string; drinks: number };
+// ----------------------
 
 export default function EventStatsPage({ params }: { params: { id: string } }) {
   const eventId = params.id;
-  const [totals, setTotals] = useState<any>(null);
-  const [items, setItems] = useState<any[]>([]);
-  const [cats, setCats] = useState<any[]>([]);
-  const [opts, setOpts] = useState<any[]>([]);
-  const [ts, setTs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [closing, setClosing] = useState(false);
-  const [filter, setFilter] = useState('');
 
-  const filteredItems = (items || []).filter((it: any) =>
-    it.item_name.toLowerCase().includes(filter.toLowerCase())
+  const [totals, setTotals] = useState<Totals | null>(null);
+  const [items, setItems]   = useState<ItemRow[]>([]);
+  const [cats, setCats]     = useState<CatRow[]>([]);
+  const [opts, setOpts]     = useState<OptRow[]>([]);
+  const [ts, setTs]         = useState<Point[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [closing, setClosing]   = useState(false);
+  const [filter, setFilter]     = useState('');
+
+  const filteredItems = useMemo(
+    () => items.filter((it) =>
+      it.item_name.toLowerCase().includes(filter.toLowerCase())
+    ),
+    [items, filter]
   );
 
   function exportCSV() {
-    const rows = [['Item', 'Quantité'], ...filteredItems.map((r: any) => [r.item_name, String(r.qty)])];
-    const csv = rows.map(r => r.map(v => `"${(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
+    const rows: (string | number)[][] = [
+      ['Item', 'Quantité'],
+      ...filteredItems.map((r) => [r.item_name, String(r.qty)]),
+    ];
+    const csv = rows
+      .map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -34,31 +61,31 @@ export default function EventStatsPage({ params }: { params: { id: string } }) {
     URL.revokeObjectURL(url);
   }
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const t = await supabase.rpc('admin_event_totals', { p_event_id: eventId });
-      const i = await supabase.rpc('admin_event_items_breakdown', { p_event_id: eventId });
-      const c = await supabase.rpc('admin_event_categories_breakdown', { p_event_id: eventId });
-      const o = await supabase.rpc('admin_event_options_breakdown', { p_event_id: eventId });
-      const s = await supabase.rpc('admin_event_timeseries', { p_event_id: eventId });
-      
-      setTotals(t.data || null);
-      setItems(i.data || []);
-      setCats(c.data || []);
-      setOpts((o.data || []).slice(0, 5));
-      setTs(s.data || []);
+      const [t, i, c, o, s] = await Promise.all([
+        supabase.rpc('admin_event_totals', { p_event_id: eventId }),
+        supabase.rpc('admin_event_items_breakdown', { p_event_id: eventId }),
+        supabase.rpc('admin_event_categories_breakdown', { p_event_id: eventId }),
+        supabase.rpc('admin_event_options_breakdown', { p_event_id: eventId }),
+        supabase.rpc('admin_event_timeseries', { p_event_id: eventId }),
+      ]);
+
+      setTotals((t.data as Totals) ?? null);
+      setItems((i.data as ItemRow[]) ?? []);
+      setCats((c.data as CatRow[]) ?? []);
+      setOpts(((o.data as OptRow[]) ?? []).slice(0, 5));
+      setTs((s.data as Point[]) ?? []);
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
       toast.error('Erreur lors du chargement des données');
     } finally {
       setLoading(false);
     }
-  }
-
-  useEffect(() => { 
-    load(); 
   }, [eventId]);
+
+  useEffect(() => { load(); }, [load]);
 
   async function closeEvent() {
     setClosing(true);
@@ -94,12 +121,12 @@ export default function EventStatsPage({ params }: { params: { id: string } }) {
         <AdminHeader title="Wild Stats" />
         <div className="flex items-center justify-between mb-2">
           <EventTabs id={eventId} />
-          <button 
-            onClick={closeEvent} 
-            disabled={closing} 
+          <button
+            onClick={closeEvent}
+            disabled={closing}
             className="h-10 px-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {closing ? 'Clôture…' : 'Clôturer l\'event'}
+            {closing ? 'Clôture…' : "Clôturer l'event"}
           </button>
         </div>
 
@@ -120,7 +147,7 @@ export default function EventStatsPage({ params }: { params: { id: string } }) {
           <div className="border rounded-lg p-4 shadow-sm">
             <div className="text-xs text-neutral-500">Period</div>
             <div className="text-sm">
-              {totals?.period?.from ? totals.period.from.slice(0, 16) : 'N/A'} 
+              {totals?.period?.from ? totals.period.from.slice(0, 16) : 'N/A'}
               {totals?.period?.to && ` → ${totals.period.to.slice(0, 16)}`}
             </div>
           </div>
@@ -135,28 +162,27 @@ export default function EventStatsPage({ params }: { params: { id: string } }) {
                 <XAxis dataKey="item_name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="qty" fill="#8884d8" />
+                <Bar dataKey="qty" />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          
+
           <div className="border rounded-lg p-4 shadow-sm">
             <div className="text-sm font-semibold mb-2">Categories</div>
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
-                <Pie 
-                  dataKey="qty" 
-                  nameKey="category_name" 
-                  data={cats} 
+                <Pie
+                  dataKey="qty"
+                  nameKey="category_name"
+                  data={cats}
                   outerRadius={80}
-                  fill="#8884d8"
                 />
                 <Tooltip />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
           </div>
-          
+
           <div className="border rounded-lg p-4 shadow-sm">
             <div className="text-sm font-semibold mb-2">Top Options</div>
             <ResponsiveContainer width="100%" height={240}>
@@ -164,7 +190,7 @@ export default function EventStatsPage({ params }: { params: { id: string } }) {
                 <XAxis dataKey="option_name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="qty" fill="#82ca9d" />
+                <Bar dataKey="qty" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -178,7 +204,7 @@ export default function EventStatsPage({ params }: { params: { id: string } }) {
               <XAxis dataKey="ts" />
               <YAxis />
               <Tooltip />
-              <Line type="monotone" dataKey="drinks" stroke="#8884d8" strokeWidth={2} />
+              <Line type="monotone" dataKey="drinks" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -208,7 +234,7 @@ export default function EventStatsPage({ params }: { params: { id: string } }) {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {filteredItems.map((r: any) => (
+                {filteredItems.map((r) => (
                   <tr key={r.item_id}>
                     <td className="py-2">{r.item_name}</td>
                     <td className="py-2 text-right font-medium">{r.qty}</td>
