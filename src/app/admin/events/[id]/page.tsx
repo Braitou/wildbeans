@@ -1,149 +1,155 @@
 'use client';
-import { useCallback, useEffect, useState, useMemo, useRef, use } from 'react';
-import { useRouter } from 'next/navigation';
-import { QRCodeCanvas } from 'qrcode.react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminGate from '@/components/auth/AdminGate';
 import AdminHeader from '@/components/layout/AdminHeader';
 import EventTabs from '@/components/admin/EventTabs';
-import Link from 'next/link';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
+type EventForm = {
+  id?: string | null;
+  name: string;
+  slug: string;
+  join_code: string;
+  kitchen_code: string;
+  starts_at: string | null; // ISO
+  ends_at: string | null;   // ISO
+};
 
-export default function EventDetailPage({ params }: PageProps) {
-  const { id } = use(params);
+export default function EventDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [closing, setClosing] = useState(false);
-  const [origin, setOrigin] = useState('');
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  
+  const id = params.id;
   const isNew = id === 'new';
-  
-  // Form state
-  const [formData, setFormData] = useState({
+
+  const [form, setForm] = useState<EventForm>({
+    id: null,
     name: '',
     slug: '',
     join_code: '',
     kitchen_code: '',
-    starts_at: '',
-    ends_at: ''
+    starts_at: null,
+    ends_at: null,
   });
+  const [loading, setLoading] = useState<boolean>(!!(!isNew));
+  const [saving, setSaving] = useState(false);
+  const [closing, setClosing] = useState(false);
+
+  // util : slugify à partir du nom (simple)
+  function slugify(s: string) {
+    return s
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+  }
 
   const loadEvent = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error) {
-        console.error('Erreur lors du chargement:', error);
-        return;
-      }
-      
-      setFormData({
-        name: data.name || '',
-        slug: data.slug || '',
-        join_code: data.join_code || '',
-        kitchen_code: data.kitchen_code || '',
-        starts_at: data.starts_at ? data.starts_at.slice(0, 16) : '',
-        ends_at: data.ends_at ? data.ends_at.slice(0, 16) : ''
-      });
-    } catch (err) {
-      console.error('Erreur:', err);
-    } finally {
-      setLoading(false);
+    if (isNew) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('events')
+      .select('id,name,slug,join_code,kitchen_code,starts_at,ends_at')
+      .eq('id', id)
+      .maybeSingle();
+
+    setLoading(false);
+
+    if (error) {
+      console.error(error);
+      toast.error('Erreur lors du chargement');
+      return;
     }
-  }, [id]);
+    if (data) {
+      setForm({
+        id: data.id,
+        name: data.name ?? '',
+        slug: data.slug ?? '',
+        join_code: data.join_code ?? '',
+        kitchen_code: data.kitchen_code ?? '',
+        starts_at: data.starts_at,
+        ends_at: data.ends_at,
+      });
+    }
+  }, [id, isNew]);
 
   useEffect(() => {
-    setOrigin(window.location.origin);
-    
-    if (!isNew) {
-      loadEvent();
-    } else {
-      setLoading(false);
+    loadEvent();
+  }, [loadEvent]);
+
+  // Auto-générer slug & codes si vides
+  useEffect(() => {
+    setForm(f => {
+      let next = { ...f };
+      if (isNew) {
+        if (f.name && !f.slug) next.slug = slugify(f.name);
+        if (!f.join_code) next.join_code = 'WB1';
+        if (!f.kitchen_code) next.kitchen_code = 'KITCHEN1';
+      }
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.name, isNew]);
+
+  async function save() {
+    if (!form.name || !form.slug) {
+      toast.error('Nom et slug sont requis');
+      return;
     }
-  }, [loadEvent, isNew]);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
     setSaving(true);
-    
     try {
-      const eventData = {
-        ...(isNew ? {} : { id: id }),
-        name: formData.name,
-        slug: formData.slug,
-        join_code: formData.join_code,
-        kitchen_code: formData.kitchen_code,
-        starts_at: formData.starts_at || null,
-        ends_at: formData.ends_at || null
-      };
+      const { data, error } = await supabase.rpc('admin_upsert_event', {
+        p_id: isNew ? null : form.id,
+        p_name: form.name,
+        p_slug: form.slug,
+        p_join_code: form.join_code || 'WB1',
+        p_kitchen_code: form.kitchen_code || 'KITCHEN1',
+        p_starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : null,
+        p_ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
+      });
 
-      const { data, error } = await supabase.rpc('admin_upsert_event', eventData);
-      
       if (error) {
-        console.error('Erreur lors de la sauvegarde:', error);
-        toast.error('Erreur lors de l\'enregistrement ❌');
+        // ✨ Ajoute ceci pour voir l'erreur exacte
+        console.error('admin_upsert_event error:', error);
+        if (error.message?.includes('SLUG_TAKEN')) {
+          toast.error('Ce slug est déjà utilisé, choisis-en un autre.');
+        } else {
+          toast.error(`Erreur lors de l'enregistrement: ${error.message}`);
+        }
         return;
       }
-      
-      toast.success('Événement enregistré ✅');
-      // Rediriger vers l'événement créé/modifié
-      router.push(`/admin/events/${data.id}`);
-    } catch (err) {
-      console.error('Erreur:', err);
-      toast.error('Erreur lors de l\'enregistrement ❌');
+
+      toast.success('Enregistré ✅');
+
+      // rediriger sur la page de l'event fraichement créé si c'était "new"
+      if (isNew && data?.id) {
+        router.replace(`/admin/events/${data.id}`);
+      } else {
+        // recharger
+        loadEvent();
+      }
     } finally {
       setSaving(false);
     }
   }
 
-  const qrUrl = useMemo(() => {
-    if (!origin || !formData.slug || !formData.join_code) return '';
-    return `${origin}/e/${encodeURIComponent(formData.slug)}?join=${encodeURIComponent(formData.join_code)}`;
-  }, [origin, formData.slug, formData.join_code]);
-
-  function downloadQR() {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
-    link.download = `wildbeans-qr-${formData.slug}.png`;
-    link.click();
-    toast.success('QR Code téléchargé 📷');
-  }
-
   async function closeEvent() {
     setClosing(true);
-    try {
-      const { error } = await supabase.rpc('admin_close_event', { p_event_id: id });
-      if (error) {
-        toast.error('Erreur: ' + error.message);
-        return;
-      }
-      toast.success('Évènement clôturé ✅');
-      loadEvent();
-    } catch (error) {
-      console.error('Erreur lors de la clôture:', error);
-      toast.error('Erreur lors de la clôture');
-    } finally {
-      setClosing(false);
+    const { error } = await supabase.rpc('admin_close_event', { p_event_id: isNew ? null : id });
+    setClosing(false);
+    if (error) {
+      toast.error('Erreur: ' + error.message);
+      return;
     }
+    toast.success('Évènement clôturé ✅');
+    loadEvent();
   }
 
   if (loading) {
     return (
       <AdminGate>
-        <main className="max-w-2xl mx-auto px-4 py-8">
-          <div className="text-center">Chargement...</div>
+        <main className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center">Chargement…</div>
         </main>
       </AdminGate>
     );
@@ -151,129 +157,94 @@ export default function EventDetailPage({ params }: PageProps) {
 
   return (
     <AdminGate>
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        <AdminHeader title={isNew ? 'Nouvel Event' : 'Event'} />
-        
-        {!isNew && (
-          <div className="flex items-center justify-between mb-2">
-            <EventTabs id={id} />
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        <AdminHeader title="Event" />
+        <div className="flex items-center justify-between mb-2">
+          {!isNew && <EventTabs id={id} />}
+          {!isNew && (
             <button
               onClick={closeEvent}
               disabled={closing}
-              className="h-10 px-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-10 px-3 border rounded-md hover:bg-gray-50"
             >
-              {closing ? 'Clôture…' : 'Clôturer l&apos;event'}
+              {closing ? 'Clôture…' : 'Clôturer l\'event'}
             </button>
-          </div>
-        )}
-        
-        <div className="mb-6 flex items-center justify-end">
-          {!isNew && (
-            <Link 
-              href={`/admin/events/${id}/menu`}
-              className="h-10 px-3 border rounded-md hover:bg-gray-50 flex items-center"
-            >
-              Configurer le menu
-            </Link>
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Nom</label>
+        <section className="grid gap-4">
+          <div className="grid gap-2">
+            <label className="text-sm">Nom</label>
             <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-              required
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Mariage Claire & Max"
+              className="h-11 px-3 border border-gray-300 rounded-md"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Slug</label>
+          <div className="grid gap-2">
+            <label className="text-sm">Slug (URL)</label>
             <input
-              type="text"
-              value={formData.slug}
-              onChange={(e) => setFormData({...formData, slug: e.target.value})}
-              className="w-full h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-              required
+              value={form.slug}
+              onChange={(e) => setForm({ ...form, slug: e.target.value })}
+              placeholder="mariage-claire-max"
+              className="h-11 px-3 border border-gray-300 rounded-md"
+            />
+            <p className="text-xs text-neutral-500">URL : /e/{'{slug}'}?join={'{code}'}</p>
+          </div>
+
+          <div className="grid gap-2">
+            <label className="text-sm">Code join (client)</label>
+            <input
+              value={form.join_code}
+              onChange={(e) => setForm({ ...form, join_code: e.target.value })}
+              placeholder="WB1"
+              className="h-11 px-3 border border-gray-300 rounded-md"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Code Join</label>
-              <input
-                type="text"
-                value={formData.join_code}
-                onChange={(e) => setFormData({...formData, join_code: e.target.value})}
-                className="w-full h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Code Kitchen</label>
-              <input
-                type="text"
-                value={formData.kitchen_code}
-                onChange={(e) => setFormData({...formData, kitchen_code: e.target.value})}
-                className="w-full h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                required
-              />
-            </div>
+          <div className="grid gap-2">
+            <label className="text-sm">Code kitchen (barista)</label>
+            <input
+              value={form.kitchen_code}
+              onChange={(e) => setForm({ ...form, kitchen_code: e.target.value })}
+              placeholder="KITCHEN1"
+              className="h-11 px-3 border border-gray-300 rounded-md"
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Date de début</label>
+          <div className="grid gap-2 md:grid-cols-2">
+            <div className="grid gap-2">
+              <label className="text-sm">Début (optionnel)</label>
               <input
                 type="datetime-local"
-                value={formData.starts_at}
-                onChange={(e) => setFormData({...formData, starts_at: e.target.value})}
-                className="w-full h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                value={form.starts_at ?? ''}
+                onChange={(e) => setForm({ ...form, starts_at: e.target.value || null })}
+                className="h-11 px-3 border border-gray-300 rounded-md"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Date de fin</label>
+            <div className="grid gap-2">
+              <label className="text-sm">Fin (optionnel)</label>
               <input
                 type="datetime-local"
-                value={formData.ends_at}
-                onChange={(e) => setFormData({...formData, ends_at: e.target.value})}
-                className="w-full h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                value={form.ends_at ?? ''}
+                onChange={(e) => setForm({ ...form, ends_at: e.target.value || null })}
+                className="h-11 px-3 border border-gray-300 rounded-md"
               />
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full h-11 rounded-md bg-black text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? 'Enregistrement...' : 'Enregistrer'}
-          </button>
-        </form>
-
-        {/* Section QR */}
-        {!isNew && qrUrl && (
-          <div className="mt-8 pt-8 border-t">
-            <h2 className="text-sm font-semibold tracking-[0.22em] uppercase mb-4">
-              QR Code
-            </h2>
-            <div className="flex flex-col items-center gap-3">
-              <div className="p-4 border border-gray-200 rounded-lg">
-                <QRCodeCanvas value={qrUrl} size={256} includeMargin ref={canvasRef} />
-              </div>
-              <button 
-                onClick={downloadQR}
-                className="h-11 px-4 rounded-md bg-black text-white hover:bg-gray-800 transition-colors"
-              >
-                Download PNG
-              </button>
-              <p className="text-sm text-neutral-600 break-all mt-1">{qrUrl}</p>
-            </div>
+          <div className="pt-2">
+            <button
+              onClick={save}
+              disabled={saving}
+              className="h-11 px-5 rounded-md bg-black text-white hover:bg-neutral-800 disabled:opacity-50"
+            >
+              {saving ? 'Enregistrement…' : 'Enregistrer'}
+            </button>
           </div>
-        )}
+        </section>
       </main>
     </AdminGate>
   );
