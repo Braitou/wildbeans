@@ -4,7 +4,6 @@ import { supabase } from '@/lib/supabase';
 import AdminGate from '@/components/auth/AdminGate';
 import AdminHeader from '@/components/layout/AdminHeader';
 import Link from 'next/link';
-import { toast } from 'sonner';
 
 type EventRow = { 
   id: string; 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, use } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminGate from '@/components/auth/AdminGate';
 import AdminHeader from '@/components/layout/AdminHeader';
@@ -11,7 +11,6 @@ import {
 } from 'recharts';
 import { toast } from 'sonner';
 
-// ---- Types ----------
 type Totals = {
   orders: number;
   drinks: number;
@@ -23,10 +22,13 @@ type ItemRow = { item_id: string; item_name: string; qty: number };
 type CatRow  = { category_id: string; category_name: string; qty: number };
 type OptRow  = { option_name: string; qty: number };
 type Point   = { ts: string; drinks: number };
-// ----------------------
 
-export default function EventStatsPage({ params }: { params: { id: string } }) {
-  const eventId = params.id;
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function EventStatsPage({ params }: PageProps) {
+  const { id: eventId } = use(params);
 
   const [totals, setTotals] = useState<Totals | null>(null);
   const [items, setItems]   = useState<ItemRow[]>([]);
@@ -130,7 +132,6 @@ export default function EventStatsPage({ params }: { params: { id: string } }) {
           </button>
         </div>
 
-        {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
           <div className="border rounded-lg p-4 shadow-sm">
             <div className="text-xs text-neutral-500">Orders</div>
@@ -153,7 +154,6 @@ export default function EventStatsPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        {/* Graphs */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
           <div className="border rounded-lg p-4 shadow-sm">
             <div className="text-sm font-semibold mb-2">Top Drinks</div>
@@ -196,7 +196,6 @@ export default function EventStatsPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        {/* Timeseries */}
         <div className="border rounded-lg p-4 shadow-sm mt-6">
           <div className="text-sm font-semibold mb-2">Drinks per hour</div>
           <ResponsiveContainer width="100%" height={260}>
@@ -209,7 +208,6 @@ export default function EventStatsPage({ params }: { params: { id: string } }) {
           </ResponsiveContainer>
         </div>
 
-        {/* Tableau des boissons */}
         <div className="mt-6 border rounded-lg p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-semibold">Boissons (quantités)</div>

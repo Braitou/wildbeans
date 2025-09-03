@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
+
+import { useCallback, useEffect, useState, use } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminGate from '@/components/auth/AdminGate';
 import AdminHeader from '@/components/layout/AdminHeader';
@@ -21,19 +22,20 @@ type Category = {
   items: MenuItem[];
 };
 
-export default function EventMenuPage({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function EventMenuPage({ params }: PageProps) {
+  const { id } = use(params);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadMenuItems();
-  }, [params.id]);
-
-  async function loadMenuItems() {
+  const loadMenuItems = useCallback(async () => {
     try {
       const { data, error } = await supabase.rpc('admin_list_items_for_event', {
-        p_event_id: params.id
+        p_event_id: id
       });
       
       if (error) {
@@ -62,13 +64,17 @@ export default function EventMenuPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [id]);
+
+  useEffect(() => {
+    loadMenuItems();
+  }, [loadMenuItems]);
 
   async function toggleItem(itemId: string, enabled: boolean) {
     setUpdating(itemId);
     try {
       const { error } = await supabase.rpc('admin_set_item_enabled', {
-        p_event_id: params.id,
+        p_event_id: id,
         p_item_id: itemId,
         p_enabled: enabled
       });
@@ -105,7 +111,7 @@ export default function EventMenuPage({ params }: { params: { id: string } }) {
       // Mettre à jour tous les items de la catégorie
       const promises = category.items.map(item => 
         supabase.rpc('admin_set_item_enabled', {
-          p_event_id: params.id,
+          p_event_id: id,
           p_item_id: item.id,
           p_enabled: enabled
         })
@@ -143,14 +149,14 @@ export default function EventMenuPage({ params }: { params: { id: string } }) {
     <AdminGate>
       <main className="max-w-4xl mx-auto px-4 py-8">
         <AdminHeader title="Menu" />
-        <EventTabs id={params.id} />
+        <EventTabs id={id} />
         
         <div className="mb-6 flex items-center justify-end">
           <Link 
-            href={`/admin/events/${params.id}`}
+            href={`/admin/events/${id}`}
             className="h-10 px-3 border rounded-md hover:bg-gray-50 flex items-center"
           >
-            Retour à l'événement
+            Retour à l&apos;événement
           </Link>
         </div>
 

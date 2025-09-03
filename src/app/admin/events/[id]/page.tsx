@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useState, useMemo, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { QRCodeCanvas } from 'qrcode.react';
 import { supabase } from '@/lib/supabase';
@@ -9,26 +9,20 @@ import EventTabs from '@/components/admin/EventTabs';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
-type Event = {
-  id: string;
-  name: string;
-  slug: string;
-  join_code: string;
-  kitchen_code: string;
-  starts_at: string|null;
-  ends_at: string|null;
-};
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-export default function EventDetailPage({ params }: { params: { id: string } }) {
+export default function EventDetailPage({ params }: PageProps) {
+  const { id } = use(params);
   const router = useRouter();
-  const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [closing, setClosing] = useState(false);
   const [origin, setOrigin] = useState('');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   
-  const isNew = params.id === 'new';
+  const isNew = id === 'new';
   
   // Form state
   const [formData, setFormData] = useState({
@@ -40,22 +34,12 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     ends_at: ''
   });
 
-  useEffect(() => {
-    setOrigin(window.location.origin);
-    
-    if (!isNew) {
-      loadEvent();
-    } else {
-      setLoading(false);
-    }
-  }, [params.id]);
-
-  async function loadEvent() {
+  const loadEvent = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single();
       
       if (error) {
@@ -63,7 +47,6 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         return;
       }
       
-      setEvent(data);
       setFormData({
         name: data.name || '',
         slug: data.slug || '',
@@ -77,7 +60,17 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     } finally {
       setLoading(false);
     }
-  }
+  }, [id]);
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+    
+    if (!isNew) {
+      loadEvent();
+    } else {
+      setLoading(false);
+    }
+  }, [loadEvent, isNew]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -85,7 +78,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     
     try {
       const eventData = {
-        ...(isNew ? {} : { id: params.id }),
+        ...(isNew ? {} : { id: id }),
         name: formData.name,
         slug: formData.slug,
         join_code: formData.join_code,
@@ -131,7 +124,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   async function closeEvent() {
     setClosing(true);
     try {
-      const { error } = await supabase.rpc('admin_close_event', { p_event_id: params.id });
+      const { error } = await supabase.rpc('admin_close_event', { p_event_id: id });
       if (error) {
         toast.error('Erreur: ' + error.message);
         return;
@@ -163,13 +156,13 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         
         {!isNew && (
           <div className="flex items-center justify-between mb-2">
-            <EventTabs id={params.id} />
+            <EventTabs id={id} />
             <button
               onClick={closeEvent}
               disabled={closing}
               className="h-10 px-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {closing ? 'Clôture…' : 'Clôturer l\'event'}
+              {closing ? 'Clôture…' : 'Clôturer l&apos;event'}
             </button>
           </div>
         )}
@@ -177,7 +170,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         <div className="mb-6 flex items-center justify-end">
           {!isNew && (
             <Link 
-              href={`/admin/events/${params.id}/menu`}
+              href={`/admin/events/${id}/menu`}
               className="h-10 px-3 border rounded-md hover:bg-gray-50 flex items-center"
             >
               Configurer le menu

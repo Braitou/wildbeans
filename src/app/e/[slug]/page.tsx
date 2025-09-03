@@ -7,9 +7,9 @@ export const dynamic = 'force-dynamic';
 export default async function Page({
   params,
   searchParams,
-}: { params: { slug: string }, searchParams: { join?: string } }) {
-  const slug = params.slug;
-  const joinCode = searchParams.join ?? 'WB1';
+}: { params: Promise<{ slug: string }>, searchParams: Promise<{ join?: string }> }) {
+  const { slug } = await params;
+  const { join: joinCode = 'WB1' } = await searchParams;
 
   // 1) Catégories
   const { data: categories } = await supabase

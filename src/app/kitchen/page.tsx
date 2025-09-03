@@ -4,7 +4,6 @@ import { useState } from 'react';
 import KitchenBoard from './KitchenBoard';
 import FullBleed from '@/components/layout/FullBleed';
 import AdminGate from '@/components/auth/AdminGate';
-import AdminHeader from '@/components/layout/AdminHeader';
 import { AdminLogoutButton } from '@/components/auth/AdminGate';
 
 export const dynamic = 'force-dynamic';
