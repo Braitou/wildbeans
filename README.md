@@ -1,5 +1,17 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Configuration
+
+Crée un fichier `.env.local` à la racine du projet avec :
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your-project-url.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
+NEXT_PUBLIC_ADMIN_SECRET=wildbeans-secret
+```
+
+⚠️ Le fichier doit être à la racine (au même niveau que `package.json`) et **sans extension cachée**.
+
 ## Getting Started
 
 First, run the development server:
