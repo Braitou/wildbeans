@@ -152,6 +152,7 @@ export default function KitchenBoard({
   }
 
   async function move(orderId: string, next: Order['status']) {
+    console.log(`Kitchen: Attempting to move order ${orderId} to status: ${next}`);
     const { error } = await supabase
       .from('orders')
       .update({ status: next })
@@ -163,6 +164,7 @@ export default function KitchenBoard({
       return;
     }
     
+    console.log(`Kitchen: Successfully moved order ${orderId} to status: ${next}`);
     setOrders((prev) =>
       prev
         .map((o) => (o.id === orderId ? { ...o, status: next } : o))
