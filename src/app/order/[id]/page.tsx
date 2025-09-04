@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { WaitingClientUI } from '@/components/order/WaitingClient';
 
 type OrderStatus = 'new' | 'pending' | 'sent' | 'taken' | 'preparing' | 'ready' | 'served' | 'cancelled' | 'in_progress' | 'done';
 
@@ -84,28 +85,15 @@ export default function OrderStatusPage() {
     return 'Your drink is ready and dying to meet you!';
   }, [step]);
 
+  // Convert status to uppercase for the new component
+  const normalizedStatus = status.toUpperCase() as 'NEW' | 'PREPARING' | 'READY' | 'SERVED' | 'CANCELLED';
+
   return (
     <main className="max-w-md mx-auto px-4 py-10 text-center">
-      {/* Dots */}
-      <div className="mb-6 flex items-center justify-center gap-2">
-        {[0,1,2].map(i => (
-          <span key={i} className={`h-2 w-2 rounded-full ${i <= step ? 'bg-black' : 'bg-gray-300'}`} />
-        ))}
-      </div>
+      {/* New polished waiting UI */}
+      <WaitingClientUI status={normalizedStatus} statusMessage={message} />
 
-      {/* Message au-dessus de la tasse */}
-      <h1 className="mb-6 text-xl font-semibold">{message}</h1>
-
-      {/* Zone visuelle tasse/loader si tu en as un */}
-      <div className="mb-10 h-32 border rounded-md flex items-center justify-center">
-        <span className="text-sm uppercase tracking-wide">{status}</span>
-      </div>
-
-      {pickup && (
-        <p className="text-sm text-neutral-600">
-          Pickup code: <span className="font-medium">{pickup}</span>
-        </p>
-      )}
+      {/* Remove pickup code display as requested */}
       {loading && <p className="mt-4 text-sm text-neutral-500">Loading…</p>}
     </main>
   );
