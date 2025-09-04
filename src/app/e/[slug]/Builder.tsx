@@ -47,6 +47,26 @@ export default function Builder({
   const [firstName, setFirstName] = useState('');
   const [note, setNote] = useState('');
 
+  // 🔥 Nouveau: mapping itemId -> count pour la sélection avec compteurs
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const totalSelected = useMemo(
+    () => Object.values(counts).reduce((a, b) => a + b, 0),
+    [counts]
+  );
+
+  function inc(id: string) {
+    setCounts(prev => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
+  }
+
+  function dec(id: string) {
+    setCounts(prev => {
+      const next = { ...prev };
+      const val = (next[id] ?? 0) - 1;
+      if (val <= 0) delete next[id]; else next[id] = val;
+      return next;
+    });
+  }
+
   // Overlay de confirmation (tasse qui se remplit)
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -94,11 +114,21 @@ export default function Builder({
   // Navigation
   function onNext() {
     if (stage === 'choose') {
-      if (cart.length > 0) {
-        setStage('options');
-        setCurrentIdx(0);
-        setOptStep(0);
-      }
+      if (totalSelected === 0) return;
+      const expanded = Object.entries(counts).flatMap(([id, qty]) => {
+        const it = allItems.find(i => i.id === id);
+        if (!it) return [];
+        return Array.from({ length: qty }, () => ({
+          tempId: crypto.randomUUID(),
+          item: it,
+          single: {},
+          multi: {},
+        }));
+      });
+      setCart(expanded);
+      setCurrentIdx(0);
+      setOptStep(0);
+      setStage('options');
       return;
     }
 
@@ -146,7 +176,7 @@ export default function Builder({
   // Validation canNext
   function canNext(): boolean {
     if (stage === 'choose') {
-      return cart.length > 0;
+      return totalSelected > 0;
     }
 
     if (stage === 'options') {
@@ -270,16 +300,17 @@ export default function Builder({
               <>
                 <div className="mb-4">
                   <h1 className="text-lg font-semibold">Select your drinks</h1>
-                  {cart.length > 0 && (
+                  {totalSelected > 0 && (
                     <p className="text-sm text-neutral-500 mt-1">
-                      {cart.length} drink{cart.length > 1 ? 's' : ''} selected
+                      {totalSelected} drink{totalSelected > 1 ? 's' : ''} selected
                     </p>
                   )}
                 </div>
                 <DrinkList
                   categories={categories}
-                  selectedIds={selectedIds}
-                  onSelect={addDrinkById}
+                  getCount={(id) => counts[id] ?? 0}
+                  onInc={inc}
+                  onDec={dec}
                 />
               </>
             )}

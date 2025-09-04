@@ -41,8 +41,8 @@ export default function EventsPage() {
     
     const { error } = await supabase.rpc('admin_delete_event', { event_id: id });
     if (error) { 
-      console.error(error);
-      toast.error(error.message); 
+      console.error('admin_delete_event error:', error);
+      toast.error(error.message || 'Delete failed');
       return; 
     }
     toast.success('Event deleted');
