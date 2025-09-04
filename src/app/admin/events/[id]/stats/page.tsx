@@ -92,7 +92,7 @@ export default function EventStatsPage({ params }: PageProps) {
   async function closeEvent() {
     setClosing(true);
     try {
-      const { error } = await supabase.rpc('admin_close_event', { p_event_id: eventId });
+      const { error } = await supabase.rpc('admin_close_event', { event_id: eventId });
       if (error) {
         toast.error('Erreur: ' + error.message);
         return;

@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminGate from '@/components/auth/AdminGate';
 import AdminHeader from '@/components/layout/AdminHeader';
@@ -34,6 +34,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   const [loading, setLoading] = useState<boolean>(!!(!isNew));
   const [saving, setSaving] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [slugTouched, setSlugTouched] = useState(false);
 
   // util : slugify à partir du nom (simple)
   function slugify(s: string) {
@@ -77,45 +78,57 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     loadEvent();
   }, [loadEvent]);
 
-  // Auto-générer slug & codes si vides
+  // Auto-générer slug & codes si vides (uniquement pour nouveaux events)
   useEffect(() => {
-    setForm(f => {
-      let next = { ...f };
-      if (isNew) {
-        if (f.name && !f.slug) next.slug = slugify(f.name);
-        if (!f.join_code) next.join_code = 'WB1';
-        if (!f.kitchen_code) next.kitchen_code = 'KITCHEN1';
-      }
+    if (!isNew) return;
+    setForm((f) => {
+      if (!f.name || slugTouched || f.slug) return f;
+      const next = {
+        ...f,
+        slug: slugify(f.name),
+        join_code: f.join_code || 'WB1',
+        kitchen_code: f.kitchen_code || 'KITCHEN1',
+      };
       return next;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.name, isNew]);
+  }, [form.name, isNew, slugTouched]);
 
   async function save() {
     if (!form.name || !form.slug) {
       toast.error('Nom et slug sont requis');
       return;
     }
+
+    // Sanity check env
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      toast.error('Config Supabase manquante (URL/ANON KEY).');
+      return;
+    }
+
     setSaving(true);
     try {
       const { data, error } = await supabase.rpc('admin_upsert_event', {
-        p_id: isNew ? null : form.id,
-        p_name: form.name,
-        p_slug: form.slug,
-        p_join_code: form.join_code || 'WB1',
-        p_kitchen_code: form.kitchen_code || 'KITCHEN1',
-        p_starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : null,
-        p_ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
+        id: isNew ? null : form.id,
+        name: form.name,
+        slug: form.slug,
+        join_code: form.join_code || 'WB1',
+        kitchen_code: form.kitchen_code || 'KITCHEN1',
+        starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : null,
+        ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
       });
       
       if (error) {
-        // >>> rendez l’erreur visible immédiatement
         console.error('admin_upsert_event error:', error);
-        const msg = (error as any)?.message || 'Unknown error';
-        if (msg.includes('SLUG_TAKEN')) {
+        const msg = (error as { message?: string; hint?: string; details?: string })?.message || 
+                   (error as { message?: string; hint?: string; details?: string })?.hint || 
+                   (error as { message?: string; hint?: string; details?: string })?.details || 
+                   'Unknown error';
+        if (String(msg).includes('SLUG_TAKEN')) {
           toast.error('Ce slug est déjà utilisé, choisis-en un autre.');
+        } else if ((error as { code?: string })?.code === 'PGRST202') {
+          toast.error('Fonction RPC introuvable. Recharge le schéma dans Supabase (NOTIFY pgrst, \'reload schema\').');
         } else {
-          toast.error(`Erreur lors de l’enregistrement : ${msg}`);
+          toast.error(`Erreur lors de l'enregistrement : ${msg}`);
         }
         return;
       }      
@@ -136,7 +149,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
   async function closeEvent() {
     setClosing(true);
-    const { error } = await supabase.rpc('admin_close_event', { p_event_id: isNew ? null : id });
+    const { error } = await supabase.rpc('admin_close_event', { event_id: isNew ? null : id });
     setClosing(false);
     if (error) {
       toast.error('Erreur: ' + error.message);
@@ -188,7 +201,10 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
             <label className="text-sm">Slug (URL)</label>
             <input
               value={form.slug}
-              onChange={(e) => setForm({ ...form, slug: e.target.value })}
+              onChange={(e) => {
+                setSlugTouched(true);
+                setForm({ ...form, slug: e.target.value });
+              }}
               placeholder="mariage-claire-max"
               className="h-11 px-3 border border-gray-300 rounded-md"
             />
