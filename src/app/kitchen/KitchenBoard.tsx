@@ -50,7 +50,10 @@ export default function KitchenBoard({
             id,
             item_name,
             qty,
-            options:order_item_options(option_name, price_delta_cents)
+            options:order_item_options(
+              option_name,
+              price_delta_cents
+            )
           )
         `)
         .order('created_at', { ascending: false });
@@ -65,8 +68,9 @@ export default function KitchenBoard({
         return;
       }
       if (Array.isArray(data)) {
-        setOrders(data as Order[]);
         console.log('[KitchenBoard] load ok; count=', data.length);
+        console.log('[KitchenBoard] sample order data:', data[0]);
+        setOrders(data as Order[]);
       }
     } catch (err) {
       console.error('[KitchenBoard] load fatal:', err);
@@ -266,13 +270,22 @@ export default function KitchenBoard({
                       {o.items?.map((it) => (
                         <li key={it.id} className="flex gap-3">
                           <span className="min-w-7 text-right">{it.qty}×</span>
-                          <div>
-                            <div className="font-medium text-[16px]">{it.item_name}</div>
-                            {it.options?.length ? (
-                              <div className="text-neutral-600">
+                          <div className="flex-1">
+                            <div className="font-medium text-[16px] flex items-center gap-2">
+                              {it.item_name}
+                              {it.options && it.options.length > 0 && (
+                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                  {it.options.length} opt.
+                                </span>
+                              )}
+                            </div>
+                            {it.options && it.options.length > 0 ? (
+                              <div className="text-neutral-600 text-sm mt-1">
                                 {it.options.map((op) => op.option_name).join(', ')}
                               </div>
-                            ) : null}
+                            ) : (
+                              <div className="text-neutral-400 text-sm mt-1">Aucune option</div>
+                            )}
                           </div>
                         </li>
                       ))}
