@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 
 type TrayItem = {
-  id: string;           // itemId (uuid)
+  id: string;           // tempId (uuid)
   name: string;         // ex "Latte"
   complete: boolean;    // toutes les options requises sont remplies ?
 };
@@ -28,7 +28,7 @@ export default function OrderTray({
           const active = i === activeIndex;
           return (
             <button
-              key={i}
+              key={it.id}
               onClick={() => onSelectIndex(i)}
               className={cn(
                 "flex items-center gap-2 px-3 h-9 rounded-full border",

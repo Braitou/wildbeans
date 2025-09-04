@@ -23,14 +23,14 @@ export default function OptionGroup({
 }) {
   if (modifier.type === 'single') {
     return (
-      <div className="space-y-1">
+      <div className="flex flex-col gap-2">
         {modifier.options.map(opt => {
           const active = valueSingle === opt.id;
           return (
             <motion.label
               key={opt.id}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-3 py-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+              className="inline-flex items-center gap-3 py-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
             >
               <input
                 type="radio"
@@ -49,7 +49,7 @@ export default function OptionGroup({
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 aria-hidden
               />
-              <span className="text-[15px]">{opt.name}</span>
+              <span className="text-sm">{translateLabel(opt.name)}</span>
             </motion.label>
           );
         })}
@@ -58,54 +58,72 @@ export default function OptionGroup({
   }
 
   // multi
-  const set = new Set(valueMulti ?? []);
+  const selected = new Set(valueMulti ?? []);
   const isOptionalMulti = modifier.type === 'multi' && !modifier.required;
+  const isNoneSelected = (valueMulti?.length ?? 0) === 0;
   
   return (
-    <div className="flex flex-wrap gap-8 py-2">
+    <div className="flex flex-col gap-2">
+      {/* Options en colonne */}
       {modifier.options.map(opt => {
-        const active = set.has(opt.id);
+        const active = selected.has(opt.id);
         return (
-          <motion.button
+          <motion.label
             key={opt.id}
-            type="button"
-            whileTap={{ scale: 0.97 }}
-            onClick={() => {
-              const next = new Set(valueMulti ?? []);
-              if (next.has(opt.id)) next.delete(opt.id);
-              else next.add(opt.id);
-              onChange(Array.from(next));
-            }}
-            className={`flex items-center gap-2 h-10 px-4 rounded-full border transition ${
-              active
-                ? 'border-black bg-black text-white'
-                : 'border-gray-200 text-black hover:bg-gray-50'
-            }`}
-            transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+            whileTap={{ scale: 0.98 }}
+            className="inline-flex items-center gap-3 py-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
           >
+            <input
+              type="checkbox"
+              className="size-4"
+              checked={active}
+              onChange={(e) => {
+                const next = new Set(valueMulti ?? []);
+                if (e.target.checked) next.add(opt.id);
+                else next.delete(opt.id);
+                onChange(Array.from(next));
+              }}
+            />
+            {/* puce visuelle animée */}
             <motion.span
               layout
-              className={`inline-block rounded-full`}
-              style={{ width: active ? 6 : 4, height: active ? 6 : 4 }}
-              animate={{ backgroundColor: active ? '#ffffff' : '#d1d5db' }}
+              className={`inline-block size-3 rounded-full border ${
+                active ? 'bg-black border-black' : 'border-gray-300'
+              }`}
+              animate={{ scale: active ? 1.15 : 1 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               aria-hidden
             />
-            <span>{opt.name}</span>
-          </motion.button>
+            <span className="text-sm">{translateLabel(opt.name)}</span>
+          </motion.label>
         );
       })}
       
-      {/* Bouton "None" pour les groupes multi optionnels */}
+      {/* Bouton "None" pour les groupes multi optionnels (en dernier, pré-sélectionné par défaut) */}
       {isOptionalMulti && (
-        <motion.button
-          type="button"
-          whileTap={{ scale: 0.97 }}
-          onClick={() => onChange([])}
-          className="inline-flex items-center h-10 px-4 rounded-full border border-gray-300 text-sm hover:bg-gray-50"
-          aria-label="None"
+        <motion.label
+          whileTap={{ scale: 0.98 }}
+          className="inline-flex items-center gap-3 py-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
         >
-          None
-        </motion.button>
+          <input
+            type="radio"
+            name={`${modifier.id}-none`}
+            className="size-4"
+            checked={isNoneSelected}
+            onChange={() => onChange([])}
+          />
+          {/* puce visuelle animée */}
+          <motion.span
+            layout
+            className={`inline-block size-3 rounded-full border ${
+              isNoneSelected ? 'bg-black border-black' : 'border-gray-300'
+            }`}
+            animate={{ scale: isNoneSelected ? 1.15 : 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            aria-hidden
+          />
+          <span className="text-sm italic">None</span>
+        </motion.label>
       )}
     </div>
   );

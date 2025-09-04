@@ -13,11 +13,14 @@ import CoffeeConfirm from '@/components/confirm/CoffeeConfirm';
 import type { Category, Item, Modifier } from '@/types/menu';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
-type ItemState = {
+type PendingItem = {
+  tempId: string;       // uuid v4 ou nanoid
   item: Item;
   single: Record<string, string | null>;
   multi: Record<string, string[]>;
 };
+
+type Stage = 'choose' | 'options' | 'review';
 
 export default function Builder({
   slug,
@@ -36,112 +39,146 @@ export default function Builder({
     [categories]
   );
 
-  // 🔥 Multi-items
-  const [multiItems, setMultiItems] = useState<ItemState[]>([]);
-  const [currentIndex, setCurrentIndex] = useState<number>(-1); // -1 = pas d'item sélectionné (liste boissons)
-  const [step, setStep] = useState(0); // step au sein de l'item courant
+  // 🔥 Nouveau flux multi-boissons avec panier
+  const [stage, setStage] = useState<Stage>('choose');
+  const [cart, setCart] = useState<PendingItem[]>([]);
+  const [currentIdx, setCurrentIdx] = useState<number>(0);
+  const [optStep, setOptStep] = useState(0);
   const [firstName, setFirstName] = useState('');
   const [note, setNote] = useState('');
 
   // Overlay de confirmation (tasse qui se remplit)
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const current = currentIndex >= 0 ? multiItems[currentIndex] : null;
+  const current = cart[currentIdx] ?? null;
   const optionSteps: Modifier[] = current ? (current.item.modifiers ?? []) : [];
 
-  // Sélection d'une boisson => sélectionne seulement (pas de navigation auto)
-  function selectItemById(id: string) {
+  // Sélection d'une boisson => ajoute au panier (ne change pas de stage)
+  function addDrinkById(id: string) {
     const it = allItems.find(i => i.id === id);
     if (!it) return;
-    setMultiItems(prev => [...prev, { item: it, single: {}, multi: {} }]);
-    setCurrentIndex(multiItems.length); // index du nouvel item
-    // Ne pas changer step ici - l'utilisateur doit cliquer sur "Suivant"
-  }
-
-  function updateCurrentSingle(modId: string, value: string) {
-    if (currentIndex < 0) return;
-    setMultiItems(prev => {
-      const next = [...prev];
-      const st = { ...next[currentIndex] };
-      st.single = { ...st.single, [modId]: value };
-      next[currentIndex] = st;
-      return next;
-    });
-  }
-
-  function updateCurrentMulti(modId: string, values: string[]) {
-    if (currentIndex < 0) return;
-    setMultiItems(prev => {
-      const next = [...prev];
-      const st = { ...next[currentIndex] };
-      st.multi = { ...st.multi, [modId]: values };
-      next[currentIndex] = st;
-      return next;
-    });
-  }
-
-  function addAnotherDrink() {
-    // retour à la liste des boissons
-    setCurrentIndex(-1);
-    setStep(0);
-  }
-
-  function removeIndex(i: number) {
-    setMultiItems(prev => {
-      const next = prev.filter((_, idx) => idx !== i);
-      // recalc current index
-      if (next.length === 0) {
-        setCurrentIndex(-1);
-        setStep(0);
-      } else if (i === currentIndex) {
-        setCurrentIndex(Math.min(i, next.length - 1));
-        setStep(1);
-      } else if (i < currentIndex) {
-        setCurrentIndex(ci => ci - 1);
+    setCart(prev => [
+      ...prev,
+      {
+        tempId: crypto.randomUUID(),
+        item: it,
+        single: {},
+        multi: {},
       }
-      return next;
-    });
+    ]);
   }
 
-  async function onNext() {
-    // navigation dans l'item
-    if (currentIndex === -1) {
-      // rien à faire : l'utilisateur doit choisir une boisson
-      return;
-    }
-    if (step < optionSteps.length) {
-      setStep(s => s + 1);
+  // Retirer une entrée du panier
+  function removeTemp(tempId: string) {
+    setCart(prev => prev.filter(p => p.tempId !== tempId));
+  }
+
+  // Mises à jour de sélection d'options
+  function updateSingle(modId: string, value: string | null) {
+    if (!current) return;
+    setCart(prev => prev.map((p, i) => 
+      i === currentIdx ? { ...p, single: { ...p.single, [modId]: value } } : p
+    ));
+  }
+
+  function updateMulti(modId: string, values: string[]) {
+    if (!current) return;
+    setCart(prev => prev.map((p, i) => 
+      i === currentIdx ? { ...p, multi: { ...p.multi, [modId]: values } } : p
+    ));
+  }
+
+  // Navigation
+  function onNext() {
+    if (stage === 'choose') {
+      if (cart.length > 0) {
+        setStage('options');
+        setCurrentIdx(0);
+        setOptStep(0);
+      }
       return;
     }
 
-    // Fin des options de l'item courant → proposer d'ajouter une autre boisson
-    // UX : on va directement au récap global, avec CTA "Ajouter une boisson"
-    setStep(optionSteps.length + 1);
+    if (stage === 'options') {
+      if (optStep < optionSteps.length - 1) {
+        setOptStep(s => s + 1);
+        return;
+      }
+
+      // Fin des options pour l'item courant
+      if (currentIdx < cart.length - 1) {
+        // Passer à l'item suivant
+        setCurrentIdx(i => i + 1);
+        setOptStep(0);
+      } else {
+        // Dernier item traité → aller au récap
+        setStage('review');
+      }
+      return;
+    }
+
+    if (stage === 'review') {
+      submitAll();
+    }
   }
 
   function onPrev() {
-    if (step > 0) {
-      setStep(s => s - 1);
+    if (stage === 'options') {
+      if (optStep > 0) {
+        setOptStep(s => s - 1);
+        return;
+      }
+      if (currentIdx > 0) {
+        // Revenir à l'item précédent
+        setCurrentIdx(i => i - 1);
+        setOptStep(optionSteps.length - 1);
+        return;
+      }
+      // Retour à la sélection
+      setStage('choose');
       return;
     }
-    // sinon, si on est à 0 → déjà sur la liste; rien
+  }
+
+  // Validation canNext
+  function canNext(): boolean {
+    if (stage === 'choose') {
+      return cart.length > 0;
+    }
+
+    if (stage === 'options') {
+      const currentMod = optionSteps[optStep];
+      if (!currentMod) return true;
+
+      if (currentMod.required) {
+        if (currentMod.type === 'single') {
+          return current.single[currentMod.id] !== null && current.single[currentMod.id] !== undefined;
+        } else {
+          return (current.multi[currentMod.id] ?? []).length > 0;
+        }
+      }
+      return true; // non requis = toujours valide
+    }
+
+    return stage === 'review';
   }
 
   // Compilation pour l'appel RPC
   async function submitAll() {
-    if (multiItems.length === 0) return;
+    if (cart.length === 0) return;
 
-    const p_items = multiItems.map(st => {
-      const optionIds: string[] = [];
-      (st.item.modifiers ?? []).forEach(mod => {
+    const payloadItems = cart.map(p => {
+      const selectedOptionIds: string[] = [];
+      for (const mod of (p.item.modifiers ?? [])) {
         if (mod.type === 'single') {
-          const v = st.single[mod.id];
-          if (v) optionIds.push(v);
+          const v = p.single[mod.id];
+          if (v) selectedOptionIds.push(v);
         } else {
-          optionIds.push(...(st.multi[mod.id] ?? []));
+          const arr = p.multi[mod.id] ?? [];
+          selectedOptionIds.push(...arr);
         }
-      });
-      return { item_id: st.item.id, qty: 1, options: optionIds };
+      }
+      return { item_id: p.item.id, qty: 1, options: selectedOptionIds };
     });
 
     const { data, error } = await supabase.rpc('place_order', {
@@ -149,7 +186,7 @@ export default function Builder({
       p_join_code: joinCode || 'WB1',
       p_customer_name: firstName || null,
       p_note: note || null,
-      p_items
+      p_items: payloadItems
     });
 
     if (error) { 
@@ -170,29 +207,29 @@ export default function Builder({
   const transition = reduce ? { duration: 0 } : { duration: 0.22 };
 
   // Dérivés pour l'affichage
-  const trayItems = multiItems.map(st => ({
-    id: st.item.id,
-    name: st.item.name,
+  const trayItems = cart.map((item, index) => ({
+    id: item.tempId,
+    name: item.item.name,
     complete: (() => {
       // un item est "complet" si toutes les requises sont remplies
-      for (const mod of (st.item.modifiers ?? [])) {
+      for (const mod of (item.item.modifiers ?? [])) {
         if (!mod.required) continue;
-        if (mod.type === 'single' && !st.single[mod.id]) return false;
-        if (mod.type === 'multi' && (st.multi[mod.id] ?? []).length === 0) return false;
+        if (mod.type === 'single' && !item.single[mod.id]) return false;
+        if (mod.type === 'multi' && (item.multi[mod.id] ?? []).length === 0) return false;
       }
       return true;
     })()
   }));
 
-  const reviewData = multiItems.map(st => ({
-    name: st.item.name,
-    options: (st.item.modifiers ?? []).map(mod => {
+  const reviewData = cart.map(item => ({
+    name: item.item.name,
+    options: (item.item.modifiers ?? []).map(mod => {
       if (mod.type === 'single') {
-        const id = st.single[mod.id];
+        const id = item.single[mod.id];
         const name = mod.options.find(o => o.id === id)?.name;
         return { group: mod.name, values: name ? [name] : [] };
       } else {
-        const ids = new Set(st.multi[mod.id] ?? []);
+        const ids = new Set(item.multi[mod.id] ?? []);
         const names = mod.options.filter(o => ids.has(o.id)).map(o => o.name);
         return { group: mod.name, values: names };
       }
@@ -203,59 +240,90 @@ export default function Builder({
     <>
       <div className="pb-24">
         {/* Mini-panier */}
-        <OrderTray
-          items={trayItems}
-          activeIndex={currentIndex}
-          onSelectIndex={(i) => { setCurrentIndex(i); setStep(1); }}
-          onRemoveIndex={removeIndex}
-          onAddNew={addAnotherDrink}
-        />
+        {stage !== 'choose' && (
+          <OrderTray
+            items={trayItems}
+            activeIndex={stage === 'options' ? currentIdx : -1}
+            onSelectIndex={(i) => { 
+              if (stage === 'options') {
+                setCurrentIdx(i);
+                setOptStep(0);
+              }
+            }}
+            onRemoveIndex={(i) => removeTemp(trayItems[i].id)}
+            onAddNew={() => setStage('choose')}
+          />
+        )}
 
         {/* Dots par rapport à l'item courant */}
-        {current && <StepDots total={optionSteps.length + 1} index={Math.min(step, optionSteps.length)} />}
+        {stage === 'options' && current && (
+          <StepDots total={optionSteps.length} index={optStep} />
+        )}
 
         <AnimatePresence mode="wait">
-          <motion.div key={`${currentIndex}-${step}`} initial="initial" animate="animate" exit="exit" variants={variants} transition={transition}>
-            {/* 0 : Liste des boissons (quand aucun item en édition) */}
-            {currentIndex === -1 && (
-              <DrinkList
-                categories={categories}
-                selectedId={multiItems.length > 0 ? multiItems[multiItems.length - 1].item.id : null}
-                onSelect={selectItemById}
-              />
+          <motion.div key={`${stage}-${currentIdx}-${optStep}`} initial="initial" animate="animate" exit="exit" variants={variants} transition={transition}>
+            {/* Stage: Sélection des boissons */}
+            {stage === 'choose' && (
+              <>
+                <div className="mb-4">
+                  <h1 className="text-lg font-semibold">Select your drinks</h1>
+                  {cart.length > 0 && (
+                    <p className="text-sm text-neutral-500 mt-1">
+                      {cart.length} drink{cart.length > 1 ? 's' : ''} selected
+                    </p>
+                  )}
+                </div>
+                <DrinkList
+                  categories={categories}
+                  selectedId={null}
+                  onSelect={addDrinkById}
+                />
+              </>
             )}
 
-            {/* Étapes d'options pour l'item courant */}
-            {currentIndex >= 0 && step >= 1 && step <= optionSteps.length && current && (
+            {/* Stage: Configuration des options */}
+            {stage === 'options' && current && optStep < optionSteps.length && (
               <section className="py-4">
                 <h2 className="mb-2 text-xs font-semibold tracking-[0.18em] uppercase text-neutral-500">
-                  Drink {currentIndex + 1}
+                  Drink {currentIdx + 1} of {cart.length}
                 </h2>
-                <h3 className="mb-2 text-sm sm:text-base font-semibold leading-tight">{current.item.name} — {optionSteps[step - 1].name}</h3>
+                <h3 className="mb-2 text-sm sm:text-base font-semibold leading-tight">
+                  {current.item.name} — {optionSteps[optStep].name}
+                </h3>
                 <OptionGroup
-                  modifier={optionSteps[step - 1]}
-                  valueSingle={current.single[optionSteps[step - 1].id] ?? null}
-                  valueMulti={current.multi[optionSteps[step - 1].id] ?? []}
+                  modifier={optionSteps[optStep]}
+                  valueSingle={current.single[optionSteps[optStep].id] ?? null}
+                  valueMulti={current.multi[optionSteps[optStep].id] ?? []}
                   onChange={(next) => {
-                    const mod = optionSteps[step - 1];
+                    const mod = optionSteps[optStep];
                     if (mod.type === 'single') {
-                      updateCurrentSingle(mod.id, next as string);
+                      updateSingle(mod.id, next as string);
                     } else {
-                      updateCurrentMulti(mod.id, next as string[]);
+                      updateMulti(mod.id, next as string[]);
                     }
                   }}
                 />
               </section>
             )}
 
-            {/* Étape finale : Récap global + prénom/note */}
-            {currentIndex >= 0 && step === optionSteps.length + 1 && (
+            {/* Stage: Récap global + prénom/note */}
+            {stage === 'review' && (
               <>
+                <div className="mb-4">
+                  <h1 className="text-lg font-semibold">Review your order</h1>
+                  <p className="text-sm text-neutral-500 mt-1">
+                    {cart.length} drink{cart.length > 1 ? 's' : ''} ready to order
+                  </p>
+                </div>
                 <ReviewList
                   items={reviewData}
-                  onEditIndex={(i) => { setCurrentIndex(i); setStep(1); }}
-                  onRemoveIndex={removeIndex}
-                  onAddNew={addAnotherDrink}
+                  onEditIndex={(i) => { 
+                    setCurrentIdx(i);
+                    setOptStep(0);
+                    setStage('options');
+                  }}
+                  onRemoveIndex={(i) => removeTemp(trayItems[i].id)}
+                  onAddNew={() => setStage('choose')}
                 />
                 <section className="py-4 space-y-3">
                   <div className="grid gap-3">
@@ -279,30 +347,18 @@ export default function Builder({
         </AnimatePresence>
 
         {/* Navigation */}
-        {currentIndex === -1 ? (
-          <WizardNav
-            canPrev={false}
-            canNext={multiItems.length > 0}
-            isFinal={false}
-            onPrev={() => {}}
-            onNext={() => {
-              if (multiItems.length > 0) {
-                setCurrentIndex(multiItems.length - 1);
-                setStep(1);
-              }
-            }}
-            nextLabel="Suivant"
-          />
-        ) : (
-          <WizardNav
-            canPrev={step > 1}
-            canNext={step <= optionSteps.length ? true : multiItems.length > 0}
-            isFinal={step === optionSteps.length + 1}
-            onPrev={onPrev}
-            onNext={step === optionSteps.length + 1 ? submitAll : onNext}
-            nextLabel={step <= optionSteps.length ? "Next" : "Order"}
-          />
-        )}
+        <WizardNav
+          canPrev={stage === 'options' && (optStep > 0 || currentIdx > 0)}
+          canNext={canNext()}
+          isFinal={stage === 'review'}
+          onPrev={onPrev}
+          onNext={onNext}
+          nextLabel={
+            stage === 'choose' ? 'Next' :
+            stage === 'options' ? 'Next' :
+            'Order'
+          }
+        />
       </div>
 
       {/* Overlay confirmation (tasse qui se remplit) */}
