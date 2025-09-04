@@ -37,6 +37,33 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
     // Chargement initial
     load();
 
+    // Écouter les changements de statut via localStorage et événements personnalisés
+    const handleStatusChange = (event: CustomEvent) => {
+      if (event.detail.orderId === orderId && active) {
+        console.log('OrderStatus: Received status change via localStorage:', event.detail.status);
+        setData(prev => {
+          const updated = prev ? { ...prev, status: event.detail.status } : prev;
+          console.log('OrderStatus: Updated data from localStorage:', updated);
+          return updated;
+        });
+      }
+    };
+
+    // Écouter les événements personnalisés
+    window.addEventListener('orderStatusChanged', handleStatusChange as EventListener);
+
+    // Vérifier localStorage au chargement
+    const orderKey = `order_status_${orderId}`;
+    const storedStatus = localStorage.getItem(orderKey);
+    if (storedStatus && active) {
+      console.log('OrderStatus: Found status in localStorage:', storedStatus);
+      setData(prev => {
+        const updated = prev ? { ...prev, status: storedStatus as any } : prev;
+        console.log('OrderStatus: Updated data from localStorage on load:', updated);
+        return updated;
+      });
+    }
+
     // Polling automatique toutes les 5 secondes (fallback si Realtime ne fonctionne pas)
     const interval = setInterval(() => {
       if (active) {
@@ -74,6 +101,7 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
       console.log('Cleaning up Realtime for order:', orderId);
       active = false;
       clearInterval(interval);
+      window.removeEventListener('orderStatusChanged', handleStatusChange as EventListener);
       supabase.removeChannel(channel);
     };
   }, [orderId, load]);

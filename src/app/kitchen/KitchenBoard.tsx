@@ -153,6 +153,16 @@ export default function KitchenBoard({
 
   async function move(orderId: string, next: Order['status']) {
     console.log(`Kitchen: Attempting to move order ${orderId} to status: ${next}`);
+    
+    // Mise à jour dans localStorage pour communication immédiate
+    const orderKey = `order_status_${orderId}`;
+    localStorage.setItem(orderKey, next);
+    
+    // Déclencher un événement personnalisé pour notifier les autres pages
+    window.dispatchEvent(new CustomEvent('orderStatusChanged', {
+      detail: { orderId, status: next }
+    }));
+    
     const { error } = await supabase
       .from('orders')
       .update({ status: next })
