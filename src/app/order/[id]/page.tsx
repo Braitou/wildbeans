@@ -1,44 +1,42 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import StepDots from '@/components/order/StepDots';
-import CoffeeStatus from '@/components/status/CoffeeStatus';
 
-type OrderStatus = 'pending' | 'sent' | 'taken' | 'preparing' | 'ready';
+type OrderStatus = 'new' | 'pending' | 'sent' | 'taken' | 'preparing' | 'ready' | 'served' | 'cancelled' | 'in_progress' | 'done';
+
+export const dynamic = 'force-dynamic';
 
 export default function OrderStatusPage() {
-  const params = useParams<{ id: string }>();
-  const search = useSearchParams();
-  const orderId = params.id;                         // <-- l'UUID de la commande
-  const pickup = search.get('pickup') || undefined;  // facultatif, pour afficher le code
+  const { id: orderId } = useParams<{ id: string }>();
+  const sp = useSearchParams();
+  const pickup = sp.get('pickup') || undefined;
 
   const [status, setStatus] = useState<OrderStatus>('pending');
   const [loading, setLoading] = useState(true);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const realtimeHeardRef = useRef(false);
 
-  // 1) Fetch initial
+  // Fetch initial
   useEffect(() => {
     let active = true;
-    async function load() {
-      const { data, error } = await supabase
+    (async () => {
+      const { data } = await supabase
         .from('orders')
-        .select('id, status')
+        .select('status')
         .eq('id', orderId)
         .maybeSingle();
-      if (!error && data && active) {
-        setStatus((data.status as OrderStatus) || 'pending');
-      }
+      if (active && data?.status) setStatus(data.status as OrderStatus);
       setLoading(false);
-    }
-    load();
+    })();
     return () => { active = false; };
   }, [orderId]);
 
-  // 2) Realtime abonné à CET id
+  // Realtime + fallback polling
   useEffect(() => {
-    const channel = supabase
-      .channel(`order-${orderId}`)
+    const ch = supabase
+      .channel(`order-${orderId}`, { config: { broadcast: { ack: true } } })
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -46,21 +44,38 @@ export default function OrderStatusPage() {
         filter: `id=eq.${orderId}`,
       }, (payload) => {
         const next = (payload.new as any)?.status as OrderStatus | undefined;
-        if (next) setStatus(next);
+        if (next) {
+          realtimeHeardRef.current = true;
+          setStatus(next);
+        }
       })
       .subscribe();
 
+    // Fallback: si aucun event realtime sous 2s, on poll en boucle
+    const to = setTimeout(() => {
+      if (realtimeHeardRef.current) return;
+      pollingRef.current = setInterval(async () => {
+        const { data } = await supabase
+          .from('orders')
+          .select('status')
+          .eq('id', orderId)
+          .maybeSingle();
+        if (data?.status) setStatus(data.status as OrderStatus);
+      }, 2000);
+    }, 2000);
+
     return () => {
-      supabase.removeChannel(channel);
+      clearTimeout(to);
+      if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
+      supabase.removeChannel(ch);
     };
   }, [orderId]);
 
-  // 3) Mapping status → étape (0..2) + message
+  // Mapping status -> step (0=sent, 1=preparing/taken, 2=ready/done)
   const step = useMemo(() => {
-    // adapte ce mapping si kitchen met 'in_progress'/'done'
-    if (status === 'ready') return 2;
-    if (status === 'taken' || status === 'preparing' /* || status === 'in_progress' */) return 1;
-    return 0; // 'pending' | 'sent'
+    if (status === 'ready' || status === 'done' || status === 'served') return 2;
+    if (status === 'taken' || status === 'preparing' || status === 'in_progress') return 1;
+    return 0; // 'new' | 'pending' | 'sent' | 'cancelled'
   }, [status]);
 
   const message = useMemo(() => {
@@ -69,36 +84,28 @@ export default function OrderStatusPage() {
     return 'Your drink is ready and dying to meet you!';
   }, [step]);
 
-  // Mapping des statuts pour CoffeeStatus
-  const coffeeStatus = useMemo(() => {
-    if (status === 'ready') return 'ready';
-    if (status === 'taken' || status === 'preparing') return 'preparing';
-    return 'new';
-  }, [status]);
-
-  // Affichage UI
   return (
     <main className="max-w-md mx-auto px-4 py-10 text-center">
-      {/* Barre d'étapes 0..2 */}
-      <div className="mb-6">
-        <StepDots total={3} index={step} />
+      {/* Dots */}
+      <div className="mb-6 flex items-center justify-center gap-2">
+        {[0,1,2].map(i => (
+          <span key={i} className={`h-2 w-2 rounded-full ${i <= step ? 'bg-black' : 'bg-gray-300'}`} />
+        ))}
       </div>
 
-      {/* Message (au-dessus de la tasse) */}
+      {/* Message au-dessus de la tasse */}
       <h1 className="mb-6 text-xl font-semibold">{message}</h1>
 
-      {/* Tasse/animation */}
-      <div className="mb-10">
-        <CoffeeStatus status={coffeeStatus} loading={loading} />
+      {/* Zone visuelle tasse/loader si tu en as un */}
+      <div className="mb-10 h-32 border rounded-md flex items-center justify-center">
+        <span className="text-sm uppercase tracking-wide">{status}</span>
       </div>
 
-      {/* Optionnel: afficher le pickup différemment */}
       {pickup && (
         <p className="text-sm text-neutral-600">
           Pickup code: <span className="font-medium">{pickup}</span>
         </p>
       )}
-
       {loading && <p className="mt-4 text-sm text-neutral-500">Loading…</p>}
     </main>
   );
