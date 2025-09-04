@@ -26,26 +26,40 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
   }, [orderId]);
 
   useEffect(() => {
+    let active = true;
+
+    async function load() {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('id,status')
+        .eq('id', orderId)
+        .maybeSingle();
+      if (!error && data && active) {
+        setData(prev => prev ? { ...prev, status: data.status } : prev);
+      }
+    }
     load();
-    
-    // Créer un channel Realtime filtré sur l'id de la commande
-    const chan = supabase
-      .channel(`rt-order-${orderId}`)
+
+    const channel = supabase
+      .channel(`order-${orderId}`)
       .on('postgres_changes', {
-        event: 'UPDATE',
+        event: '*',
         schema: 'public',
         table: 'orders',
         filter: `id=eq.${orderId}`
       }, (payload) => {
-        setData(prev => prev ? { ...prev, status: payload.new.status } : prev);
+        const next = (payload.new as any)?.status;
+        if (next && active) {
+          setData(prev => prev ? { ...prev, status: next } : prev);
+        }
       })
       .subscribe();
 
-    // Nettoyer le channel au return
     return () => {
-      supabase.removeChannel(chan);
+      active = false;
+      supabase.removeChannel(channel);
     };
-  }, [orderId, load]);
+  }, [orderId]);
 
   const status = (data?.status ?? 'new') as OrderJson['status'];
 
@@ -79,7 +93,7 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
           {/* (vide intentionnellement) */}
         </div>
         <div className="text-sm md:text-base text-neutral-800">
-          All good... It’s not in your hands anymore.
+          All good... It's not in your hands anymore.
         </div>
       </div>
 

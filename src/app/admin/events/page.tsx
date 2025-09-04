@@ -39,8 +39,9 @@ export default function EventsPage() {
   async function deleteEvent(id: string) {
     if (!confirm('Delete this event?')) return;
     
-    const { error } = await supabase.rpc('admin_delete_event', { p_event_id: id });
+    const { error } = await supabase.rpc('admin_delete_event', { event_id: id });
     if (error) { 
+      console.error(error);
       toast.error(error.message); 
       return; 
     }

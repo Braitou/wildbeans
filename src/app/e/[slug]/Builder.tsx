@@ -53,6 +53,9 @@ export default function Builder({
   const current = cart[currentIdx] ?? null;
   const optionSteps: Modifier[] = current ? (current.item.modifiers ?? []) : [];
 
+  // Dérivé pour la sélection visuelle
+  const selectedIds = new Set(cart.map(item => item.item.id));
+
   // Sélection d'une boisson => ajoute au panier (ne change pas de stage)
   function addDrinkById(id: string) {
     const it = allItems.find(i => i.id === id);
@@ -275,7 +278,7 @@ export default function Builder({
                 </div>
                 <DrinkList
                   categories={categories}
-                  selectedId={null}
+                  selectedIds={selectedIds}
                   onSelect={addDrinkById}
                 />
               </>
