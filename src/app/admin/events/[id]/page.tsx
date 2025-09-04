@@ -45,6 +45,11 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     ? `${origin}/e/${encodeURIComponent(form.slug)}?join=${encodeURIComponent(form.join_code)}`
     : '', [origin, form.slug, form.join_code]);
 
+  // Kitchen link
+  const kitchenUrl = useMemo(() =>
+    form.kitchen_code && origin ? `${origin}/kitchen?code=${encodeURIComponent(form.kitchen_code)}` : ''
+  , [origin, form.kitchen_code]);
+
   function downloadQR() {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -313,6 +318,31 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
             </div>
           ) : (
             <div className="text-sm text-neutral-500">Fill slug & join code to preview the QR.</div>
+          )}
+        </section>
+
+        {/* Kitchen Link Section */}
+        <section className="mt-6 border rounded-lg p-4">
+          <div className="text-sm font-semibold mb-2">Kitchen link</div>
+          {kitchenUrl ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <code className="text-xs bg-neutral-50 border rounded px-2 py-1 break-all">{kitchenUrl}</code>
+              <button 
+                onClick={() => navigator.clipboard.writeText(kitchenUrl)} 
+                className="h-9 px-3 border rounded-md hover:bg-gray-50"
+              >
+                Copy
+              </button>
+              <a 
+                href={kitchenUrl} 
+                target="_blank" 
+                className="h-9 px-3 border rounded-md hover:bg-gray-50 inline-flex items-center"
+              >
+                Open
+              </a>
+            </div>
+          ) : (
+            <div className="text-sm text-neutral-500">Set a kitchen code to get the link.</div>
           )}
         </section>
       </main>

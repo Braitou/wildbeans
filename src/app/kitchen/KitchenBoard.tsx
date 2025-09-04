@@ -9,6 +9,7 @@ type OrderItemOption = { option_name: string; price_delta_cents: number };
 type OrderItem = { id: string; item_name: string; qty: number; options: OrderItemOption[] };
 type Order = {
   id: string;
+  event_id: string;
   pickup_code: string;
   customer_name: string | null;
   note: string | null;
@@ -18,13 +19,12 @@ type Order = {
   items: OrderItem[];
 };
 
-const EVENT_SLUG = 'demo';
-const KITCHEN_CODE = 'WBK1';
-
 export default function KitchenBoard({
+  eventId,
   density = 'comfortable',
   statusFilter = 'active', // 'active' | 'all'
 }: {
+  eventId?: string;
   density?: 'comfortable' | 'compact';
   statusFilter?: 'active' | 'all';
 }) {
@@ -32,38 +32,89 @@ export default function KitchenBoard({
   const [loading, setLoading] = useState(true);
 
   async function load() {
-    const { data, error } = await supabase.rpc('kitchen_list_orders', {
-      p_event_slug: EVENT_SLUG,
-      p_kitchen_code: KITCHEN_CODE,
-    });
-    if (!error && Array.isArray(data)) setOrders(data as Order[]);
-    setLoading(false);
+    try {
+      let q = supabase
+        .from('orders')
+        .select(`
+          id,
+          event_id,
+          pickup_code,
+          customer_name,
+          note,
+          status,
+          created_at,
+          total_cents,
+          items:order_items(
+            id,
+            item_name,
+            qty,
+            options:order_item_options(option_name, price_delta_cents)
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (eventId) {
+        q = q.eq('event_id', eventId);
+      }
+
+      const { data, error } = await q;
+      
+      if (error) {
+        console.error('Error loading orders:', error);
+        return;
+      }
+      
+      if (Array.isArray(data)) {
+        setOrders(data as Order[]);
+      }
+    } catch (err) {
+      console.error('Error in load function:', err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
     load();
     
     // Créer un channel Realtime pour écouter les changements
+    const channelName = `kitchen-orders-${eventId ?? 'all'}`;
     const chan = supabase
-      .channel('rt-orders-kitchen')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, () => load())
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (payload) => {
-        // petit update local si la commande est déjà en mémoire, sinon fallback load()
-        setOrders(prev => {
-          const idx = prev.findIndex(o => o.id === payload.new.id);
-          if (idx === -1) return prev; // on laisse INSERT déclencher load()
-          const next = [...prev];
-          next[idx] = { ...next[idx], status: payload.new.status };
-          return next;
-        });
-      })
+      .channel(channelName)
+      .on('postgres_changes', 
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'orders',
+          ...(eventId ? { filter: `event_id=eq.${eventId}` } : {})
+        }, 
+        () => load()
+      )
+      .on('postgres_changes', 
+        { 
+          event: 'UPDATE', 
+          schema: 'public', 
+          table: 'orders',
+          ...(eventId ? { filter: `event_id=eq.${eventId}` } : {})
+        }, 
+        (payload) => {
+          // petit update local si la commande est déjà en mémoire, sinon fallback load()
+          setOrders(prev => {
+            const idx = prev.findIndex(o => o.id === payload.new.id);
+            if (idx === -1) return prev; // on laisse INSERT déclencher load()
+            const next = [...prev];
+            next[idx] = { ...next[idx], status: payload.new.status };
+            return next;
+          });
+        }
+      )
       .subscribe();
 
     // Nettoyer le channel au return
     return () => {
       supabase.removeChannel(chan);
     };
-  }, []);
+  }, [eventId]);
 
   // refresh "time ago" toutes les 30s
   const [, forceTick] = useState(0);
@@ -93,7 +144,7 @@ export default function KitchenBoard({
     const d = new Date(iso).getTime();
     const diff = Math.max(0, Date.now() - d);
     const m = Math.round(diff / 60000);
-    if (m < 1) return 'à l’instant';
+    if (m < 1) return 'à l\'instant';
     if (m === 1) return 'il y a 1 min';
     if (m < 60) return `il y a ${m} min`;
     const h = Math.round(m / 60);
@@ -101,16 +152,17 @@ export default function KitchenBoard({
   }
 
   async function move(orderId: string, next: Order['status']) {
-    const { error } = await supabase.rpc('update_order_status', {
-      p_event_slug: EVENT_SLUG,
-      p_kitchen_code: KITCHEN_CODE,
-      p_order_id: orderId,
-      p_next_status: next,
-    });
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: next })
+      .eq('id', orderId);
+      
     if (error) {
+      console.error('Error updating order status:', error);
       alert('Erreur: ' + error.message);
       return;
     }
+    
     setOrders((prev) =>
       prev
         .map((o) => (o.id === orderId ? { ...o, status: next } : o))
