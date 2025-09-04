@@ -28,6 +28,7 @@ export default function EventsPage() {
       console.log('SUPABASE_URL =', process.env.NEXT_PUBLIC_SUPABASE_URL);
     }
   }, []);
+  
 
   async function loadEvents() {
     try {

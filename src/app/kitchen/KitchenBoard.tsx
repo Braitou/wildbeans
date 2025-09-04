@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button';
 
 type OrderItemOption = { option_name: string; price_delta_cents: number };
 type OrderItem = { id: string; item_name: string; qty: number; options: OrderItemOption[] };
+type OrderStatus = 'new' | 'preparing' | 'ready' | 'served' | 'cancelled';
 type Order = {
   id: string;
   event_id: string;
   pickup_code: string;
   customer_name: string | null;
   note: string | null;
-  status: 'new' | 'preparing' | 'ready' | 'served' | 'cancelled';
+  status: OrderStatus;
   created_at: string;
   total_cents: number;
   items: OrderItem[];
@@ -33,6 +34,7 @@ export default function KitchenBoard({
 
   async function load() {
     try {
+      console.log('[KitchenBoard] load start', { eventId });
       let q = supabase
         .from('orders')
         .select(`
@@ -58,60 +60,74 @@ export default function KitchenBoard({
       }
 
       const { data, error } = await q;
-      
       if (error) {
-        console.error('Error loading orders:', error);
+        console.error('[KitchenBoard] load error:', error);
         return;
       }
-      
       if (Array.isArray(data)) {
         setOrders(data as Order[]);
+        console.log('[KitchenBoard] load ok; count=', data.length);
       }
     } catch (err) {
-      console.error('Error in load function:', err);
+      console.error('[KitchenBoard] load fatal:', err);
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    load();
-    
-    // Créer un channel Realtime pour écouter les changements
+    void load();
+
+    // Realtime: INSERT & UPDATE sur orders (filtré par event si présent)
     const channelName = `kitchen-orders-${eventId ?? 'all'}`;
+    console.log('[KitchenBoard] subscribe', channelName);
+
     const chan = supabase
-      .channel(channelName)
-      .on('postgres_changes', 
-        { 
-          event: 'INSERT', 
-          schema: 'public', 
+      .channel(channelName, { config: { broadcast: { ack: true } } })
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
           table: 'orders',
-          ...(eventId ? { filter: `event_id=eq.${eventId}` } : {})
-        }, 
-        () => load()
-      )
-      .on('postgres_changes', 
-        { 
-          event: 'UPDATE', 
-          schema: 'public', 
-          table: 'orders',
-          ...(eventId ? { filter: `event_id=eq.${eventId}` } : {})
-        }, 
+          ...(eventId ? { filter: `event_id=eq.${eventId}` } : {}),
+        },
         (payload) => {
-          // petit update local si la commande est déjà en mémoire, sinon fallback load()
-          setOrders(prev => {
-            const idx = prev.findIndex(o => o.id === payload.new.id);
-            if (idx === -1) return prev; // on laisse INSERT déclencher load()
+          console.log('[KitchenBoard] realtime INSERT payload:', payload);
+          // on recharge pour récupérer items & relations
+          void load();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          ...(eventId ? { filter: `event_id=eq.${eventId}` } : {}),
+        },
+        (payload) => {
+          console.log('[KitchenBoard] realtime UPDATE payload:', payload);
+          const updatedId = (payload.new as any)?.id as string | undefined;
+          const nextStatus = (payload.new as any)?.status as OrderStatus | undefined;
+          if (!updatedId || !nextStatus) return;
+
+          // update optimiste si la commande est déjà en mémoire
+          setOrders((prev) => {
+            const idx = prev.findIndex((o) => o.id === updatedId);
+            if (idx === -1) return prev;
             const next = [...prev];
-            next[idx] = { ...next[idx], status: payload.new.status };
+            next[idx] = { ...next[idx], status: nextStatus };
             return next;
           });
         }
       )
-      .subscribe();
+      .subscribe((st) => {
+        console.log('[KitchenBoard] subscribe status:', st);
+      });
 
-    // Nettoyer le channel au return
     return () => {
+      console.log('[KitchenBoard] unsubscribe', channelName);
       supabase.removeChannel(chan);
     };
   }, [eventId]);
@@ -126,16 +142,16 @@ export default function KitchenBoard({
   // filtres
   const filtered = useMemo(() => {
     if (statusFilter === 'active') {
-      return orders.filter(o => ['new','preparing','ready'].includes(o.status));
+      return orders.filter((o) => ['new', 'preparing', 'ready'].includes(o.status));
     }
     return orders;
   }, [orders, statusFilter]);
 
   const cols = useMemo(
     () => ({
-      new: filtered.filter(o => o.status === 'new'),
-      preparing: filtered.filter(o => o.status === 'preparing'),
-      ready: filtered.filter(o => o.status === 'ready'),
+      new: filtered.filter((o) => o.status === 'new'),
+      preparing: filtered.filter((o) => o.status === 'preparing'),
+      ready: filtered.filter((o) => o.status === 'ready'),
     }),
     [filtered]
   );
@@ -144,37 +160,44 @@ export default function KitchenBoard({
     const d = new Date(iso).getTime();
     const diff = Math.max(0, Date.now() - d);
     const m = Math.round(diff / 60000);
-    if (m < 1) return 'à l\'instant';
+    if (m < 1) return "à l'instant";
     if (m === 1) return 'il y a 1 min';
     if (m < 60) return `il y a ${m} min`;
     const h = Math.round(m / 60);
     return h === 1 ? 'il y a 1 h' : `il y a ${h} h`;
+    // (tu peux ajouter les jours si tu veux)
   }
 
-  async function move(orderId: string, next: Order['status']) {
-    console.log(`Kitchen: Attempting to move order ${orderId} to status: ${next}`);
-    
-    // Mise à jour dans localStorage pour communication immédiate
+  async function move(orderId: string, next: OrderStatus) {
+    console.log('[KitchenBoard] move →', { orderId, next });
+
+    // signal local immédiat (fallback inter-onglets)
     const orderKey = `order_status_${orderId}`;
-    localStorage.setItem(orderKey, next);
-    
-    // Déclencher un événement personnalisé pour notifier les autres pages
-    window.dispatchEvent(new CustomEvent('orderStatusChanged', {
-      detail: { orderId, status: next }
-    }));
-    
-    const { error } = await supabase
+    try {
+      localStorage.setItem(orderKey, next);
+      window.dispatchEvent(new CustomEvent('orderStatusChanged', { detail: { orderId, status: next } }));
+    } catch {}
+
+    // update DB + retourne la/les lignes mises à jour
+    const { data, error } = await supabase
       .from('orders')
       .update({ status: next })
-      .eq('id', orderId);
-      
+      .eq('id', orderId)
+      .select('id, status'); // <= important pour vérifier qu’une row a bien été modifiée
+
+    console.log('[KitchenBoard] move result:', { data, error });
+
     if (error) {
-      console.error('Error updating order status:', error);
+      console.error('[KitchenBoard] update error:', error);
       alert('Erreur: ' + error.message);
       return;
     }
-    
-    console.log(`Kitchen: Successfully moved order ${orderId} to status: ${next}`);
+    if (!data || data.length === 0) {
+      console.warn('[KitchenBoard] update: no rows returned (RLS ? mauvais id ?)');
+      return;
+    }
+
+    // maj locale immédiate (sans attendre realtime)
     setOrders((prev) =>
       prev
         .map((o) => (o.id === orderId ? { ...o, status: next } : o))
@@ -185,11 +208,14 @@ export default function KitchenBoard({
   const title = (k: keyof typeof cols) =>
     k === 'new' ? 'Nouvelles' : k === 'preparing' ? 'En préparation' : 'Prêtes';
 
-  const statusTone = (s: Order['status']) =>
-    s === 'new' ? 'bg-amber-100 text-amber-900'
-    : s === 'preparing' ? 'bg-blue-100 text-blue-900'
-    : s === 'ready' ? 'bg-emerald-100 text-emerald-900'
-    : 'bg-gray-100 text-gray-800';
+  const statusTone = (s: OrderStatus) =>
+    s === 'new'
+      ? 'bg-amber-100 text-amber-900'
+      : s === 'preparing'
+      ? 'bg-blue-100 text-blue-900'
+      : s === 'ready'
+      ? 'bg-emerald-100 text-emerald-900'
+      : 'bg-gray-100 text-gray-800';
 
   if (loading) return <div className="p-8 text-lg">Chargement…</div>;
 
@@ -219,18 +245,19 @@ export default function KitchenBoard({
                   <CardHeader className={`${pad} pb-0`}>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        {/* code plus grand */}
                         <div className="text-4xl font-semibold tracking-wider">{o.pickup_code}</div>
-                        <span className={`inline-flex items-center px-2.5 py-1.5 text-xs rounded-full ${statusTone(o.status)}`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-1.5 text-xs rounded-full ${statusTone(
+                            o.status
+                          )}`}
+                        >
                           {o.status.toUpperCase()}
                         </span>
                       </div>
                       <div className="text-sm text-neutral-500">{timeAgo(o.created_at)}</div>
                     </div>
                     {o.customer_name && (
-                      <div className="mt-2 text-[15px] text-neutral-600">
-                        {o.customer_name}
-                      </div>
+                      <div className="mt-2 text-[15px] text-neutral-600">{o.customer_name}</div>
                     )}
                   </CardHeader>
 
@@ -251,11 +278,7 @@ export default function KitchenBoard({
                       ))}
                     </ul>
 
-                    {o.note && (
-                      <div className="mt-3 text-[15px] italic text-neutral-700">
-                        « {o.note} »
-                      </div>
-                    )}
+                    {o.note && <div className="mt-3 text-[15px] italic text-neutral-700">« {o.note} »</div>}
 
                     <div className="flex flex-wrap gap-3 pt-5">
                       {o.status === 'new' && (
@@ -263,7 +286,11 @@ export default function KitchenBoard({
                           <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'preparing')}>
                             Prendre
                           </Button>
-                          <Button className="h-12 px-5 text-[15px]" variant="outline" onClick={() => move(o.id, 'cancelled')}>
+                          <Button
+                            className="h-12 px-5 text-[15px]"
+                            variant="outline"
+                            onClick={() => move(o.id, 'cancelled')}
+                          >
                             Annuler
                           </Button>
                         </>
@@ -273,7 +300,11 @@ export default function KitchenBoard({
                           <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'ready')}>
                             Prêt
                           </Button>
-                          <Button className="h-12 px-5 text-[15px]" variant="outline" onClick={() => move(o.id, 'cancelled')}>
+                          <Button
+                            className="h-12 px-5 text-[15px]"
+                            variant="outline"
+                            onClick={() => move(o.id, 'cancelled')}
+                          >
                             Annuler
                           </Button>
                         </>
@@ -287,9 +318,7 @@ export default function KitchenBoard({
                   </CardContent>
                 </Card>
               ))}
-              {!cols[k].length && (
-                <div className="text-sm text-neutral-400">Aucune commande ici.</div>
-              )}
+              {!cols[k].length && <div className="text-sm text-neutral-400">Aucune commande ici.</div>}
             </div>
           </section>
         ))}

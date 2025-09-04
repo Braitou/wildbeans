@@ -1,17 +1,18 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import KitchenBoard from './KitchenBoard';
-import FullBleed from '@/components/layout/FullBleed';
-import AdminGate from '@/components/auth/AdminGate';
-import { AdminLogoutButton } from '@/components/auth/AdminGate';
 import { supabase } from '@/lib/supabase';
+import FullBleed from '@/components/layout/FullBleed';
+import AdminGate, { AdminLogoutButton } from '@/components/auth/AdminGate';
+import KitchenBoard from './KitchenBoard';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 
-type Event = {
+export const dynamic = 'force-dynamic';
+
+type EventRow = {
   id: string;
   name: string;
   slug: string;
@@ -21,61 +22,78 @@ type Event = {
   is_closed: boolean;
 };
 
-function KitchenPageContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const code = searchParams.get('code')?.trim() ?? '';
-  
-  const [fs, setFs] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+function formatDateFR(dateString: string | null) {
+  if (!dateString) return null;
+  const d = new Date(dateString);
+  return new Intl.DateTimeFormat('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(d);
+}
 
-  async function toggleFS() {
+function KitchenPageContent() {
+  const router = useRouter();
+  const sp = useSearchParams();
+  const kitchenCode = (sp.get('code') || '').trim();
+
+  const [isFS, setIsFS] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [events, setEvents] = useState<EventRow[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<EventRow | null>(null);
+
+  const hasCode = useMemo(() => kitchenCode.length > 0, [kitchenCode]);
+
+  const toggleFS = useCallback(async () => {
     try {
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
-        setFs(true);
+        setIsFS(true);
       } else {
         await document.exitFullscreen();
-        setFs(false);
+        setIsFS(false);
       }
-    } catch {}
-  }
+    } catch {
+      // noop
+    }
+  }, []);
 
-  // Charger l'événement par code kitchen
-  async function loadEventByCode(kitchenCode: string) {
+  const loadEventByCode = useCallback(async (code: string) => {
     setLoading(true);
-    setError(null);
-    
+    setErrorMsg(null);
+    console.log('[Kitchen] loadEventByCode:', code);
+
     const { data, error } = await supabase
       .from('events')
       .select('id, name, slug, kitchen_code, starts_at, ends_at, is_closed')
-      .eq('kitchen_code', kitchenCode)
+      .eq('kitchen_code', code)
       .maybeSingle();
 
     if (error) {
-      console.error('Error loading event by kitchen code:', error);
-      setError('Erreur lors du chargement de l\'événement');
+      console.error('[Kitchen] error loadEventByCode:', error);
+      setErrorMsg('Erreur lors du chargement de l’événement');
+      setSelectedEvent(null);
       setLoading(false);
       return;
     }
-
     if (!data) {
-      setError(`Code kitchen "${kitchenCode}" non trouvé`);
+      setErrorMsg(`Code kitchen "${code}" introuvable`);
+      setSelectedEvent(null);
       setLoading(false);
       return;
     }
-
     setSelectedEvent(data);
     setLoading(false);
-  }
+  }, []);
 
-  // Charger la liste des événements actifs
-  async function loadActiveEvents() {
+  const loadActiveEvents = useCallback(async () => {
     setLoading(true);
-    
+    setErrorMsg(null);
+    console.log('[Kitchen] loadActiveEvents');
+
     const { data, error } = await supabase
       .from('events')
       .select('id, name, slug, kitchen_code, starts_at, ends_at, is_closed')
@@ -83,45 +101,34 @@ function KitchenPageContent() {
       .order('starts_at', { ascending: false, nullsLast: true });
 
     if (error) {
-      console.error('Error loading active events:', error);
-      setError('Erreur lors du chargement des événements');
+      console.error('[Kitchen] error loadActiveEvents:', error);
+      setErrorMsg('Erreur lors du chargement des événements');
+      setEvents([]);
       setLoading(false);
       return;
     }
-
     setEvents(data || []);
     setLoading(false);
-  }
+  }, []);
 
   useEffect(() => {
-    if (code) {
-      loadEventByCode(code);
+    if (hasCode) {
+      void loadEventByCode(kitchenCode);
     } else {
-      loadActiveEvents();
+      void loadActiveEvents();
     }
-  }, [code]);
+  }, [hasCode, kitchenCode, loadEventByCode, loadActiveEvents]);
 
-  // Format de date pour l'affichage
-  function formatDate(dateString: string | null) {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
+  // ---------- Rendus conditionnels ----------
 
-  // Si on a un code et qu'on charge
-  if (code && loading) {
+  // Avec code – en cours de chargement
+  if (hasCode && loading) {
     return (
       <AdminGate>
         <main className="py-4">
           <FullBleed>
             <div className="px-6 py-6">
-              <div className="text-lg">Chargement de l'événement…</div>
+              <div className="text-lg">Chargement de l’événement…</div>
             </div>
           </FullBleed>
         </main>
@@ -129,15 +136,15 @@ function KitchenPageContent() {
     );
   }
 
-  // Si on a un code mais une erreur
-  if (code && error) {
+  // Avec code – erreur
+  if (hasCode && errorMsg) {
     return (
       <AdminGate>
         <main className="py-4">
           <FullBleed>
-            <div className="px-6 py-6">
-              <div className="text-lg text-red-600 mb-4">{error}</div>
-              <Button 
+            <div className="px-6 py-6 space-y-4">
+              <div className="text-lg text-red-600">{errorMsg}</div>
+              <Button
                 onClick={() => router.push('/kitchen')}
                 className="inline-flex items-center gap-2"
               >
@@ -151,13 +158,13 @@ function KitchenPageContent() {
     );
   }
 
-  // Si on a un code et un événement valide
-  if (code && selectedEvent) {
+  // Avec code – événement trouvé
+  if (hasCode && selectedEvent) {
     return (
       <AdminGate>
         <main className="py-4">
           <FullBleed>
-            {/* Header plein écran avec info de l'événement */}
+            {/* Header plein écran */}
             <div className="px-6 py-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-col gap-2">
                 <div className="text-3xl font-semibold uppercase tracking-widest">
@@ -173,7 +180,7 @@ function KitchenPageContent() {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <Button 
+                <Button
                   onClick={() => router.push('/kitchen')}
                   variant="outline"
                   className="inline-flex items-center gap-2"
@@ -185,7 +192,7 @@ function KitchenPageContent() {
                   onClick={toggleFS}
                   className="h-11 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
-                  {fs ? 'Exit full screen' : 'Full screen'}
+                  {isFS ? 'Exit full screen' : 'Full screen'}
                 </button>
                 <AdminLogoutButton />
               </div>
@@ -199,7 +206,7 @@ function KitchenPageContent() {
     );
   }
 
-  // Liste des événements actifs (pas de code)
+  // Sans code – liste des événements actifs
   return (
     <AdminGate>
       <main className="py-4">
@@ -214,7 +221,7 @@ function KitchenPageContent() {
                 onClick={toggleFS}
                 className="h-11 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
               >
-                {fs ? 'Exit full screen' : 'Full screen'}
+                {isFS ? 'Exit full screen' : 'Full screen'}
               </button>
               <AdminLogoutButton />
             </div>
@@ -224,41 +231,39 @@ function KitchenPageContent() {
           <div className="px-6 pb-16">
             {loading ? (
               <div className="text-lg">Chargement des événements…</div>
+            ) : errorMsg ? (
+              <div className="text-lg text-red-600">{errorMsg}</div>
             ) : events.length === 0 ? (
               <div className="text-lg text-neutral-500">Aucun événement actif trouvé.</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {events.map((event) => (
-                  <Card key={event.id} className="shadow-sm border-gray-200">
+                {events.map((ev) => (
+                  <Card key={ev.id} className="shadow-sm border-gray-200">
                     <CardHeader className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="text-xl font-semibold mb-2">{event.name}</h3>
-                          <div className="text-sm text-neutral-500 mb-3">
-                            {event.starts_at && (
-                              <div>Début: {formatDate(event.starts_at)}</div>
-                            )}
-                            {event.ends_at && (
-                              <div>Fin: {formatDate(event.ends_at)}</div>
-                            )}
+                          <h3 className="text-xl font-semibold mb-2">{ev.name}</h3>
+                          <div className="text-sm text-neutral-500 mb-3 space-y-1">
+                            {ev.starts_at && <div>Début : {formatDateFR(ev.starts_at)}</div>}
+                            {ev.ends_at && <div>Fin : {formatDateFR(ev.ends_at)}</div>}
                           </div>
                           <div className="text-xs text-neutral-400">
-                            Code: {event.kitchen_code}
+                            Code: {ev.kitchen_code}
                           </div>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent className="p-6 pt-0">
                       <div className="flex gap-3">
-                        <Button 
-                          onClick={() => router.push(`/kitchen?code=${event.kitchen_code}`)}
+                        <Button
+                          onClick={() => router.push(`/kitchen?code=${encodeURIComponent(ev.kitchen_code)}`)}
                           className="flex-1"
                         >
                           Open Kitchen
                         </Button>
-                        <Button 
+                        <Button
                           variant="outline"
-                          onClick={() => window.open(`/kitchen?code=${event.kitchen_code}`, '_blank')}
+                          onClick={() => window.open(`/kitchen?code=${encodeURIComponent(ev.kitchen_code)}`, '_blank', 'noopener,noreferrer')}
                           className="inline-flex items-center gap-2"
                         >
                           <ExternalLink className="h-4 w-4" />
@@ -277,21 +282,21 @@ function KitchenPageContent() {
   );
 }
 
-export const dynamic = 'force-dynamic';
-
 export default function KitchenPage() {
   return (
-    <Suspense fallback={
-      <AdminGate>
-        <main className="py-4">
-          <FullBleed>
-            <div className="px-6 py-6">
-              <div className="text-lg">Chargement…</div>
-            </div>
-          </FullBleed>
-        </main>
-      </AdminGate>
-    }>
+    <Suspense
+      fallback={
+        <AdminGate>
+          <main className="py-4">
+            <FullBleed>
+              <div className="px-6 py-6">
+                <div className="text-lg">Chargement…</div>
+              </div>
+            </FullBleed>
+          </main>
+        </AdminGate>
+      }
+    >
       <KitchenPageContent />
     </Suspense>
   );
