@@ -39,7 +39,6 @@ export default function DrinkList({
                     )} />
                     <div className="flex-1">
                       <div className="font-medium">{item.name}</div>
-                      {item.description && <div className="text-xs text-neutral-500">{item.description}</div>}
                     </div>
                     {hasBeenSelected && (
                       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>

@@ -33,11 +33,6 @@ export default function DrinkGrid({ categories, onSelectItem }: DrinkGridProps) 
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  {item.description && (
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {item.description}
-                    </p>
-                  )}
                   {item.modifiers.length > 0 && (
                     <div className="mt-3 text-xs text-muted-foreground">
                       {item.modifiers.length} option{item.modifiers.length > 1 ? 's' : ''} disponible{item.modifiers.length > 1 ? 's' : ''}
