@@ -24,10 +24,13 @@ export default function DrinkList({
           <div className="space-y-2">
             {cat.items.map(item => {
               const count = getCount(item.id);
+              const hasBeenSelected = count > 0;
+              
               return (
                 <div
                   key={item.id}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 hover:border-gray-300 transition bg-white text-black"
+                  onClick={() => onInc(item.id)}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 hover:border-gray-300 transition bg-white text-black cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
                     <span className={cn(
@@ -38,20 +41,22 @@ export default function DrinkList({
                       <div className="font-medium">{item.name}</div>
                       {item.description && <div className="text-xs text-neutral-500">{item.description}</div>}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => onDec(item.id)}
-                        disabled={count === 0}
-                        className="h-8 w-8 border rounded-md disabled:opacity-40 hover:bg-gray-50"
-                        aria-label="Decrease"
-                      >−</button>
-                      <div className="min-w-[2ch] text-center tabular-nums">{count || 0}</div>
-                      <button
-                        onClick={() => onInc(item.id)}
-                        className="h-8 w-8 border rounded-md hover:bg-gray-50"
-                        aria-label="Increase"
-                      >+</button>
-                    </div>
+                    {hasBeenSelected && (
+                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => onDec(item.id)}
+                          disabled={count === 0}
+                          className="h-8 w-8 border rounded-md disabled:opacity-40 hover:bg-gray-50"
+                          aria-label="Decrease"
+                        >−</button>
+                        <div className="min-w-[2ch] text-center tabular-nums">{count}</div>
+                        <button
+                          onClick={() => onInc(item.id)}
+                          className="h-8 w-8 border rounded-md hover:bg-gray-50"
+                          aria-label="Increase"
+                        >+</button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
