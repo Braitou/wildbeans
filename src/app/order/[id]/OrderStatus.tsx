@@ -47,6 +47,11 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
       } else {
         setTestMessage(`Successfully updated to ${newStatus}!`);
         console.log(`Status updated to ${newStatus}`);
+        
+        // 🔥 SOLUTION TEMPORAIRE : Recharger les données après mise à jour
+        setTimeout(() => {
+          load();
+        }, 500);
       }
     } catch (err) {
       setTestMessage(`Error: ${err}`);
@@ -147,6 +152,12 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
           className="px-4 py-2 bg-green-500 text-white rounded text-sm"
         >
           Test → Ready
+        </button>
+        <button
+          onClick={load}
+          className="px-4 py-2 bg-gray-500 text-white rounded text-sm"
+        >
+          Reload Data
         </button>
       </div>
       
