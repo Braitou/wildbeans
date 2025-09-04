@@ -16,7 +16,6 @@ type OrderJson = {
 export default function OrderStatus({ orderId }: { orderId: string }) {
   const [data, setData] = useState<OrderJson | null>(null);
   const [loading, setLoading] = useState(true);
-  const [testMessage, setTestMessage] = useState<string>('');
 
   const load = useCallback(async () => {
     console.log('Loading order data for:', orderId);
@@ -32,38 +31,19 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
     setLoading(false);
   }, [orderId]);
 
-  // Fonction de test pour mettre à jour le statut
-  const testUpdateStatus = async (newStatus: 'preparing' | 'ready') => {
-    try {
-      setTestMessage(`Testing update to ${newStatus}...`);
-      const { error } = await supabase
-        .from('orders')
-        .update({ status: newStatus })
-        .eq('id', orderId);
-      
-      if (error) {
-        setTestMessage(`Error: ${error.message}`);
-        console.error('Update error:', error);
-      } else {
-        setTestMessage(`Successfully updated to ${newStatus}!`);
-        console.log(`Status updated to ${newStatus}`);
-        
-        // 🔥 SOLUTION TEMPORAIRE : Recharger les données après mise à jour
-        setTimeout(() => {
-          load();
-        }, 500);
-      }
-    } catch (err) {
-      setTestMessage(`Error: ${err}`);
-      console.error('Test error:', err);
-    }
-  };
-
   useEffect(() => {
     let active = true;
 
     // Chargement initial
     load();
+
+    // Polling automatique toutes les 5 secondes (fallback si Realtime ne fonctionne pas)
+    const interval = setInterval(() => {
+      if (active) {
+        console.log('Polling for order status update...');
+        load();
+      }
+    }, 5000);
 
     // Abonnement Realtime
     console.log('Setting up Realtime for order:', orderId);
@@ -93,6 +73,7 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
     return () => {
       console.log('Cleaning up Realtime for order:', orderId);
       active = false;
+      clearInterval(interval);
       supabase.removeChannel(channel);
     };
   }, [orderId, load]);
@@ -138,34 +119,6 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
       <p className="mt-4 mb-2 text-center text-[18px] font-semibold">
         {topMessage}
       </p>
-
-      {/* Boutons de test pour le debug */}
-      <div className="mt-4 flex justify-center gap-4">
-        <button
-          onClick={() => testUpdateStatus('preparing')}
-          className="px-4 py-2 bg-blue-500 text-white rounded text-sm"
-        >
-          Test → Preparing
-        </button>
-        <button
-          onClick={() => testUpdateStatus('ready')}
-          className="px-4 py-2 bg-green-500 text-white rounded text-sm"
-        >
-          Test → Ready
-        </button>
-        <button
-          onClick={load}
-          className="px-4 py-2 bg-gray-500 text-white rounded text-sm"
-        >
-          Reload Data
-        </button>
-      </div>
-      
-      {testMessage && (
-        <p className="mt-2 text-center text-sm text-gray-600">
-          {testMessage}
-        </p>
-      )}
 
       {/* Tasse animée */}
       <CoffeeStatus status={status} loading={loading} />
