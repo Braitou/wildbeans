@@ -107,17 +107,18 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         p_starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : null,
         p_ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
       });
-
+      
       if (error) {
-        // ✨ Ajoute ceci pour voir l'erreur exacte
+        // >>> rendez l’erreur visible immédiatement
         console.error('admin_upsert_event error:', error);
-        if (error.message?.includes('SLUG_TAKEN')) {
+        const msg = (error as any)?.message || 'Unknown error';
+        if (msg.includes('SLUG_TAKEN')) {
           toast.error('Ce slug est déjà utilisé, choisis-en un autre.');
         } else {
-          toast.error(`Erreur lors de l'enregistrement: ${error.message}`);
+          toast.error(`Erreur lors de l’enregistrement : ${msg}`);
         }
         return;
-      }
+      }      
 
       toast.success('Enregistré ✅');
 
