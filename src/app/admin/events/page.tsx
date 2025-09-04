@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase';
 import AdminGate from '@/components/auth/AdminGate';
 import AdminHeader from '@/components/layout/AdminHeader';
 import Link from 'next/link';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 type EventRow = { 
   id: string; 
@@ -19,22 +21,34 @@ export default function EventsPage() {
   const [rows, setRows] = useState<EventRow[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadEvents() {
-      try {
-        const { data, error } = await supabase.rpc('admin_list_events');
-        if (error) {
-          console.error('Erreur lors du chargement des événements:', error);
-          return;
-        }
-        setRows(data || []);
-      } catch (err) {
-        console.error('Erreur:', err);
-      } finally {
-        setLoading(false);
+  async function loadEvents() {
+    try {
+      const { data, error } = await supabase.rpc('admin_list_events');
+      if (error) {
+        console.error('Erreur lors du chargement des événements:', error);
+        return;
       }
+      setRows(data || []);
+    } catch (err) {
+      console.error('Erreur:', err);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  async function deleteEvent(id: string) {
+    if (!confirm('Delete this event?')) return;
     
+    const { error } = await supabase.rpc('admin_delete_event', { p_event_id: id });
+    if (error) { 
+      toast.error(error.message); 
+      return; 
+    }
+    toast.success('Event deleted');
+    loadEvents(); // recharger la liste
+  }
+
+  useEffect(() => {
     loadEvents();
   }, []);
 
@@ -94,6 +108,13 @@ export default function EventsPage() {
                       >
                         Ouvrir
                       </Link>
+                      <button
+                        onClick={() => deleteEvent(e.id)}
+                        className="ml-2 h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-gray-50"
+                        aria-label="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </td>
                   </tr>
                 ))

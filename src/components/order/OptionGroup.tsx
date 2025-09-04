@@ -1,6 +1,15 @@
 import { Modifier } from '@/types/menu';
 import { motion } from 'framer-motion';
 
+// Fonction pour traduire les labels en anglais
+function translateLabel(label: string): string {
+  const translations: Record<string, string> = {
+    'Sirops': 'Syrups',
+    'Toppings': 'Toppings',
+  };
+  return translations[label] || label;
+}
+
 export default function OptionGroup({
   modifier,
   valueSingle,
@@ -50,6 +59,8 @@ export default function OptionGroup({
 
   // multi
   const set = new Set(valueMulti ?? []);
+  const isOptionalMulti = modifier.type === 'multi' && !modifier.required;
+  
   return (
     <div className="flex flex-wrap gap-8 py-2">
       {modifier.options.map(opt => {
@@ -83,6 +94,19 @@ export default function OptionGroup({
           </motion.button>
         );
       })}
+      
+      {/* Bouton "None" pour les groupes multi optionnels */}
+      {isOptionalMulti && (
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.97 }}
+          onClick={() => onChange([])}
+          className="inline-flex items-center h-10 px-4 rounded-full border border-gray-300 text-sm hover:bg-gray-50"
+          aria-label="None"
+        >
+          None
+        </motion.button>
+      )}
     </div>
   );
 }

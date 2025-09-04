@@ -10,6 +10,8 @@ import {
   BarChart, Bar, PieChart, Pie, Legend
 } from 'recharts';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 
 type Totals = {
   orders: number;
@@ -29,6 +31,7 @@ interface PageProps {
 
 export default function EventStatsPage({ params }: PageProps) {
   const { id: eventId } = use(params);
+  const router = useRouter();
 
   const [totals, setTotals] = useState<Totals | null>(null);
   const [items, setItems]   = useState<ItemRow[]>([]);
@@ -121,6 +124,16 @@ export default function EventStatsPage({ params }: PageProps) {
     <AdminGate>
       <main className="max-w-6xl mx-auto px-4 py-8">
         <AdminHeader title="Wild Stats" />
+        
+        {/* Bouton Back to events */}
+        <button
+          onClick={() => router.push('/admin/events')}
+          className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-md hover:bg-gray-50"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to events
+        </button>
+        
         <div className="flex items-center justify-between mb-2">
           <EventTabs id={eventId} />
           <button

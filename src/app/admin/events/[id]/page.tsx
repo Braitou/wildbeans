@@ -1,11 +1,13 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminGate from '@/components/auth/AdminGate';
 import AdminHeader from '@/components/layout/AdminHeader';
 import EventTabs from '@/components/admin/EventTabs';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 
 type EventForm = {
   id?: string | null;
@@ -35,6 +37,22 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   const [saving, setSaving] = useState(false);
   const [closing, setClosing] = useState(false);
   const [slugTouched, setSlugTouched] = useState(false);
+  const [origin, setOrigin] = useState('');
+
+  // QR code
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const qrUrl = useMemo(() => (origin && form.slug && form.join_code)
+    ? `${origin}/e/${encodeURIComponent(form.slug)}?join=${encodeURIComponent(form.join_code)}`
+    : '', [origin, form.slug, form.join_code]);
+
+  function downloadQR() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `wildbeans-qr-${form.slug || 'event'}.png`;
+    link.click();
+  }
 
   // util : slugify à partir du nom (simple)
   function slugify(s: string) {
@@ -77,6 +95,11 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   useEffect(() => {
     loadEvent();
   }, [loadEvent]);
+
+  // Définir l'origine pour le QR code
+  useEffect(() => {
+    if (typeof window !== 'undefined') setOrigin(window.location.origin);
+  }, []);
 
   // Auto-générer slug & codes si vides (uniquement pour nouveaux events)
   useEffect(() => {
@@ -173,6 +196,16 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     <AdminGate>
       <main className="max-w-4xl mx-auto px-4 py-8">
         <AdminHeader title="Event" />
+        
+        {/* Bouton Back to events */}
+        <button
+          onClick={() => router.push('/admin/events')}
+          className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-md hover:bg-gray-50"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to events
+        </button>
+        
         <div className="flex items-center justify-between mb-2">
           {!isNew && <EventTabs id={id} />}
           {!isNew && (
@@ -261,6 +294,26 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               {saving ? 'Enregistrement…' : 'Enregistrer'}
             </button>
           </div>
+        </section>
+
+        {/* QR Code Section */}
+        <section className="mt-6 border rounded-lg p-4">
+          <div className="text-sm font-semibold mb-2">Event QR</div>
+          {qrUrl ? (
+            <div className="flex items-center gap-4">
+              <div className="p-3 border rounded">
+                <QRCodeCanvas value={qrUrl} size={192} includeMargin ref={canvasRef} />
+              </div>
+              <div className="space-y-2">
+                <div className="text-sm break-all">{qrUrl}</div>
+                <button onClick={downloadQR} className="h-10 px-3 border rounded-md hover:bg-gray-50">
+                  Download PNG
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-neutral-500">Fill slug & join code to preview the QR.</div>
+          )}
         </section>
       </main>
     </AdminGate>

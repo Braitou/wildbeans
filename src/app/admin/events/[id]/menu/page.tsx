@@ -7,6 +7,8 @@ import AdminHeader from '@/components/layout/AdminHeader';
 import EventTabs from '@/components/admin/EventTabs';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 
 type MenuItem = {
   id: string;
@@ -28,6 +30,7 @@ interface PageProps {
 
 export default function EventMenuPage({ params }: PageProps) {
   const { id } = use(params);
+  const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -149,6 +152,16 @@ export default function EventMenuPage({ params }: PageProps) {
     <AdminGate>
       <main className="max-w-4xl mx-auto px-4 py-8">
         <AdminHeader title="Menu" />
+        
+        {/* Bouton Back to events */}
+        <button
+          onClick={() => router.push('/admin/events')}
+          className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-md hover:bg-gray-50"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to events
+        </button>
+        
         <EventTabs id={id} />
         
         <div className="mb-6 flex items-center justify-end">

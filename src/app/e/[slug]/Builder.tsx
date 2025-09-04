@@ -49,13 +49,13 @@ export default function Builder({
   const current = currentIndex >= 0 ? multiItems[currentIndex] : null;
   const optionSteps: Modifier[] = current ? (current.item.modifiers ?? []) : [];
 
-  // Sélection d'une boisson => crée un nouvel item et passe en édition
+  // Sélection d'une boisson => sélectionne seulement (pas de navigation auto)
   function selectItemById(id: string) {
     const it = allItems.find(i => i.id === id);
     if (!it) return;
     setMultiItems(prev => [...prev, { item: it, single: {}, multi: {} }]);
     setCurrentIndex(multiItems.length); // index du nouvel item
-    setStep(1); // passe à la première étape d'options (0=liste)
+    // Ne pas changer step ici - l'utilisateur doit cliquer sur "Suivant"
   }
 
   function updateCurrentSingle(modId: string, value: string) {
@@ -220,7 +220,7 @@ export default function Builder({
             {currentIndex === -1 && (
               <DrinkList
                 categories={categories}
-                selectedId={null}
+                selectedId={multiItems.length > 0 ? multiItems[multiItems.length - 1].item.id : null}
                 onSelect={selectItemById}
               />
             )}
@@ -229,9 +229,9 @@ export default function Builder({
             {currentIndex >= 0 && step >= 1 && step <= optionSteps.length && current && (
               <section className="py-4">
                 <h2 className="mb-2 text-xs font-semibold tracking-[0.18em] uppercase text-neutral-500">
-                  Boisson {currentIndex + 1}
+                  Drink {currentIndex + 1}
                 </h2>
-                <h3 className="mb-2 text-[15px] font-semibold">{current.item.name} — {optionSteps[step - 1].name}</h3>
+                <h3 className="mb-2 text-sm sm:text-base font-semibold leading-tight">{current.item.name} — {optionSteps[step - 1].name}</h3>
                 <OptionGroup
                   modifier={optionSteps[step - 1]}
                   valueSingle={current.single[optionSteps[step - 1].id] ?? null}
@@ -262,13 +262,13 @@ export default function Builder({
                     <input
                       value={firstName}
                       onChange={e => setFirstName(e.target.value)}
-                      placeholder="Prénom (optionnel)"
+                      placeholder="First name (optional)"
                       className="h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                     />
                     <textarea
                       value={note}
                       onChange={e => setNote(e.target.value)}
-                      placeholder="Note pour le barista (optionnel)"
+                      placeholder="Note for barista (optional)"
                       className="min-h-[90px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                     />
                   </div>
@@ -282,10 +282,15 @@ export default function Builder({
         {currentIndex === -1 ? (
           <WizardNav
             canPrev={false}
-            canNext={false}
+            canNext={multiItems.length > 0}
             isFinal={false}
             onPrev={() => {}}
-            onNext={() => {}}
+            onNext={() => {
+              if (multiItems.length > 0) {
+                setCurrentIndex(multiItems.length - 1);
+                setStep(1);
+              }
+            }}
             nextLabel="Suivant"
           />
         ) : (
@@ -295,7 +300,7 @@ export default function Builder({
             isFinal={step === optionSteps.length + 1}
             onPrev={onPrev}
             onNext={step === optionSteps.length + 1 ? submitAll : onNext}
-            nextLabel={step <= optionSteps.length ? "Suivant" : "Commander"}
+            nextLabel={step <= optionSteps.length ? "Next" : "Order"}
           />
         )}
       </div>

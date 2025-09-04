@@ -1,5 +1,6 @@
 'use client';
 import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
 
 type TrayItem = {
   id: string;           // itemId (uuid)
@@ -40,22 +41,22 @@ export default function OrderTray({
               </span>
               <span className="text-sm">{it.name}</span>
               {it.complete ? <span className="text-[11px] opacity-80">✓</span> : null}
-              <span
+              <button
                 onClick={(e) => { e.stopPropagation(); onRemoveIndex(i); }}
-                className="ml-1 text-[12px] opacity-70 hover:opacity-100"
-                aria-label="Supprimer"
-                title="Supprimer"
+                className="ml-1 inline-flex items-center justify-center h-6 w-6 rounded-full border hover:bg-gray-50"
+                aria-label="Remove"
+                title="Remove"
               >
-                🗑
-              </span>
+                <X className="h-3 w-3" />
+              </button>
             </button>
           );
         })}
         <button
           onClick={onAddNew}
-          className="ml-2 h-9 px-3 rounded-full border border-gray-300 hover:bg-gray-50"
+          className="ml-2 h-9 px-3 rounded-full border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm leading-tight truncate"
         >
-          + Ajouter une boisson
+          Add a drink
         </button>
       </div>
     </div>
