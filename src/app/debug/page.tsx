@@ -51,22 +51,43 @@ export default function DebugPage() {
 
   async function checkRLSPolicies() {
     try {
-      setMessages(prev => [...prev, 'Checking RLS policies...']);
+      setMessages(prev => [...prev, 'Testing RLS permissions...']);
       
-      // Essayer de lire les politiques
-      const { data, error } = await supabase
-        .from('information_schema.policies')
-        .select('*')
-        .eq('table_name', 'orders');
+      // Test 1: Essayer de lire une commande
+      const { data: readData, error: readError } = await supabase
+        .from('orders')
+        .select('id, status')
+        .limit(1);
       
-      if (error) {
-        setMessages(prev => [...prev, `RLS check error: ${error.message}`]);
+      if (readError) {
+        setMessages(prev => [...prev, `READ permission error: ${readError.message}`]);
       } else {
-        setMessages(prev => [...prev, `Found ${data?.length || 0} policies for orders table`]);
-        data?.forEach(policy => {
-          setMessages(prev => [...prev, `Policy: ${policy.policy_name} - ${policy.permissive} - ${policy.roles}`]);
-        });
+        setMessages(prev => [...prev, `READ permission OK - Found ${readData?.length || 0} orders`]);
       }
+      
+      // Test 2: Essayer de mettre à jour une commande
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({ status: 'new' })
+        .eq('id', orderId);
+      
+      if (updateError) {
+        setMessages(prev => [...prev, `UPDATE permission error: ${updateError.message}`]);
+      } else {
+        setMessages(prev => [...prev, `UPDATE permission OK`]);
+      }
+      
+      // Test 3: Vérifier si RLS est activé
+      const { data: rlsData, error: rlsError } = await supabase
+        .rpc('check_rls_enabled', { table_name: 'orders' })
+        .catch(() => ({ data: null, error: { message: 'RPC not available' } }));
+      
+      if (rlsError) {
+        setMessages(prev => [...prev, `RLS check RPC error: ${rlsError.message}`]);
+      } else {
+        setMessages(prev => [...prev, `RLS status: ${rlsData}`]);
+      }
+      
     } catch (err) {
       setMessages(prev => [...prev, `RLS check error: ${err}`]);
     }
