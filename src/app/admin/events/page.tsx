@@ -20,6 +20,14 @@ type EventRow = {
 export default function EventsPage() {
   const [rows, setRows] = useState<EventRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Log de vérification du projet Supabase
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log('SUPABASE_URL =', process.env.NEXT_PUBLIC_SUPABASE_URL);
+    }
+  }, []);
 
   async function loadEvents() {
     try {
@@ -36,17 +44,23 @@ export default function EventsPage() {
     }
   }
 
-  async function deleteEvent(id: string) {
+  async function deleteEvent(evId: string) {
     if (!confirm('Delete this event?')) return;
     
-    const { error } = await supabase.rpc('admin_delete_event', { event_id: id });
-    if (error) { 
+    setDeletingId(evId);
+    const { error } = await supabase.rpc('admin_delete_event', { event_id: evId });
+    if (error) {
       console.error('admin_delete_event error:', error);
-      toast.error(error.message || 'Delete failed');
-      return; 
+      // Affiche l'erreur réelle (utile si FK bloque la suppression)
+      // @ts-ignore
+      const msg = error?.message || error?.hint || error?.details || 'Delete failed';
+      toast.error(msg);
+      return;
     }
     toast.success('Event deleted');
-    loadEvents(); // recharger la liste
+    // recharge la liste
+    await loadEvents();
+    setDeletingId(null);
   }
 
   useEffect(() => {
@@ -111,8 +125,9 @@ export default function EventsPage() {
                       </Link>
                       <button
                         onClick={() => deleteEvent(e.id)}
-                        className="ml-2 h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-gray-50"
+                        className="ml-2 h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Delete"
+                        disabled={deletingId === e.id}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

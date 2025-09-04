@@ -70,11 +70,11 @@ export default function EventStatsPage({ params }: PageProps) {
     setLoading(true);
     try {
       const [t, i, c, o, s] = await Promise.all([
-        supabase.rpc('admin_event_totals', { p_event_id: eventId }),
-        supabase.rpc('admin_event_items_breakdown', { p_event_id: eventId }),
-        supabase.rpc('admin_event_categories_breakdown', { p_event_id: eventId }),
-        supabase.rpc('admin_event_options_breakdown', { p_event_id: eventId }),
-        supabase.rpc('admin_event_timeseries', { p_event_id: eventId }),
+        supabase.rpc('admin_event_totals', { event_id: eventId }),
+        supabase.rpc('admin_event_items_breakdown', { event_id: eventId }),
+        supabase.rpc('admin_event_categories_breakdown', { event_id: eventId }),
+        supabase.rpc('admin_event_options_breakdown', { event_id: eventId }),
+        supabase.rpc('admin_event_timeseries', { event_id: eventId }),
       ]);
 
       setTotals((t.data as Totals) ?? null);

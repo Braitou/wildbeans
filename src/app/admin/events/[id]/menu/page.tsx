@@ -38,7 +38,7 @@ export default function EventMenuPage({ params }: PageProps) {
   const loadMenuItems = useCallback(async () => {
     try {
       const { data, error } = await supabase.rpc('admin_list_items_for_event', {
-        p_event_id: id
+        event_id: id
       });
       
       if (error) {
@@ -77,9 +77,9 @@ export default function EventMenuPage({ params }: PageProps) {
     setUpdating(itemId);
     try {
       const { error } = await supabase.rpc('admin_set_item_enabled', {
-        p_event_id: id,
-        p_item_id: itemId,
-        p_enabled: enabled
+        event_id: id,
+        item_id: itemId,
+        enabled: enabled
       });
       
       if (error) {
@@ -114,9 +114,9 @@ export default function EventMenuPage({ params }: PageProps) {
       // Mettre à jour tous les items de la catégorie
       const promises = category.items.map(item => 
         supabase.rpc('admin_set_item_enabled', {
-          p_event_id: id,
-          p_item_id: item.id,
-          p_enabled: enabled
+          event_id: id,
+          item_id: item.id,
+          enabled: enabled
         })
       );
 

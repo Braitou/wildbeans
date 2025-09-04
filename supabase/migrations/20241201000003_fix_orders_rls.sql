@@ -1,6 +1,6 @@
 -- Migration pour corriger les politiques RLS sur orders et activer le Realtime
 
--- Vérifier si RLS est activé sur orders
+-- Verifier si RLS est active sur orders
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
 -- Politique pour permettre la lecture des commandes (pour le statut client)
@@ -11,7 +11,7 @@ CREATE POLICY orders_select_policy
   TO anon, authenticated
   USING (true);
 
--- Politique pour permettre la mise à jour des statuts (pour la kitchen)
+-- Politique pour permettre la mise a jour des statuts (pour la kitchen)
 DROP POLICY IF EXISTS orders_update_policy ON public.orders;
 CREATE POLICY orders_update_policy
   ON public.orders
@@ -28,5 +28,5 @@ CREATE POLICY orders_insert_policy
   TO anon, authenticated
   WITH CHECK (true);
 
--- S'assurer que la table orders est publiée pour le Realtime
+-- S'assurer que la table orders est publiee pour le Realtime
 SELECT pg_notify('pgrst', 'reload schema');
