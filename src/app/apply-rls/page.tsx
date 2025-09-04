@@ -12,40 +12,56 @@ export default function ApplyRLSMigration() {
     setStatus('Applying RLS migration...');
 
     try {
-      // Activer RLS
-      const { error: rlsError } = await supabase.rpc('exec_sql', {
-        sql: 'ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;'
-      });
+      // Note: RLS doit être activé manuellement via Supabase Dashboard
+      // car nous ne pouvons pas exécuter ALTER TABLE via l'API
+      setStatus('RLS activation requires manual execution in Supabase Dashboard.');
+      setStatus('Please execute the following SQL in Supabase SQL Editor:');
+      setStatus('');
+      setStatus('ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;');
+      setStatus('');
+      setStatus('Then click "Apply Policies" below to create the policies.');
+      
+    } catch (err) {
+      setStatus(`Error: ${err}`);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-      if (rlsError) {
-        setStatus(`RLS activation error: ${rlsError.message}`);
+  async function applyPolicies() {
+    setLoading(true);
+    setStatus('Applying policies...');
+
+    try {
+      // Test si RLS est activé en essayant une opération
+      const { data, error: testError } = await supabase
+        .from('orders')
+        .select('id')
+        .limit(1);
+
+      if (testError && testError.message.includes('row security')) {
+        setStatus('RLS is enabled but policies are missing. Creating policies...');
+      } else if (testError) {
+        setStatus(`Error testing RLS: ${testError.message}`);
         return;
       }
 
-      // Créer les politiques
-      const policies = [
-        `DROP POLICY IF EXISTS orders_select_policy ON public.orders;`,
-        `CREATE POLICY orders_select_policy ON public.orders FOR SELECT TO anon, authenticated USING (true);`,
-        `DROP POLICY IF EXISTS orders_update_policy ON public.orders;`,
-        `CREATE POLICY orders_update_policy ON public.orders FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);`,
-        `DROP POLICY IF EXISTS orders_insert_policy ON public.orders;`,
-        `CREATE POLICY orders_insert_policy ON public.orders FOR INSERT TO anon, authenticated WITH CHECK (true);`
-      ];
+      // Créer les politiques via des opérations de test
+      // Note: Les politiques doivent être créées manuellement
+      setStatus('Policies must be created manually in Supabase Dashboard.');
+      setStatus('Please execute the following SQL:');
+      setStatus('');
+      setStatus('DROP POLICY IF EXISTS orders_select_policy ON public.orders;');
+      setStatus('CREATE POLICY orders_select_policy ON public.orders FOR SELECT TO anon, authenticated USING (true);');
+      setStatus('');
+      setStatus('DROP POLICY IF EXISTS orders_update_policy ON public.orders;');
+      setStatus('CREATE POLICY orders_update_policy ON public.orders FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);');
+      setStatus('');
+      setStatus('DROP POLICY IF EXISTS orders_insert_policy ON public.orders;');
+      setStatus('CREATE POLICY orders_insert_policy ON public.orders FOR INSERT TO anon, authenticated WITH CHECK (true);');
+      setStatus('');
+      setStatus('SELECT pg_notify(\'pgrst\', \'reload schema\');');
 
-      for (const policy of policies) {
-        const { error } = await supabase.rpc('exec_sql', { sql: policy });
-        if (error) {
-          setStatus(`Policy creation error: ${error.message}`);
-          return;
-        }
-      }
-
-      // Recharger le schéma
-      await supabase.rpc('exec_sql', {
-        sql: "SELECT pg_notify('pgrst', 'reload schema');"
-      });
-
-      setStatus('RLS migration applied successfully!');
     } catch (err) {
       setStatus(`Error: ${err}`);
     } finally {
@@ -67,9 +83,17 @@ export default function ApplyRLSMigration() {
       <button
         onClick={applyRLSMigration}
         disabled={loading}
-        className="px-6 py-3 bg-red-500 text-white rounded font-semibold disabled:opacity-50"
+        className="px-6 py-3 bg-red-500 text-white rounded font-semibold disabled:opacity-50 mr-4"
       >
-        {loading ? 'Applying...' : 'Apply RLS Migration'}
+        {loading ? 'Applying...' : 'Step 1: Enable RLS'}
+      </button>
+
+      <button
+        onClick={applyPolicies}
+        disabled={loading}
+        className="px-6 py-3 bg-blue-500 text-white rounded font-semibold disabled:opacity-50"
+      >
+        {loading ? 'Applying...' : 'Step 2: Apply Policies'}
       </button>
 
       {status && (
