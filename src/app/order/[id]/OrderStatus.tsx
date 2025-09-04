@@ -18,9 +18,15 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
+    console.log('Loading order data for:', orderId);
     const { data, error } = await supabase.rpc('public_get_order', { p_order_id: orderId });
-    if (!error && data && Object.keys(data).length) {
+    if (error) {
+      console.error('Error loading order:', error);
+    } else if (data && Object.keys(data).length) {
+      console.log('Order data loaded:', data);
       setData(data as OrderJson);
+    } else {
+      console.log('No order data found');
     }
     setLoading(false);
   }, [orderId]);
@@ -28,18 +34,11 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
   useEffect(() => {
     let active = true;
 
-    async function load() {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('id,status')
-        .eq('id', orderId)
-        .maybeSingle();
-      if (!error && data && active) {
-        setData(prev => prev ? { ...prev, status: data.status } : prev);
-      }
-    }
+    // Chargement initial
     load();
 
+    // Abonnement Realtime
+    console.log('Setting up Realtime for order:', orderId);
     const channel = supabase
       .channel(`order-${orderId}`)
       .on('postgres_changes', {
@@ -48,20 +47,30 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
         table: 'orders',
         filter: `id=eq.${orderId}`
       }, (payload) => {
+        console.log('Realtime payload received:', payload);
         const next = (payload.new as any)?.status;
         if (next && active) {
-          setData(prev => prev ? { ...prev, status: next } : prev);
+          console.log('Order status changed:', next);
+          setData(prev => {
+            const updated = prev ? { ...prev, status: next } : prev;
+            console.log('Updated data:', updated);
+            return updated;
+          });
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up Realtime for order:', orderId);
       active = false;
       supabase.removeChannel(channel);
     };
-  }, [orderId]);
+  }, [orderId, load]);
 
   const status = (data?.status ?? 'new') as OrderJson['status'];
+  console.log('Current status:', status);
 
   // Barre de progression
   const progress = useMemo(() => {
@@ -99,8 +108,8 @@ export default function OrderStatus({ orderId }: { orderId: string }) {
 
       {/* 👉 Message AU-DESSUS de la tasse */}
       <p className="mt-4 mb-2 text-center text-[18px] font-semibold">
-  {topMessage}
-</p>
+        {topMessage}
+      </p>
 
       {/* Tasse animée */}
       <CoffeeStatus status={status} loading={loading} />
