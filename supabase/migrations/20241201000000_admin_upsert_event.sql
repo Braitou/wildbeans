@@ -12,13 +12,13 @@ end$$;
 
 -- RPC upsert (create/update) d'un évènement
 create or replace function public.admin_upsert_event(
-  p_id uuid,
-  p_name text,
-  p_slug text,
-  p_join_code text,
-  p_kitchen_code text,
-  p_starts_at timestamptz,
-  p_ends_at timestamptz
+  id uuid,
+  name text,
+  slug text,
+  join_code text,
+  kitchen_code text,
+  starts_at timestamptz,
+  ends_at timestamptz
 ) returns public.events
 language plpgsql
 security definer
@@ -26,20 +26,20 @@ as $$
 declare
   v_row public.events;
 begin
-  if p_id is null then
+  if id is null then
     insert into public.events (name, slug, join_code, kitchen_code, starts_at, ends_at, is_closed)
-    values (p_name, p_slug, p_join_code, p_kitchen_code, p_starts_at, p_ends_at, false)
+    values (name, slug, join_code, kitchen_code, starts_at, ends_at, false)
     returning * into v_row;
   else
     update public.events
     set
-      name = p_name,
-      slug = p_slug,
-      join_code = p_join_code,
-      kitchen_code = p_kitchen_code,
-      starts_at = p_starts_at,
-      ends_at = p_ends_at
-    where id = p_id
+      name = name,
+      slug = slug,
+      join_code = join_code,
+      kitchen_code = kitchen_code,
+      starts_at = starts_at,
+      ends_at = ends_at
+    where id = id
     returning * into v_row;
   end if;
 

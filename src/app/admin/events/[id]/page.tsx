@@ -107,15 +107,15 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
     setSaving(true);
     try {
-      const { data, error } = await supabase.rpc('admin_upsert_event', {
-        id: isNew ? null : form.id,
-        name: form.name,
-        slug: form.slug,
-        join_code: form.join_code || 'WB1',
-        kitchen_code: form.kitchen_code || 'KITCHEN1',
-        starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : null,
-        ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
-      });
+          const { data, error } = await supabase.rpc('admin_upsert_event', {
+      id: isNew ? null : form.id,
+      name: form.name,
+      slug: form.slug,
+      join_code: form.join_code || 'WB1',
+      kitchen_code: form.kitchen_code || 'KITCHEN1',
+      starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : null,
+      ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
+    });
       
       if (error) {
         console.error('admin_upsert_event error:', error);
