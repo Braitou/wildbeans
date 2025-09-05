@@ -46,13 +46,13 @@ export default function DrinkList({
                           onClick={() => onDec(item.id)}
                           disabled={count === 0}
                           className="h-8 w-8 border rounded-md disabled:opacity-40 hover:bg-gray-50"
-                          aria-label="Decrease"
+                          aria-label="DECREASE"
                         >−</button>
                         <div className="min-w-[2ch] text-center tabular-nums">{count}</div>
                         <button
                           onClick={() => onInc(item.id)}
                           className="h-8 w-8 border rounded-md hover:bg-gray-50"
-                          aria-label="Increase"
+                          aria-label="INCREASE"
                         >+</button>
                       </div>
                     )}

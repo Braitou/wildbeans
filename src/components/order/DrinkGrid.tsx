@@ -35,7 +35,7 @@ export default function DrinkGrid({ categories, onSelectItem }: DrinkGridProps) 
                 <CardContent className="pt-0">
                   {item.modifiers.length > 0 && (
                     <div className="mt-3 text-xs text-muted-foreground">
-                      {item.modifiers.length} option{item.modifiers.length > 1 ? 's' : ''} disponible{item.modifiers.length > 1 ? 's' : ''}
+                      {item.modifiers.length} OPTION{item.modifiers.length > 1 ? 'S' : ''} DISPONIBLE{item.modifiers.length > 1 ? 'S' : ''}
                     </div>
                   )}
                 </CardContent>

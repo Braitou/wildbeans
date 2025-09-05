@@ -28,7 +28,7 @@ export function WaitingClientUI({
     <div className="flex flex-col items-center gap-6 py-10">
       {/* Tagline */}
       <p className="text-[11px] tracking-wide uppercase opacity-60">
-        All good… It's not in your hands anymore
+        ALL GOOD… IT'S NOT IN YOUR HANDS ANYMORE
       </p>
 
       {/* Thin progress bar */}

@@ -80,9 +80,9 @@ export default function OrderStatusPage() {
   }, [status]);
 
   const message = useMemo(() => {
-    if (step === 0) return 'Your order has been sent to your favorite barista';
-    if (step === 1) return 'Your order is being prepared with love';
-    return 'Your drink is ready and dying to meet you!';
+    if (step === 0) return 'YOUR ORDER HAS BEEN SENT TO YOUR FAVORITE BARISTA';
+    if (step === 1) return 'YOUR ORDER IS BEING PREPARED WITH LOVE';
+    return 'YOUR DRINK IS READY AND DYING TO MEET YOU!';
   }, [step]);
 
   // Convert status to uppercase for the new component
@@ -94,7 +94,7 @@ export default function OrderStatusPage() {
       <WaitingClientUI status={normalizedStatus} statusMessage={message} />
 
       {/* Remove pickup code display as requested */}
-      {loading && <p className="mt-4 text-sm text-neutral-500">Loading…</p>}
+      {loading && <p className="mt-4 text-sm text-neutral-500">LOADING…</p>}
     </main>
   );
 }

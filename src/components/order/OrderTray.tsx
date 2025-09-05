@@ -44,8 +44,8 @@ export default function OrderTray({
               <button
                 onClick={(e) => { e.stopPropagation(); onRemoveIndex(i); }}
                 className="ml-1 inline-flex items-center justify-center h-6 w-6 rounded-full border hover:bg-gray-50"
-                aria-label="Remove"
-                title="Remove"
+                aria-label="REMOVE"
+                title="REMOVE"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -56,7 +56,7 @@ export default function OrderTray({
           onClick={onAddNew}
           className="ml-2 h-9 px-3 rounded-full border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm leading-tight truncate"
         >
-          Add a drink
+          ADD A DRINK
         </button>
       </div>
     </div>

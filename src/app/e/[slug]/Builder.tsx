@@ -299,10 +299,10 @@ export default function Builder({
             {stage === 'choose' && (
               <>
                 <div className="mb-4">
-                  <h1 className="text-lg font-semibold">Select your drinks</h1>
+                  <h1 className="text-lg font-semibold">SELECT YOUR DRINKS</h1>
                   {totalSelected > 0 && (
                     <p className="text-sm text-neutral-500 mt-1">
-                      {totalSelected} drink{totalSelected > 1 ? 's' : ''} selected
+                      {totalSelected} DRINK{totalSelected > 1 ? 'S' : ''} SELECTED
                     </p>
                   )}
                 </div>
@@ -319,7 +319,7 @@ export default function Builder({
             {stage === 'options' && current && optStep < optionSteps.length && (
               <section className="py-4">
                 <h2 className="mb-2 text-xs font-semibold tracking-[0.18em] uppercase text-neutral-500">
-                  Drink {currentIdx + 1} of {cart.length}
+                  DRINK {currentIdx + 1} OF {cart.length}
                 </h2>
                 <h3 className="mb-2 text-sm sm:text-base font-semibold leading-tight">
                   {current.item.name} — {optionSteps[optStep].name}
@@ -344,9 +344,9 @@ export default function Builder({
             {stage === 'review' && (
               <>
                 <div className="mb-4">
-                  <h1 className="text-lg font-semibold">Review your order</h1>
+                  <h1 className="text-lg font-semibold">REVIEW YOUR ORDER</h1>
                   <p className="text-sm text-neutral-500 mt-1">
-                    {cart.length} drink{cart.length > 1 ? 's' : ''} ready to order
+                    {cart.length} DRINK{cart.length > 1 ? 'S' : ''} READY TO ORDER
                   </p>
                 </div>
                 <ReviewList
@@ -364,13 +364,13 @@ export default function Builder({
                     <input
                       value={firstName}
                       onChange={e => setFirstName(e.target.value)}
-                      placeholder="First name (optional)"
+                      placeholder="FIRST NAME (OPTIONAL)"
                       className="h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                     />
                     <textarea
                       value={note}
                       onChange={e => setNote(e.target.value)}
-                      placeholder="Note for barista (optional)"
+                      placeholder="NOTE FOR BARISTA (OPTIONAL)"
                       className="min-h-[90px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                     />
                   </div>
@@ -388,9 +388,9 @@ export default function Builder({
           onPrev={onPrev}
           onNext={onNext}
           nextLabel={
-            stage === 'choose' ? 'Next' :
-            stage === 'options' ? 'Next' :
-            'Order'
+            stage === 'choose' ? 'NEXT' :
+            stage === 'options' ? 'NEXT' :
+            'ORDER'
           }
         />
       </div>

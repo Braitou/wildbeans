@@ -122,7 +122,7 @@ export default function OptionGroup({
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             aria-hidden
           />
-          <span className="text-sm italic">None</span>
+          <span className="text-sm italic">NONE</span>
         </motion.label>
       )}
     </div>
