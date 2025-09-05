@@ -97,3 +97,9 @@
   0% { background: #f3f4f6; }
   100% { background: transparent; }
 }
+
+@layer utilities {
+  .font-fragmentmono {
+    font-family: var(--font-fragmentmono);
+  }
+}
