@@ -74,13 +74,13 @@ function KitchenPageContent() {
 
     if (error) {
       console.error('[Kitchen] error loadEventByCode:', error);
-      setErrorMsg('Erreur lors du chargement de l’événement');
+      setErrorMsg('ERREUR LORS DU CHARGEMENT DE L\'ÉVÉNEMENT');
       setSelectedEvent(null);
       setLoading(false);
       return;
     }
     if (!data) {
-      setErrorMsg(`Code kitchen "${code}" introuvable`);
+      setErrorMsg(`CODE KITCHEN "${code}" INTROUVABLE`);
       setSelectedEvent(null);
       setLoading(false);
       return;
@@ -98,11 +98,11 @@ function KitchenPageContent() {
       .from('events')
       .select('id, name, slug, kitchen_code, starts_at, ends_at, is_closed')
       .eq('is_closed', false)
-      .order('starts_at', { ascending: false, nullsLast: true });
+      .order('starts_at', { ascending: false, nullsFirst: false });
 
     if (error) {
       console.error('[Kitchen] error loadActiveEvents:', error);
-      setErrorMsg('Erreur lors du chargement des événements');
+      setErrorMsg('ERREUR LORS DU CHARGEMENT DES ÉVÉNEMENTS');
       setEvents([]);
       setLoading(false);
       return;
@@ -128,7 +128,7 @@ function KitchenPageContent() {
         <main className="py-4">
           <FullBleed>
             <div className="px-6 py-6">
-              <div className="text-lg">Chargement de l’événement…</div>
+              <div className="text-lg">CHARGEMENT DE L'ÉVÉNEMENT…</div>
             </div>
           </FullBleed>
         </main>
@@ -149,7 +149,7 @@ function KitchenPageContent() {
                 className="inline-flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back to events
+                BACK TO EVENTS
               </Button>
             </div>
           </FullBleed>
@@ -186,13 +186,13 @@ function KitchenPageContent() {
                   className="inline-flex items-center gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Back to events
+                  BACK TO EVENTS
                 </Button>
                 <button
                   onClick={toggleFS}
                   className="h-11 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
-                  {isFS ? 'Exit full screen' : 'Full screen'}
+                  {isFS ? 'EXIT FULL SCREEN' : 'FULL SCREEN'}
                 </button>
                 <AdminLogoutButton />
               </div>
@@ -221,7 +221,7 @@ function KitchenPageContent() {
                 onClick={toggleFS}
                 className="h-11 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
               >
-                {isFS ? 'Exit full screen' : 'Full screen'}
+                {isFS ? 'EXIT FULL SCREEN' : 'FULL SCREEN'}
               </button>
               <AdminLogoutButton />
             </div>
@@ -230,11 +230,11 @@ function KitchenPageContent() {
           {/* Liste des événements */}
           <div className="px-6 pb-16">
             {loading ? (
-              <div className="text-lg">Chargement des événements…</div>
+              <div className="text-lg">CHARGEMENT DES ÉVÉNEMENTS…</div>
             ) : errorMsg ? (
               <div className="text-lg text-red-600">{errorMsg}</div>
             ) : events.length === 0 ? (
-              <div className="text-lg text-neutral-500">Aucun événement actif trouvé.</div>
+              <div className="text-lg text-neutral-500">AUCUN ÉVÉNEMENT ACTIF TROUVÉ.</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {events.map((ev) => (
@@ -244,11 +244,11 @@ function KitchenPageContent() {
                         <div className="flex-1">
                           <h3 className="text-xl font-semibold mb-2">{ev.name}</h3>
                           <div className="text-sm text-neutral-500 mb-3 space-y-1">
-                            {ev.starts_at && <div>Début : {formatDateFR(ev.starts_at)}</div>}
-                            {ev.ends_at && <div>Fin : {formatDateFR(ev.ends_at)}</div>}
+                            {ev.starts_at && <div>DÉBUT : {formatDateFR(ev.starts_at)}</div>}
+                            {ev.ends_at && <div>FIN : {formatDateFR(ev.ends_at)}</div>}
                           </div>
                           <div className="text-xs text-neutral-400">
-                            Code: {ev.kitchen_code}
+                            CODE: {ev.kitchen_code}
                           </div>
                         </div>
                       </div>
@@ -259,7 +259,7 @@ function KitchenPageContent() {
                           onClick={() => router.push(`/kitchen?code=${encodeURIComponent(ev.kitchen_code)}`)}
                           className="flex-1"
                         >
-                          Open Kitchen
+                          OPEN KITCHEN
                         </Button>
                         <Button
                           variant="outline"
@@ -267,7 +267,7 @@ function KitchenPageContent() {
                           className="inline-flex items-center gap-2"
                         >
                           <ExternalLink className="h-4 w-4" />
-                          Open
+                          OPEN
                         </Button>
                       </div>
                     </CardContent>
@@ -290,7 +290,7 @@ export default function KitchenPage() {
           <main className="py-4">
             <FullBleed>
               <div className="px-6 py-6">
-                <div className="text-lg">Chargement…</div>
+                <div className="text-lg">CHARGEMENT…</div>
               </div>
             </FullBleed>
           </main>

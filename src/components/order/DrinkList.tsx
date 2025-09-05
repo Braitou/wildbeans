@@ -38,7 +38,7 @@ export default function DrinkList({
                       count > 0 ? "bg-black border-black" : "bg-white border-gray-300"
                     )} />
                     <div className="flex-1">
-                      <div className="font-medium">{item.name}</div>
+                      <div className="font-medium">{item.name.toUpperCase()}</div>
                     </div>
                     {hasBeenSelected && (
                       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>

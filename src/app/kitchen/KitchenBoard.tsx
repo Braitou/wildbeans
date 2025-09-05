@@ -136,7 +136,7 @@ export default function KitchenBoard({
     };
   }, [eventId]);
 
-  // refresh "time ago" toutes les 30s
+  // REFRESH "TIME AGO" TOUTES LES 30S
   const [, forceTick] = useState(0);
   useEffect(() => {
     const id = setInterval(() => forceTick((x) => x + 1), 30000);
@@ -164,11 +164,11 @@ export default function KitchenBoard({
     const d = new Date(iso).getTime();
     const diff = Math.max(0, Date.now() - d);
     const m = Math.round(diff / 60000);
-    if (m < 1) return "à l'instant";
-    if (m === 1) return 'il y a 1 min';
-    if (m < 60) return `il y a ${m} min`;
+    if (m < 1) return "À L'INSTANT";
+    if (m === 1) return 'IL Y A 1 MIN';
+    if (m < 60) return `IL Y A ${m} MIN`;
     const h = Math.round(m / 60);
-    return h === 1 ? 'il y a 1 h' : `il y a ${h} h`;
+    return h === 1 ? 'IL Y A 1 H' : `IL Y A ${h} H`;
     // (tu peux ajouter les jours si tu veux)
   }
 
@@ -193,7 +193,7 @@ export default function KitchenBoard({
 
     if (error) {
       console.error('[KitchenBoard] update error:', error);
-      alert('Erreur: ' + error.message);
+      alert('ERREUR: ' + error.message);
       return;
     }
     if (!data || data.length === 0) {
@@ -210,7 +210,7 @@ export default function KitchenBoard({
   }
 
   const title = (k: keyof typeof cols) =>
-    k === 'new' ? 'Nouvelles' : k === 'preparing' ? 'En préparation' : 'Prêtes';
+    k === 'new' ? 'NOUVELLES' : k === 'preparing' ? 'EN PRÉPARATION' : 'PRÊTES';
 
   const statusTone = (s: OrderStatus) =>
     s === 'new'
@@ -221,7 +221,7 @@ export default function KitchenBoard({
       ? 'bg-emerald-100 text-emerald-900'
       : 'bg-gray-100 text-gray-800';
 
-  if (loading) return <div className="p-8 text-lg">Chargement…</div>;
+  if (loading) return <div className="p-8 text-lg">CHARGEMENT…</div>;
 
   // density
   const pad = density === 'compact' ? 'p-4' : 'p-6';
@@ -240,7 +240,7 @@ export default function KitchenBoard({
               <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-neutral-600">
                 {title(k)}
               </h2>
-              <div className="text-xs text-neutral-400">{cols[k].length} commande(s)</div>
+              <div className="text-xs text-neutral-400">{cols[k].length} COMMANDE(S)</div>
             </div>
 
             <div className="mt-2 space-y-8">
@@ -272,7 +272,7 @@ export default function KitchenBoard({
                           <span className="min-w-7 text-right">{it.qty}×</span>
                           <div className="flex-1">
                             <div className="font-medium text-[16px] flex items-center gap-2">
-                              {it.item_name}
+                              {it.item_name.toUpperCase()}
                               {it.options && it.options.length > 0 && (
                                 <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                                   {it.options.length} opt.
@@ -281,10 +281,10 @@ export default function KitchenBoard({
                             </div>
                             {it.options && it.options.length > 0 ? (
                               <div className="text-neutral-600 text-sm mt-1">
-                                {it.options.map((op) => op.option_name).join(', ')}
+                                {it.options.map((op) => op.option_name.toUpperCase()).join(', ')}
                               </div>
                             ) : (
-                              <div className="text-neutral-400 text-sm mt-1">Aucune option</div>
+                              <div className="text-neutral-400 text-sm mt-1">AUCUNE OPTION</div>
                             )}
                           </div>
                         </li>
@@ -297,41 +297,41 @@ export default function KitchenBoard({
                       {o.status === 'new' && (
                         <>
                           <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'preparing')}>
-                            Prendre
+                            PRENDRE
                           </Button>
                           <Button
                             className="h-12 px-5 text-[15px]"
                             variant="outline"
                             onClick={() => move(o.id, 'cancelled')}
                           >
-                            Annuler
+                            ANNULER
                           </Button>
                         </>
                       )}
                       {o.status === 'preparing' && (
                         <>
                           <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'ready')}>
-                            Prêt
+                            PRÊT
                           </Button>
                           <Button
                             className="h-12 px-5 text-[15px]"
                             variant="outline"
                             onClick={() => move(o.id, 'cancelled')}
                           >
-                            Annuler
+                            ANNULER
                           </Button>
                         </>
                       )}
                       {o.status === 'ready' && (
                         <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'served')}>
-                          Servi
+                                                      SERVI
                         </Button>
                       )}
                     </div>
                   </CardContent>
                 </Card>
               ))}
-              {!cols[k].length && <div className="text-sm text-neutral-400">Aucune commande ici.</div>}
+              {!cols[k].length && <div className="text-sm text-neutral-400">AUCUNE COMMANDE ICI.</div>}
             </div>
           </section>
         ))}

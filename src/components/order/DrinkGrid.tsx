@@ -18,7 +18,7 @@ export default function DrinkGrid({ categories, onSelectItem }: DrinkGridProps) 
       {categories.map((category) => (
         <div key={category.id}>
           <h2 className="mb-4 text-lg font-semibold uppercase tracking-widest text-muted-foreground">
-            {category.name}
+            {category.name.toUpperCase()}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {category.items.map((item) => (
@@ -29,7 +29,7 @@ export default function DrinkGrid({ categories, onSelectItem }: DrinkGridProps) 
               >
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base font-medium uppercase tracking-wide">
-                    {item.name}
+                    {item.name.toUpperCase()}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">

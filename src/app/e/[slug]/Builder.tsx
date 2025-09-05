@@ -223,7 +223,7 @@ export default function Builder({
     });
 
     if (error) { 
-      alert('Erreur: ' + error.message); 
+      alert('ERREUR: ' + error.message); 
       return; 
     }
 
@@ -242,9 +242,9 @@ export default function Builder({
   // Dérivés pour l'affichage
   const trayItems = cart.map((item, index) => ({
     id: item.tempId,
-    name: item.item.name,
+    name: item.item.name.toUpperCase(),
     complete: (() => {
-      // un item est "complet" si toutes les requises sont remplies
+      // UN ITEM EST "COMPLET" SI TOUTES LES REQUISES SONT REMPLIES
       for (const mod of (item.item.modifiers ?? [])) {
         if (!mod.required) continue;
         if (mod.type === 'single' && !item.single[mod.id]) return false;
@@ -255,16 +255,16 @@ export default function Builder({
   }));
 
   const reviewData = cart.map(item => ({
-    name: item.item.name,
+    name: item.item.name.toUpperCase(),
     options: (item.item.modifiers ?? []).map(mod => {
       if (mod.type === 'single') {
         const id = item.single[mod.id];
         const name = mod.options.find(o => o.id === id)?.name;
-        return { group: mod.name, values: name ? [name] : [] };
+        return { group: mod.name.toUpperCase(), values: name ? [name.toUpperCase()] : [] };
       } else {
         const ids = new Set(item.multi[mod.id] ?? []);
         const names = mod.options.filter(o => ids.has(o.id)).map(o => o.name);
-        return { group: mod.name, values: names };
+        return { group: mod.name.toUpperCase(), values: names.map(n => n.toUpperCase()) };
       }
     }).filter(g => g.values.length > 0)
   }));
@@ -322,7 +322,7 @@ export default function Builder({
                   DRINK {currentIdx + 1} OF {cart.length}
                 </h2>
                 <h3 className="mb-2 text-sm sm:text-base font-semibold leading-tight">
-                  {current.item.name} — {optionSteps[optStep].name}
+                  {current.item.name.toUpperCase()} — {optionSteps[optStep].name.toUpperCase()}
                 </h3>
                 <OptionGroup
                   modifier={optionSteps[optStep]}

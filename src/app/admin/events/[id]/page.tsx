@@ -81,7 +81,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
     if (error) {
       console.error(error);
-      toast.error('Erreur lors du chargement');
+      toast.error('ERREUR LORS DU CHARGEMENT');
       return;
     }
     if (data) {
@@ -123,13 +123,13 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
   async function save() {
     if (!form.name || !form.slug) {
-      toast.error('Nom et slug sont requis');
+      toast.error('NOM ET SLUG SONT REQUIS');
       return;
     }
 
     // Sanity check env
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      toast.error('Config Supabase manquante (URL/ANON KEY).');
+      toast.error('CONFIG SUPABASE MANQUANTE (URL/ANON KEY).');
       return;
     }
 
@@ -152,16 +152,16 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                    (error as { message?: string; hint?: string; details?: string })?.details || 
                    'Unknown error';
         if (String(msg).includes('SLUG_TAKEN')) {
-          toast.error('Ce slug est déjà utilisé, choisis-en un autre.');
+          toast.error('CE SLUG EST DÉJÀ UTILISÉ, CHOISIS-EN UN AUTRE.');
         } else if ((error as { code?: string })?.code === 'PGRST202') {
-          toast.error('Fonction RPC introuvable. Recharge le schéma dans Supabase (NOTIFY pgrst, \'reload schema\').');
+          toast.error('FONCTION RPC INTROUVABLE. RECHARGE LE SCHÉMA DANS SUPABASE (NOTIFY pgrst, \'reload schema\').');
         } else {
           toast.error(`Erreur lors de l'enregistrement : ${msg}`);
         }
         return;
       }      
 
-      toast.success('Enregistré ✅');
+      toast.success('ENREGISTRÉ ✅');
 
       // rediriger sur la page de l'event fraichement créé si c'était "new"
       if (isNew && data?.id) {
@@ -180,10 +180,10 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     const { error } = await supabase.rpc('admin_close_event', { event_id: isNew ? null : id });
     setClosing(false);
     if (error) {
-      toast.error('Erreur: ' + error.message);
+      toast.error('ERREUR: ' + error.message);
       return;
     }
-    toast.success('Évènement clôturé ✅');
+    toast.success('ÉVÈNEMENT CLÔTURÉ ✅');
     loadEvent();
   }
 
@@ -191,7 +191,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     return (
       <AdminGate>
         <main className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center">Chargement…</div>
+          <div className="text-center">CHARGEMENT…</div>
         </main>
       </AdminGate>
     );
@@ -200,7 +200,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   return (
     <AdminGate>
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <AdminHeader title="Event" />
+        <AdminHeader title="EVENT" />
         
         {/* Bouton Back to events */}
         <button
@@ -208,7 +208,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
           className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-md hover:bg-gray-50"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to events
+          BACK TO EVENTS
         </button>
         
         <div className="flex items-center justify-between mb-2">
@@ -219,24 +219,24 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               disabled={closing}
               className="h-10 px-3 border rounded-md hover:bg-gray-50"
             >
-              {closing ? 'Clôture…' : 'Clôturer l\'event'}
+              {closing ? 'CLÔTURE…' : 'CLÔTURER L\'EVENT'}
             </button>
           )}
         </div>
 
         <section className="grid gap-4">
           <div className="grid gap-2">
-            <label className="text-sm">Nom</label>
+            <label className="text-sm">NOM</label>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="Mariage Claire & Max"
+              placeholder="MARIAGE CLAIRE & MAX"
               className="h-11 px-3 border border-gray-300 rounded-md"
             />
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm">Slug (URL)</label>
+            <label className="text-sm">SLUG (URL)</label>
             <input
               value={form.slug}
               onChange={(e) => {
@@ -250,7 +250,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm">Code join (client)</label>
+            <label className="text-sm">CODE JOIN (CLIENT)</label>
             <input
               value={form.join_code}
               onChange={(e) => setForm({ ...form, join_code: e.target.value })}
@@ -260,7 +260,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm">Code kitchen (barista)</label>
+            <label className="text-sm">CODE KITCHEN (BARISTA)</label>
             <input
               value={form.kitchen_code}
               onChange={(e) => setForm({ ...form, kitchen_code: e.target.value })}
@@ -271,7 +271,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
           <div className="grid gap-2 md:grid-cols-2">
             <div className="grid gap-2">
-              <label className="text-sm">Début (optionnel)</label>
+              <label className="text-sm">DÉBUT (OPTIONNEL)</label>
               <input
                 type="datetime-local"
                 value={form.starts_at ?? ''}
@@ -280,7 +280,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               />
             </div>
             <div className="grid gap-2">
-              <label className="text-sm">Fin (optionnel)</label>
+              <label className="text-sm">FIN (OPTIONNEL)</label>
               <input
                 type="datetime-local"
                 value={form.ends_at ?? ''}
@@ -296,14 +296,14 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               disabled={saving}
               className="h-11 px-5 rounded-md bg-black text-white hover:bg-neutral-800 disabled:opacity-50"
             >
-              {saving ? 'Enregistrement…' : 'Enregistrer'}
+              {saving ? 'ENREGISTREMENT…' : 'ENREGISTRER'}
             </button>
           </div>
         </section>
 
         {/* QR Code Section */}
         <section className="mt-6 border rounded-lg p-4">
-          <div className="text-sm font-semibold mb-2">Event QR</div>
+          <div className="text-sm font-semibold mb-2">EVENT QR</div>
           {qrUrl ? (
             <div className="flex items-center gap-4">
               <div className="p-3 border rounded">
@@ -312,18 +312,18 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               <div className="space-y-2">
                 <div className="text-sm break-all">{qrUrl}</div>
                 <button onClick={downloadQR} className="h-10 px-3 border rounded-md hover:bg-gray-50">
-                  Download PNG
+                  DOWNLOAD PNG
                 </button>
               </div>
             </div>
           ) : (
-            <div className="text-sm text-neutral-500">Fill slug & join code to preview the QR.</div>
+            <div className="text-sm text-neutral-500">FILL SLUG & JOIN CODE TO PREVIEW THE QR.</div>
           )}
         </section>
 
         {/* Kitchen Link Section */}
         <section className="mt-6 border rounded-lg p-4">
-          <div className="text-sm font-semibold mb-2">Kitchen link</div>
+          <div className="text-sm font-semibold mb-2">KITCHEN LINK</div>
           {kitchenUrl ? (
             <div className="flex items-center gap-2 flex-wrap">
               <code className="text-xs bg-neutral-50 border rounded px-2 py-1 break-all">{kitchenUrl}</code>
@@ -331,18 +331,18 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 onClick={() => navigator.clipboard.writeText(kitchenUrl)} 
                 className="h-9 px-3 border rounded-md hover:bg-gray-50"
               >
-                Copy
+                COPY
               </button>
               <a 
                 href={kitchenUrl} 
                 target="_blank" 
                 className="h-9 px-3 border rounded-md hover:bg-gray-50 inline-flex items-center"
               >
-                Open
+                OPEN
               </a>
             </div>
           ) : (
-            <div className="text-sm text-neutral-500">Set a kitchen code to get the link.</div>
+            <div className="text-sm text-neutral-500">SET A KITCHEN CODE TO GET THE LINK.</div>
           )}
         </section>
       </main>

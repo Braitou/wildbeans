@@ -34,31 +34,31 @@ export default function EventsPage() {
     try {
       const { data, error } = await supabase.rpc('admin_list_events');
       if (error) {
-        console.error('Erreur lors du chargement des événements:', error);
+        console.error('ERREUR LORS DU CHARGEMENT DES ÉVÉNEMENTS:', error);
         return;
       }
       setRows(data || []);
     } catch (err) {
-      console.error('Erreur:', err);
+      console.error('ERREUR:', err);
     } finally {
       setLoading(false);
     }
   }
 
   async function deleteEvent(evId: string) {
-    if (!confirm('Delete this event?')) return;
+    if (!confirm('SUPPRIMER CET ÉVÉNEMENT ?')) return;
     
     setDeletingId(evId);
     const { error } = await supabase.rpc('admin_delete_event', { event_id: evId });
     if (error) {
-      console.error('admin_delete_event error:', error);
+      console.error('ADMIN_DELETE_EVENT ERROR:', error);
       // Affiche l'erreur réelle (utile si FK bloque la suppression)
       // @ts-ignore
       const msg = error?.message || error?.hint || error?.details || 'Delete failed';
-      toast.error(msg);
+      toast.error(msg.toUpperCase());
       return;
     }
-    toast.success('Event deleted');
+    toast.success('ÉVÉNEMENT SUPPRIMÉ');
     // recharge la liste
     await loadEvents();
     setDeletingId(null);
@@ -78,7 +78,7 @@ export default function EventsPage() {
             href="/admin/events/new" 
             className="h-10 px-3 border rounded-md hover:bg-gray-50 flex items-center"
           >
-            Créer
+            CRÉER
           </Link>
         </div>
         
@@ -86,11 +86,11 @@ export default function EventsPage() {
           <table className="w-full text-sm">
             <thead className="text-left text-neutral-500">
               <tr>
-                <th className="py-2">Nom</th>
-                <th>Slug</th>
-                <th>Join</th>
-                <th>Kitchen</th>
-                <th>Dates</th>
+                <th className="py-2">NOM</th>
+                <th>SLUG</th>
+                <th>JOIN</th>
+                <th>KITCHEN</th>
+                <th>DATES</th>
                 <th></th>
               </tr>
             </thead>
@@ -98,13 +98,13 @@ export default function EventsPage() {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="py-4 text-center text-neutral-500">
-                    Chargement...
+                    CHARGEMENT...
                   </td>
                 </tr>
               ) : rows.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-4 text-center text-neutral-500">
-                    Aucun événement trouvé
+                    AUCUN ÉVÉNEMENT TROUVÉ
                   </td>
                 </tr>
               ) : (
@@ -122,12 +122,12 @@ export default function EventsPage() {
                         href={`/admin/events/${e.id}`} 
                         className="underline"
                       >
-                        Ouvrir
+                        OUVRIR
                       </Link>
                       <button
                         onClick={() => deleteEvent(e.id)}
                         className="ml-2 h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label="Delete"
+                        aria-label="DELETE"
                         disabled={deletingId === e.id}
                       >
                         <Trash2 className="h-4 w-4" />

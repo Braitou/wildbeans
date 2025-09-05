@@ -142,7 +142,7 @@ export default function EventMenuPage({ params }: PageProps) {
     return (
       <AdminGate>
         <main className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center">Chargement...</div>
+          <div className="text-center">CHARGEMENT...</div>
         </main>
       </AdminGate>
     );
@@ -159,7 +159,7 @@ export default function EventMenuPage({ params }: PageProps) {
           className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-md hover:bg-gray-50"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to events
+          BACK TO EVENTS
         </button>
         
         <EventTabs id={id} />
@@ -169,34 +169,34 @@ export default function EventMenuPage({ params }: PageProps) {
             href={`/admin/events/${id}`}
             className="h-10 px-3 border rounded-md hover:bg-gray-50 flex items-center"
           >
-            Retour à l&apos;événement
+            RETOUR À L'ÉVÉNEMENT
           </Link>
         </div>
 
         <div className="space-y-6">
           {categories.length === 0 ? (
             <div className="text-center text-neutral-500 py-8">
-              Aucun item trouvé pour cet événement
+              AUCUN ITEM TROUVÉ POUR CET ÉVÉNEMENT
             </div>
           ) : (
             categories.map(category => (
               <div key={category.id} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-medium">{category.name}</h2>
+                  <h2 className="text-lg font-medium">{category.name.toUpperCase()}</h2>
                   <div className="flex gap-2">
                     <button
                       onClick={() => toggleCategory(category.id, true)}
                       disabled={updating === category.id}
                       className="h-8 px-3 text-sm border rounded-md hover:bg-gray-50 disabled:opacity-50"
                     >
-                      Activer tout
+                      ACTIVER TOUT
                     </button>
                     <button
                       onClick={() => toggleCategory(category.id, false)}
                       disabled={updating === category.id}
                       className="h-8 px-3 text-sm border rounded-md hover:bg-gray-50 disabled:opacity-50"
                     >
-                      Désactiver tout
+                      DÉSACTIVER TOUT
                     </button>
                   </div>
                 </div>
@@ -204,7 +204,7 @@ export default function EventMenuPage({ params }: PageProps) {
                 <div className="space-y-2">
                   {category.items.map(item => (
                     <div key={item.id} className="flex items-center justify-between py-2">
-                      <span className="text-sm">{item.name}</span>
+                      <span className="text-sm">{item.name.toUpperCase()}</span>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"

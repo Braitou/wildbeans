@@ -6,9 +6,9 @@ export default function EventTabs({ id }: { id: string }) {
   const pathname = usePathname();
   const base = `/admin/events/${id}`;
   const tabs = [
-    { href: `${base}`, label: 'Détails', exact: true },
-    { href: `${base}/menu`, label: 'Menu' },
-    { href: `${base}/stats`, label: 'Wild Stats' },
+    { href: `${base}`, label: 'DÉTAILS', exact: true },
+    { href: `${base}/menu`, label: 'MENU' },
+    { href: `${base}/stats`, label: 'WILD STATS' },
   ];
 
   return (

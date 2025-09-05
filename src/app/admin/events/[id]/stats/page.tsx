@@ -83,8 +83,8 @@ export default function EventStatsPage({ params }: PageProps) {
       setOpts(((o.data as OptRow[]) ?? []).slice(0, 5));
       setTs((s.data as Point[]) ?? []);
     } catch (error) {
-      console.error('Erreur lors du chargement des données:', error);
-      toast.error('Erreur lors du chargement des données');
+      console.error('ERREUR LORS DU CHARGEMENT DES DONNÉES:', error);
+      toast.error('ERREUR LORS DU CHARGEMENT DES DONNÉES');
     } finally {
       setLoading(false);
     }
@@ -97,14 +97,14 @@ export default function EventStatsPage({ params }: PageProps) {
     try {
       const { error } = await supabase.rpc('admin_close_event', { event_id: eventId });
       if (error) {
-        toast.error('Erreur: ' + error.message);
+        toast.error('ERREUR: ' + error.message);
         return;
       }
-      toast.success('Évènement clôturé ✅');
+      toast.success('ÉVÈNEMENT CLÔTURÉ ✅');
       load();
     } catch (error) {
-      console.error('Erreur lors de la clôture:', error);
-      toast.error('Erreur lors de la clôture');
+      console.error('ERREUR LORS DE LA CLÔTURE:', error);
+      toast.error('ERREUR LORS DE LA CLÔTURE');
     } finally {
       setClosing(false);
     }
@@ -114,7 +114,7 @@ export default function EventStatsPage({ params }: PageProps) {
     return (
       <AdminGate>
         <main className="max-w-6xl mx-auto px-4 py-8">
-          <div className="text-center">Chargement des statistiques...</div>
+          <div className="text-center">CHARGEMENT DES STATISTIQUES...</div>
         </main>
       </AdminGate>
     );
@@ -131,7 +131,7 @@ export default function EventStatsPage({ params }: PageProps) {
           className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-md hover:bg-gray-50"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to events
+          BACK TO EVENTS
         </button>
         
         <div className="flex items-center justify-between mb-2">
@@ -141,25 +141,25 @@ export default function EventStatsPage({ params }: PageProps) {
             disabled={closing}
             className="h-10 px-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {closing ? 'Clôture…' : "Clôturer l'event"}
+            {closing ? 'CLÔTURE…' : "CLÔTURER L'EVENT"}
           </button>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
           <div className="border rounded-lg p-4 shadow-sm">
-            <div className="text-xs text-neutral-500">Orders</div>
+            <div className="text-xs text-neutral-500">ORDERS</div>
             <div className="text-2xl font-semibold">{totals?.orders ?? 0}</div>
           </div>
           <div className="border rounded-lg p-4 shadow-sm">
-            <div className="text-xs text-neutral-500">Drinks</div>
+            <div className="text-xs text-neutral-500">DRINKS</div>
             <div className="text-2xl font-semibold">{totals?.drinks ?? 0}</div>
           </div>
           <div className="border rounded-lg p-4 shadow-sm">
-            <div className="text-xs text-neutral-500">Unique customers</div>
+            <div className="text-xs text-neutral-500">UNIQUE CUSTOMERS</div>
             <div className="text-2xl font-semibold">{totals?.unique_customers ?? 0}</div>
           </div>
           <div className="border rounded-lg p-4 shadow-sm">
-            <div className="text-xs text-neutral-500">Period</div>
+            <div className="text-xs text-neutral-500">PERIOD</div>
             <div className="text-sm">
               {totals?.period?.from ? totals.period.from.slice(0, 16) : 'N/A'}
               {totals?.period?.to && ` → ${totals.period.to.slice(0, 16)}`}
@@ -169,7 +169,7 @@ export default function EventStatsPage({ params }: PageProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
           <div className="border rounded-lg p-4 shadow-sm">
-            <div className="text-sm font-semibold mb-2">Top Drinks</div>
+            <div className="text-sm font-semibold mb-2">TOP DRINKS</div>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={items.slice(0, 5)}>
                 <XAxis dataKey="item_name" />
@@ -181,7 +181,7 @@ export default function EventStatsPage({ params }: PageProps) {
           </div>
 
           <div className="border rounded-lg p-4 shadow-sm">
-            <div className="text-sm font-semibold mb-2">Categories</div>
+            <div className="text-sm font-semibold mb-2">CATEGORIES</div>
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie
@@ -197,7 +197,7 @@ export default function EventStatsPage({ params }: PageProps) {
           </div>
 
           <div className="border rounded-lg p-4 shadow-sm">
-            <div className="text-sm font-semibold mb-2">Top Options</div>
+            <div className="text-sm font-semibold mb-2">TOP OPTIONS</div>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={opts}>
                 <XAxis dataKey="option_name" />
@@ -210,7 +210,7 @@ export default function EventStatsPage({ params }: PageProps) {
         </div>
 
         <div className="border rounded-lg p-4 shadow-sm mt-6">
-          <div className="text-sm font-semibold mb-2">Drinks per hour</div>
+          <div className="text-sm font-semibold mb-2">DRINKS PER HOUR</div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={ts}>
               <XAxis dataKey="ts" />
@@ -223,16 +223,16 @@ export default function EventStatsPage({ params }: PageProps) {
 
         <div className="mt-6 border rounded-lg p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-semibold">Boissons (quantités)</div>
+            <div className="text-sm font-semibold">BOISSONS (QUANTITÉS)</div>
             <div className="flex gap-2">
               <input
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                placeholder="Filtrer par nom…"
+                placeholder="FILTRER PAR NOM…"
                 className="h-10 px-3 border border-gray-300 rounded-md"
               />
               <button onClick={exportCSV} className="h-10 px-3 border rounded-md hover:bg-gray-50">
-                Export CSV
+                EXPORT CSV
               </button>
             </div>
           </div>
@@ -240,14 +240,14 @@ export default function EventStatsPage({ params }: PageProps) {
             <table className="w-full text-sm">
               <thead className="text-left text-neutral-500">
                 <tr>
-                  <th className="py-2">Boisson</th>
-                  <th className="py-2 w-24 text-right">Quantité</th>
+                  <th className="py-2">BOISSON</th>
+                  <th className="py-2 w-24 text-right">QUANTITÉ</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {filteredItems.map((r) => (
                   <tr key={r.item_id}>
-                    <td className="py-2">{r.item_name}</td>
+                    <td className="py-2">{r.item_name.toUpperCase()}</td>
                     <td className="py-2 text-right font-medium">{r.qty}</td>
                   </tr>
                 ))}

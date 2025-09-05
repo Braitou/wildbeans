@@ -77,7 +77,7 @@ export default function CoffeeConfirm({
               />
             </svg>
             <div className="mt-3 text-center text-sm tracking-[0.14em] uppercase text-black">
-              Commande envoyée
+              COMMANDE ENVOYÉE
             </div>
           </motion.div>
         </motion.div>
