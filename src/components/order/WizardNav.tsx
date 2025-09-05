@@ -4,8 +4,8 @@ export default function WizardNav({
   isFinal,
   onPrev,
   onNext,
-  nextLabel = 'SUIVANT',
-  finalLabel = 'COMMANDER',
+  nextLabel = 'NEXT',
+  finalLabel = 'ORDER',
 }: {
   canPrev: boolean;
   canNext: boolean;
@@ -23,7 +23,7 @@ export default function WizardNav({
           onClick={onPrev}
           disabled={!canPrev}
         >
-          PRÉCÉDENT
+          PREVIOUS
         </button>
         <button
           className="flex-1 h-11 rounded-md bg-black text-white disabled:opacity-40"

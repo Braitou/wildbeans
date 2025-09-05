@@ -142,7 +142,7 @@ export default function EventMenuPage({ params }: PageProps) {
     return (
       <AdminGate>
         <main className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center">CHARGEMENT...</div>
+          <div className="text-center">LOADING...</div>
         </main>
       </AdminGate>
     );
@@ -169,14 +169,14 @@ export default function EventMenuPage({ params }: PageProps) {
             href={`/admin/events/${id}`}
             className="h-10 px-3 border rounded-md hover:bg-gray-50 flex items-center"
           >
-            RETOUR À L'ÉVÉNEMENT
+            BACK TO EVENT
           </Link>
         </div>
 
         <div className="space-y-6">
           {categories.length === 0 ? (
             <div className="text-center text-neutral-500 py-8">
-              AUCUN ITEM TROUVÉ POUR CET ÉVÉNEMENT
+              NO ITEMS FOUND FOR THIS EVENT
             </div>
           ) : (
             categories.map(category => (
@@ -189,14 +189,14 @@ export default function EventMenuPage({ params }: PageProps) {
                       disabled={updating === category.id}
                       className="h-8 px-3 text-sm border rounded-md hover:bg-gray-50 disabled:opacity-50"
                     >
-                      ACTIVER TOUT
+                      ACTIVATE ALL
                     </button>
                     <button
                       onClick={() => toggleCategory(category.id, false)}
                       disabled={updating === category.id}
                       className="h-8 px-3 text-sm border rounded-md hover:bg-gray-50 disabled:opacity-50"
                     >
-                      DÉSACTIVER TOUT
+                      DEACTIVATE ALL
                     </button>
                   </div>
                 </div>

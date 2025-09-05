@@ -51,7 +51,7 @@ export default function EventStatsPage({ params }: PageProps) {
 
   function exportCSV() {
     const rows: (string | number)[][] = [
-      ['Item', 'Quantité'],
+      ['Item', 'Quantity'],
       ...filteredItems.map((r) => [r.item_name, String(r.qty)]),
     ];
     const csv = rows
@@ -83,8 +83,8 @@ export default function EventStatsPage({ params }: PageProps) {
       setOpts(((o.data as OptRow[]) ?? []).slice(0, 5));
       setTs((s.data as Point[]) ?? []);
     } catch (error) {
-      console.error('ERREUR LORS DU CHARGEMENT DES DONNÉES:', error);
-      toast.error('ERREUR LORS DU CHARGEMENT DES DONNÉES');
+      console.error('ERROR LOADING DATA:', error);
+      toast.error('ERROR LOADING DATA');
     } finally {
       setLoading(false);
     }
@@ -97,14 +97,14 @@ export default function EventStatsPage({ params }: PageProps) {
     try {
       const { error } = await supabase.rpc('admin_close_event', { event_id: eventId });
       if (error) {
-        toast.error('ERREUR: ' + error.message);
+        toast.error('ERROR: ' + error.message);
         return;
       }
-      toast.success('ÉVÈNEMENT CLÔTURÉ ✅');
+      toast.success('EVENT CLOSED ✅');
       load();
     } catch (error) {
-      console.error('ERREUR LORS DE LA CLÔTURE:', error);
-      toast.error('ERREUR LORS DE LA CLÔTURE');
+      console.error('ERROR DURING CLOSURE:', error);
+      toast.error('ERROR DURING CLOSURE');
     } finally {
       setClosing(false);
     }
@@ -114,7 +114,7 @@ export default function EventStatsPage({ params }: PageProps) {
     return (
       <AdminGate>
         <main className="max-w-6xl mx-auto px-4 py-8">
-          <div className="text-center">CHARGEMENT DES STATISTIQUES...</div>
+          <div className="text-center">LOADING STATISTICS...</div>
         </main>
       </AdminGate>
     );
@@ -141,7 +141,7 @@ export default function EventStatsPage({ params }: PageProps) {
             disabled={closing}
             className="h-10 px-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {closing ? 'CLÔTURE…' : "CLÔTURER L'EVENT"}
+            {closing ? 'CLOSING…' : "CLOSE EVENT"}
           </button>
         </div>
 
@@ -223,12 +223,12 @@ export default function EventStatsPage({ params }: PageProps) {
 
         <div className="mt-6 border rounded-lg p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-semibold">BOISSONS (QUANTITÉS)</div>
+            <div className="text-sm font-semibold">DRINKS (QUANTITIES)</div>
             <div className="flex gap-2">
               <input
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                placeholder="FILTRER PAR NOM…"
+                placeholder="FILTER BY NAME…"
                 className="h-10 px-3 border border-gray-300 rounded-md"
               />
               <button onClick={exportCSV} className="h-10 px-3 border rounded-md hover:bg-gray-50">
@@ -240,8 +240,8 @@ export default function EventStatsPage({ params }: PageProps) {
             <table className="w-full text-sm">
               <thead className="text-left text-neutral-500">
                 <tr>
-                  <th className="py-2">BOISSON</th>
-                  <th className="py-2 w-24 text-right">QUANTITÉ</th>
+                  <th className="py-2">DRINK</th>
+                  <th className="py-2 w-24 text-right">QUANTITY</th>
                 </tr>
               </thead>
               <tbody className="divide-y">

@@ -1,7 +1,7 @@
 import { Modifier } from '@/types/menu';
 import { motion } from 'framer-motion';
 
-// Fonction pour traduire les labels en anglais
+// Function to translate labels to English
 function translateLabel(label: string): string {
   const translations: Record<string, string> = {
     'Sirops': 'Syrups',
@@ -39,7 +39,7 @@ export default function OptionGroup({
                 checked={active}
                 onChange={() => onChange(opt.id)}
               />
-              {/* puce visuelle animée */}
+              {/* animated visual dot */}
               <motion.span
                 layout
                 className={`inline-block size-3 rounded-full border ${
@@ -84,7 +84,7 @@ export default function OptionGroup({
                 onChange(Array.from(next));
               }}
             />
-            {/* puce visuelle animée */}
+            {/* animated visual dot */}
             <motion.span
               layout
               className={`inline-block size-3 rounded-full border ${
@@ -99,7 +99,7 @@ export default function OptionGroup({
         );
       })}
       
-      {/* Bouton "None" pour les groupes multi optionnels (en dernier, pré-sélectionné par défaut) */}
+      {/* "None" button for optional multi groups (last, pre-selected by default) */}
       {isOptionalMulti && (
         <motion.label
           whileTap={{ scale: 0.98 }}
@@ -112,7 +112,7 @@ export default function OptionGroup({
             checked={isNoneSelected}
             onChange={() => onChange([])}
           />
-          {/* puce visuelle animée */}
+          {/* animated visual dot */}
           <motion.span
             layout
             className={`inline-block size-3 rounded-full border ${

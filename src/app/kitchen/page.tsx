@@ -74,7 +74,7 @@ function KitchenPageContent() {
 
     if (error) {
       console.error('[Kitchen] error loadEventByCode:', error);
-      setErrorMsg('ERREUR LORS DU CHARGEMENT DE L\'ÉVÉNEMENT');
+      setErrorMsg('ERROR LOADING EVENT');
       setSelectedEvent(null);
       setLoading(false);
       return;
@@ -102,7 +102,7 @@ function KitchenPageContent() {
 
     if (error) {
       console.error('[Kitchen] error loadActiveEvents:', error);
-      setErrorMsg('ERREUR LORS DU CHARGEMENT DES ÉVÉNEMENTS');
+      setErrorMsg('ERROR LOADING EVENTS');
       setEvents([]);
       setLoading(false);
       return;
@@ -128,7 +128,7 @@ function KitchenPageContent() {
         <main className="py-4">
           <FullBleed>
             <div className="px-6 py-6">
-              <div className="text-lg">CHARGEMENT DE L'ÉVÉNEMENT…</div>
+              <div className="text-lg">LOADING EVENT…</div>
             </div>
           </FullBleed>
         </main>
@@ -230,11 +230,11 @@ function KitchenPageContent() {
           {/* Liste des événements */}
           <div className="px-6 pb-16">
             {loading ? (
-              <div className="text-lg">CHARGEMENT DES ÉVÉNEMENTS…</div>
+              <div className="text-lg">LOADING EVENTS…</div>
             ) : errorMsg ? (
               <div className="text-lg text-red-600">{errorMsg}</div>
             ) : events.length === 0 ? (
-              <div className="text-lg text-neutral-500">AUCUN ÉVÉNEMENT ACTIF TROUVÉ.</div>
+              <div className="text-lg text-neutral-500">NO ACTIVE EVENTS FOUND.</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {events.map((ev) => (
@@ -244,8 +244,8 @@ function KitchenPageContent() {
                         <div className="flex-1">
                           <h3 className="text-xl font-semibold mb-2">{ev.name}</h3>
                           <div className="text-sm text-neutral-500 mb-3 space-y-1">
-                            {ev.starts_at && <div>DÉBUT : {formatDateFR(ev.starts_at)}</div>}
-                            {ev.ends_at && <div>FIN : {formatDateFR(ev.ends_at)}</div>}
+                            {ev.starts_at && <div>START: {formatDateFR(ev.starts_at)}</div>}
+                            {ev.ends_at && <div>END: {formatDateFR(ev.ends_at)}</div>}
                           </div>
                           <div className="text-xs text-neutral-400">
                             CODE: {ev.kitchen_code}
@@ -290,7 +290,7 @@ export default function KitchenPage() {
           <main className="py-4">
             <FullBleed>
               <div className="px-6 py-6">
-                <div className="text-lg">CHARGEMENT…</div>
+                <div className="text-lg">LOADING…</div>
               </div>
             </FullBleed>
           </main>

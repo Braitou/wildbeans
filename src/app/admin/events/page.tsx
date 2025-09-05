@@ -34,19 +34,19 @@ export default function EventsPage() {
     try {
       const { data, error } = await supabase.rpc('admin_list_events');
       if (error) {
-        console.error('ERREUR LORS DU CHARGEMENT DES ÉVÉNEMENTS:', error);
+        console.error('ERROR LOADING EVENTS:', error);
         return;
       }
       setRows(data || []);
     } catch (err) {
-      console.error('ERREUR:', err);
+      console.error('ERROR:', err);
     } finally {
       setLoading(false);
     }
   }
 
   async function deleteEvent(evId: string) {
-    if (!confirm('SUPPRIMER CET ÉVÉNEMENT ?')) return;
+    if (!confirm('DELETE THIS EVENT?')) return;
     
     setDeletingId(evId);
     const { error } = await supabase.rpc('admin_delete_event', { event_id: evId });
@@ -58,7 +58,7 @@ export default function EventsPage() {
       toast.error(msg.toUpperCase());
       return;
     }
-    toast.success('ÉVÉNEMENT SUPPRIMÉ');
+    toast.success('EVENT DELETED');
     // recharge la liste
     await loadEvents();
     setDeletingId(null);
@@ -78,7 +78,7 @@ export default function EventsPage() {
             href="/admin/events/new" 
             className="h-10 px-3 border rounded-md hover:bg-gray-50 flex items-center"
           >
-            CRÉER
+            CREATE
           </Link>
         </div>
         
@@ -86,7 +86,7 @@ export default function EventsPage() {
           <table className="w-full text-sm">
             <thead className="text-left text-neutral-500">
               <tr>
-                <th className="py-2">NOM</th>
+                <th className="py-2">NAME</th>
                 <th>SLUG</th>
                 <th>JOIN</th>
                 <th>KITCHEN</th>
@@ -98,13 +98,13 @@ export default function EventsPage() {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="py-4 text-center text-neutral-500">
-                    CHARGEMENT...
+                    LOADING...
                   </td>
                 </tr>
               ) : rows.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-4 text-center text-neutral-500">
-                    AUCUN ÉVÉNEMENT TROUVÉ
+                    NO EVENTS FOUND
                   </td>
                 </tr>
               ) : (
@@ -122,7 +122,7 @@ export default function EventsPage() {
                         href={`/admin/events/${e.id}`} 
                         className="underline"
                       >
-                        OUVRIR
+                        OPEN
                       </Link>
                       <button
                         onClick={() => deleteEvent(e.id)}

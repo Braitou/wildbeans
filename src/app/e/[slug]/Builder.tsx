@@ -39,7 +39,7 @@ export default function Builder({
     [categories]
   );
 
-  // 🔥 Nouveau flux multi-boissons avec panier
+  // 🔥 New multi-drink flow with cart
   const [stage, setStage] = useState<Stage>('choose');
   const [cart, setCart] = useState<PendingItem[]>([]);
   const [currentIdx, setCurrentIdx] = useState<number>(0);
@@ -47,7 +47,7 @@ export default function Builder({
   const [firstName, setFirstName] = useState('');
   const [note, setNote] = useState('');
 
-  // 🔥 Nouveau: mapping itemId -> count pour la sélection avec compteurs
+  // 🔥 New: mapping itemId -> count for selection with counters
   const [counts, setCounts] = useState<Record<string, number>>({});
   const totalSelected = useMemo(
     () => Object.values(counts).reduce((a, b) => a + b, 0),
@@ -76,7 +76,7 @@ export default function Builder({
   // Dérivé pour la sélection visuelle
   const selectedIds = new Set(cart.map(item => item.item.id));
 
-  // Sélection d'une boisson => ajoute au panier (ne change pas de stage)
+  // Drink selection => adds to cart (doesn't change stage)
   function addDrinkById(id: string) {
     const it = allItems.find(i => i.id === id);
     if (!it) return;
@@ -96,7 +96,7 @@ export default function Builder({
     setCart(prev => prev.filter(p => p.tempId !== tempId));
   }
 
-  // Mises à jour de sélection d'options
+  // Option selection updates
   function updateSingle(modId: string, value: string | null) {
     if (!current) return;
     setCart(prev => prev.map((p, i) => 
@@ -138,13 +138,13 @@ export default function Builder({
         return;
       }
 
-      // Fin des options pour l'item courant
+      // End of options for current item
       if (currentIdx < cart.length - 1) {
-        // Passer à l'item suivant
+        // Move to next item
         setCurrentIdx(i => i + 1);
         setOptStep(0);
       } else {
-        // Dernier item traité → aller au récap
+        // Last item processed → go to review
         setStage('review');
       }
       return;
@@ -162,12 +162,12 @@ export default function Builder({
         return;
       }
       if (currentIdx > 0) {
-        // Revenir à l'item précédent
+        // Go back to previous item
         setCurrentIdx(i => i - 1);
         setOptStep(optionSteps.length - 1);
         return;
       }
-      // Retour à la sélection
+      // Back to selection
       setStage('choose');
       return;
     }
@@ -223,13 +223,13 @@ export default function Builder({
     });
 
     if (error) { 
-      alert('ERREUR: ' + error.message); 
+      alert('ERROR: ' + error.message); 
       return; 
     }
 
-    // Lance l'anim tasse qui se remplit, puis redirige
+    // Launch cup filling animation, then redirect
     setShowConfirm(true);
-    // durée de l'anim ≈ 1.1s → on redirige juste après
+    // animation duration ≈ 1.1s → redirect just after
     setTimeout(() => {
       router.replace(`/order/${data.order_id}?pickup=${data.pickup_code}`);
     }, 1150);
@@ -244,7 +244,7 @@ export default function Builder({
     id: item.tempId,
     name: item.item.name.toUpperCase(),
     complete: (() => {
-      // UN ITEM EST "COMPLET" SI TOUTES LES REQUISES SONT REMPLIES
+      // AN ITEM IS "COMPLETE" IF ALL REQUIRED FIELDS ARE FILLED
       for (const mod of (item.item.modifiers ?? [])) {
         if (!mod.required) continue;
         if (mod.type === 'single' && !item.single[mod.id]) return false;
@@ -272,7 +272,7 @@ export default function Builder({
   return (
     <>
       <div className="pb-24">
-        {/* Mini-panier */}
+        {/* Mini-cart */}
         {stage !== 'choose' && (
           <OrderTray
             items={trayItems}
@@ -295,7 +295,7 @@ export default function Builder({
 
         <AnimatePresence mode="wait">
           <motion.div key={`${stage}-${currentIdx}-${optStep}`} initial="initial" animate="animate" exit="exit" variants={variants} transition={transition}>
-            {/* Stage: Sélection des boissons */}
+            {/* Stage: Drink selection */}
             {stage === 'choose' && (
               <>
                 <div className="mb-4">
@@ -315,7 +315,7 @@ export default function Builder({
               </>
             )}
 
-            {/* Stage: Configuration des options */}
+            {/* Stage: Option configuration */}
             {stage === 'options' && current && optStep < optionSteps.length && (
               <section className="py-4">
                 <h2 className="mb-2 text-xs font-semibold tracking-[0.18em] uppercase text-neutral-500">
@@ -340,7 +340,7 @@ export default function Builder({
               </section>
             )}
 
-            {/* Stage: Récap global + prénom/note */}
+            {/* Stage: Global review + first name/note */}
             {stage === 'review' && (
               <>
                 <div className="mb-4">

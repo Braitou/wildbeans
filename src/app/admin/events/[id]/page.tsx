@@ -81,7 +81,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
     if (error) {
       console.error(error);
-      toast.error('ERREUR LORS DU CHARGEMENT');
+      toast.error('ERROR LOADING');
       return;
     }
     if (data) {
@@ -123,13 +123,13 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
   async function save() {
     if (!form.name || !form.slug) {
-      toast.error('NOM ET SLUG SONT REQUIS');
+      toast.error('NAME AND SLUG ARE REQUIRED');
       return;
     }
 
     // Sanity check env
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      toast.error('CONFIG SUPABASE MANQUANTE (URL/ANON KEY).');
+      toast.error('MISSING SUPABASE CONFIG (URL/ANON KEY).');
       return;
     }
 
@@ -152,16 +152,16 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                    (error as { message?: string; hint?: string; details?: string })?.details || 
                    'Unknown error';
         if (String(msg).includes('SLUG_TAKEN')) {
-          toast.error('CE SLUG EST DÉJÀ UTILISÉ, CHOISIS-EN UN AUTRE.');
+          toast.error('THIS SLUG IS ALREADY USED, CHOOSE ANOTHER ONE.');
         } else if ((error as { code?: string })?.code === 'PGRST202') {
-          toast.error('FONCTION RPC INTROUVABLE. RECHARGE LE SCHÉMA DANS SUPABASE (NOTIFY pgrst, \'reload schema\').');
+          toast.error('RPC FUNCTION NOT FOUND. RELOAD THE SCHEMA IN SUPABASE (NOTIFY pgrst, \'reload schema\').');
         } else {
-          toast.error(`Erreur lors de l'enregistrement : ${msg}`);
+          toast.error(`Error during save: ${msg}`);
         }
         return;
       }      
 
-      toast.success('ENREGISTRÉ ✅');
+      toast.success('SAVED ✅');
 
       // rediriger sur la page de l'event fraichement créé si c'était "new"
       if (isNew && data?.id) {
@@ -180,10 +180,10 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     const { error } = await supabase.rpc('admin_close_event', { event_id: isNew ? null : id });
     setClosing(false);
     if (error) {
-      toast.error('ERREUR: ' + error.message);
+      toast.error('ERROR: ' + error.message);
       return;
     }
-    toast.success('ÉVÈNEMENT CLÔTURÉ ✅');
+    toast.success('EVENT CLOSED ✅');
     loadEvent();
   }
 
@@ -191,7 +191,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     return (
       <AdminGate>
         <main className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center">CHARGEMENT…</div>
+          <div className="text-center">LOADING…</div>
         </main>
       </AdminGate>
     );
@@ -219,18 +219,18 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               disabled={closing}
               className="h-10 px-3 border rounded-md hover:bg-gray-50"
             >
-              {closing ? 'CLÔTURE…' : 'CLÔTURER L\'EVENT'}
+              {closing ? 'CLOSING…' : 'CLOSE EVENT'}
             </button>
           )}
         </div>
 
         <section className="grid gap-4">
           <div className="grid gap-2">
-            <label className="text-sm">NOM</label>
+            <label className="text-sm">NAME</label>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="MARIAGE CLAIRE & MAX"
+              placeholder="WEDDING CLAIRE & MAX"
               className="h-11 px-3 border border-gray-300 rounded-md"
             />
           </div>
@@ -243,7 +243,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 setSlugTouched(true);
                 setForm({ ...form, slug: e.target.value });
               }}
-              placeholder="mariage-claire-max"
+              placeholder="wedding-claire-max"
               className="h-11 px-3 border border-gray-300 rounded-md"
             />
             <p className="text-xs text-neutral-500">URL : /e/{'{slug}'}?join={'{code}'}</p>
@@ -271,7 +271,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
           <div className="grid gap-2 md:grid-cols-2">
             <div className="grid gap-2">
-              <label className="text-sm">DÉBUT (OPTIONNEL)</label>
+              <label className="text-sm">START (OPTIONAL)</label>
               <input
                 type="datetime-local"
                 value={form.starts_at ?? ''}
@@ -280,7 +280,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               />
             </div>
             <div className="grid gap-2">
-              <label className="text-sm">FIN (OPTIONNEL)</label>
+              <label className="text-sm">END (OPTIONAL)</label>
               <input
                 type="datetime-local"
                 value={form.ends_at ?? ''}
@@ -296,7 +296,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               disabled={saving}
               className="h-11 px-5 rounded-md bg-black text-white hover:bg-neutral-800 disabled:opacity-50"
             >
-              {saving ? 'ENREGISTREMENT…' : 'ENREGISTRER'}
+              {saving ? 'SAVING…' : 'SAVE'}
             </button>
           </div>
         </section>

@@ -193,7 +193,7 @@ export default function KitchenBoard({
 
     if (error) {
       console.error('[KitchenBoard] update error:', error);
-      alert('ERREUR: ' + error.message);
+      alert('ERROR: ' + error.message);
       return;
     }
     if (!data || data.length === 0) {
@@ -210,7 +210,7 @@ export default function KitchenBoard({
   }
 
   const title = (k: keyof typeof cols) =>
-    k === 'new' ? 'NOUVELLES' : k === 'preparing' ? 'EN PRÉPARATION' : 'PRÊTES';
+    k === 'new' ? 'NEW' : k === 'preparing' ? 'PREPARING' : 'READY';
 
   const statusTone = (s: OrderStatus) =>
     s === 'new'
@@ -221,7 +221,7 @@ export default function KitchenBoard({
       ? 'bg-emerald-100 text-emerald-900'
       : 'bg-gray-100 text-gray-800';
 
-  if (loading) return <div className="p-8 text-lg">CHARGEMENT…</div>;
+  if (loading) return <div className="p-8 text-lg">LOADING…</div>;
 
   // density
   const pad = density === 'compact' ? 'p-4' : 'p-6';
@@ -240,7 +240,7 @@ export default function KitchenBoard({
               <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-neutral-600">
                 {title(k)}
               </h2>
-              <div className="text-xs text-neutral-400">{cols[k].length} COMMANDE(S)</div>
+              <div className="text-xs text-neutral-400">{cols[k].length} ORDER(S)</div>
             </div>
 
             <div className="mt-2 space-y-8">
@@ -284,7 +284,7 @@ export default function KitchenBoard({
                                 {it.options.map((op) => op.option_name.toUpperCase()).join(', ')}
                               </div>
                             ) : (
-                              <div className="text-neutral-400 text-sm mt-1">AUCUNE OPTION</div>
+                              <div className="text-neutral-400 text-sm mt-1">NO OPTIONS</div>
                             )}
                           </div>
                         </li>
@@ -297,41 +297,41 @@ export default function KitchenBoard({
                       {o.status === 'new' && (
                         <>
                           <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'preparing')}>
-                            PRENDRE
+                            TAKE
                           </Button>
                           <Button
                             className="h-12 px-5 text-[15px]"
                             variant="outline"
                             onClick={() => move(o.id, 'cancelled')}
                           >
-                            ANNULER
+                            CANCEL
                           </Button>
                         </>
                       )}
                       {o.status === 'preparing' && (
                         <>
                           <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'ready')}>
-                            PRÊT
+                            READY
                           </Button>
                           <Button
                             className="h-12 px-5 text-[15px]"
                             variant="outline"
                             onClick={() => move(o.id, 'cancelled')}
                           >
-                            ANNULER
+                            CANCEL
                           </Button>
                         </>
                       )}
                       {o.status === 'ready' && (
                         <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'served')}>
-                                                      SERVI
+                                                      SERVED
                         </Button>
                       )}
                     </div>
                   </CardContent>
                 </Card>
               ))}
-              {!cols[k].length && <div className="text-sm text-neutral-400">AUCUNE COMMANDE ICI.</div>}
+              {!cols[k].length && <div className="text-sm text-neutral-400">NO ORDERS HERE.</div>}
             </div>
           </section>
         ))}
