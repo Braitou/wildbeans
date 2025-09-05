@@ -72,10 +72,10 @@ create table if not exists public.event_items (
 
 -- Insérer quelques données de test pour les catégories et items
 insert into public.menu_categories (name) values 
-  ('Coffee') on conflict do nothing;
+  ('Cafés') on conflict do nothing;
 
 insert into public.menu_items (name, category_id, price) 
-select 'Espresso', id, 2.50 from public.menu_categories where name = 'Coffee'
+select 'Espresso', id, 2.50 from public.menu_categories where name = 'Cafés'
 on conflict do nothing;
 
 -- Créer la fonction admin_list_events

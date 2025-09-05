@@ -41,7 +41,7 @@ export default function DebugPage() {
         setMessages(prev => [...prev, `Update error: ${error.message}`]);
       } else {
         setMessages(prev => [...prev, `Successfully updated to ${newStatus}!`]);
-        // Check status after update
+        // Vérifier le statut après mise à jour
         setTimeout(checkOrderStatus, 1000);
       }
     } catch (err) {
@@ -65,7 +65,7 @@ export default function DebugPage() {
         setMessages(prev => [...prev, `READ permission OK - Found ${readData?.length || 0} orders`]);
       }
       
-      // Test 2: Try to update an order
+      // Test 2: Essayer de mettre à jour une commande
       const { error: updateError } = await supabase
         .from('orders')
         .update({ status: 'new' })
@@ -77,7 +77,7 @@ export default function DebugPage() {
         setMessages(prev => [...prev, `UPDATE permission OK`]);
       }
       
-      // Test 3: Check if RLS is enabled
+      // Test 3: Vérifier si RLS est activé
       const { data: rlsData, error: rlsError } = await supabase
         .rpc('check_rls_enabled', { table_name: 'orders' })
         .catch(() => ({ data: null, error: { message: 'RPC not available' } }));

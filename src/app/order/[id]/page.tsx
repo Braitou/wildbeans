@@ -52,7 +52,7 @@ export default function OrderStatusPage() {
       })
       .subscribe();
 
-    // Fallback: if no realtime event under 2s, poll in loop
+    // Fallback: si aucun event realtime sous 2s, on poll en boucle
     const to = setTimeout(() => {
       if (realtimeHeardRef.current) return;
       pollingRef.current = setInterval(async () => {

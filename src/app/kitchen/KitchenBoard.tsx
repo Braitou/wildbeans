@@ -82,7 +82,7 @@ export default function KitchenBoard({
   useEffect(() => {
     void load();
 
-    // Realtime: INSERT & UPDATE on orders (filtered by event if present)
+    // Realtime: INSERT & UPDATE sur orders (filtré par event si présent)
     const channelName = `kitchen-orders-${eventId ?? 'all'}`;
     console.log('[KitchenBoard] subscribe', channelName);
 
@@ -98,7 +98,7 @@ export default function KitchenBoard({
         },
         (payload) => {
           console.log('[KitchenBoard] realtime INSERT payload:', payload);
-          // reload to get items & relations
+          // on recharge pour récupérer items & relations
           void load();
         }
       )
@@ -136,7 +136,7 @@ export default function KitchenBoard({
     };
   }, [eventId]);
 
-  // REFRESH "TIME AGO" EVERY 30S
+  // REFRESH "TIME AGO" TOUTES LES 30S
   const [, forceTick] = useState(0);
   useEffect(() => {
     const id = setInterval(() => forceTick((x) => x + 1), 30000);
@@ -164,18 +164,18 @@ export default function KitchenBoard({
     const d = new Date(iso).getTime();
     const diff = Math.max(0, Date.now() - d);
     const m = Math.round(diff / 60000);
-    if (m < 1) return "JUST NOW";
-    if (m === 1) return '1 MIN AGO';
-    if (m < 60) return `${m} MIN AGO`;
+    if (m < 1) return "À L'INSTANT";
+    if (m === 1) return 'IL Y A 1 MIN';
+    if (m < 60) return `IL Y A ${m} MIN`;
     const h = Math.round(m / 60);
-    return h === 1 ? '1 H AGO' : `${h} H AGO`;
-    // (you can add days if you want)
+    return h === 1 ? 'IL Y A 1 H' : `IL Y A ${h} H`;
+    // (tu peux ajouter les jours si tu veux)
   }
 
   async function move(orderId: string, next: OrderStatus) {
     console.log('[KitchenBoard] move →', { orderId, next });
 
-    // immediate local signal (fallback inter-tabs)
+    // signal local immédiat (fallback inter-onglets)
     const orderKey = `order_status_${orderId}`;
     try {
       localStorage.setItem(orderKey, next);
@@ -197,11 +197,11 @@ export default function KitchenBoard({
       return;
     }
     if (!data || data.length === 0) {
-      console.warn('[KitchenBoard] update: no rows returned (RLS ? wrong id ?)');
+      console.warn('[KitchenBoard] update: no rows returned (RLS ? mauvais id ?)');
       return;
     }
 
-    // immediate local update (without waiting for realtime)
+    // maj locale immédiate (sans attendre realtime)
     setOrders((prev) =>
       prev
         .map((o) => (o.id === orderId ? { ...o, status: next } : o))
@@ -235,7 +235,7 @@ export default function KitchenBoard({
       <div className="grid grid-cols-1 lg:grid-cols-2 [@media(min-width:1360px)]:grid-cols-3 [@media(min-width:1600px)]:grid-cols-4 gap-10">
         {(Object.keys(cols) as Array<keyof typeof cols>).map((k) => (
           <section key={k} className="flex flex-col min-h-[65vh]">
-            {/* sticky column header */}
+            {/* header de colonne sticky */}
             <div className="sticky top-0 z-10 bg-white pt-2 pb-3">
               <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-neutral-600">
                 {title(k)}

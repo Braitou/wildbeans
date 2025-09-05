@@ -42,11 +42,11 @@ export default function EventMenuPage({ params }: PageProps) {
       });
       
       if (error) {
-        console.error('Error loading:', error);
+        console.error('Erreur lors du chargement:', error);
         return;
       }
 
-      // Group by category
+      // Grouper par catégorie
       const grouped = (data || []).reduce((acc: Category[], item: MenuItem) => {
         const existingCategory = acc.find(cat => cat.id === item.category_id);
         if (existingCategory) {
@@ -63,7 +63,7 @@ export default function EventMenuPage({ params }: PageProps) {
 
       setCategories(grouped);
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Erreur:', err);
     } finally {
       setLoading(false);
     }
@@ -83,12 +83,12 @@ export default function EventMenuPage({ params }: PageProps) {
       });
       
       if (error) {
-        console.error('Error during update:', error);
-        toast.error('Error ❌');
+        console.error('Erreur lors de la mise à jour:', error);
+        toast.error('Erreur ❌');
         return;
       }
 
-      // Update local state
+      // Mettre à jour l'état local
       setCategories(prev => prev.map(cat => ({
         ...cat,
         items: cat.items.map(item => 
@@ -96,10 +96,10 @@ export default function EventMenuPage({ params }: PageProps) {
         )
       })));
       
-      toast.success(enabled ? 'Activated ✅' : 'Deactivated ✅');
+      toast.success(enabled ? 'Activé ✅' : 'Désactivé ✅');
     } catch (err) {
-      console.error('Error:', err);
-      toast.error('Error ❌');
+      console.error('Erreur:', err);
+      toast.error('Erreur ❌');
     } finally {
       setUpdating(null);
     }
@@ -111,7 +111,7 @@ export default function EventMenuPage({ params }: PageProps) {
 
     setUpdating(categoryId);
     try {
-      // Update all items in the category
+      // Mettre à jour tous les items de la catégorie
       const promises = category.items.map(item => 
         supabase.rpc('admin_set_item_enabled', {
           event_id: id,
@@ -122,17 +122,17 @@ export default function EventMenuPage({ params }: PageProps) {
 
       await Promise.all(promises);
 
-      // Update local state
+      // Mettre à jour l'état local
       setCategories(prev => prev.map(cat => 
         cat.id === categoryId 
           ? { ...cat, items: cat.items.map(item => ({ ...item, enabled })) }
           : cat
       ));
       
-      toast.success(enabled ? 'Category activated ✅' : 'Category deactivated ✅');
+      toast.success(enabled ? 'Catégorie activée ✅' : 'Catégorie désactivée ✅');
     } catch (err) {
-      console.error('Error:', err);
-      toast.error('Error ❌');
+      console.error('Erreur:', err);
+      toast.error('Erreur ❌');
     } finally {
       setUpdating(null);
     }
@@ -153,7 +153,7 @@ export default function EventMenuPage({ params }: PageProps) {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <AdminHeader title="Menu" />
         
-        {/* Back to events button */}
+        {/* Bouton Back to events */}
         <button
           onClick={() => router.push('/admin/events')}
           className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-md hover:bg-gray-50"

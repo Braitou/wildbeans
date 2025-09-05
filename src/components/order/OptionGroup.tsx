@@ -4,10 +4,10 @@ import { motion } from 'framer-motion';
 // Function to translate labels to English
 function translateLabel(label: string): string {
   const translations: Record<string, string> = {
-    'syrups': 'Syrups',
-    'syrups': 'Syrups',
-    'Type of milkt': 'Type of milk',
-    'Type of milk': 'Type of milk',
+    'Sirops': 'Syrups',
+    'sirops': 'Syrups',
+    'Choix du lait': 'Type of milk',
+    'choix du lait': 'Type of milk',
     'Toppings': 'Toppings',
   };
   return translations[label] || label;
@@ -67,7 +67,7 @@ export default function OptionGroup({
   
   return (
     <div className="flex flex-col gap-2">
-      {/* Options in column */}
+      {/* Options en colonne */}
       {modifier.options.map(opt => {
         const active = selected.has(opt.id);
         return (

@@ -239,7 +239,7 @@ export default function Builder({
   const variants = reduce ? undefined : { initial: { opacity: 0, x: 20 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -20 } };
   const transition = reduce ? { duration: 0 } : { duration: 0.22 };
 
-  // Derived for display
+  // Dérivés pour l'affichage
   const trayItems = cart.map((item, index) => ({
     id: item.tempId,
     name: item.item.name.toUpperCase(),
@@ -288,7 +288,7 @@ export default function Builder({
           />
         )}
 
-        {/* Dots relative to current item */}
+        {/* Dots par rapport à l'item courant */}
         {stage === 'options' && current && (
           <StepDots total={optionSteps.length} index={optStep} />
         )}

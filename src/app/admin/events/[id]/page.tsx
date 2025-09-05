@@ -59,7 +59,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     link.click();
   }
 
-  // util: slugify from name (simple)
+  // util : slugify à partir du nom (simple)
   function slugify(s: string) {
     return s
       .toLowerCase()
@@ -101,12 +101,12 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     loadEvent();
   }, [loadEvent]);
 
-  // Set origin for QR code
+  // Définir l'origine pour le QR code
   useEffect(() => {
     if (typeof window !== 'undefined') setOrigin(window.location.origin);
   }, []);
 
-  // Auto-generate slug & codes if empty (only for new events)
+  // Auto-générer slug & codes si vides (uniquement pour nouveaux events)
   useEffect(() => {
     if (!isNew) return;
     setForm((f) => {
@@ -163,11 +163,11 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
       toast.success('SAVED ✅');
 
-      // redirect to the page of the freshly created event if it was "new"
+      // rediriger sur la page de l'event fraichement créé si c'était "new"
       if (isNew && data?.id) {
         router.replace(`/admin/events/${data.id}`);
       } else {
-        // reload
+        // recharger
         loadEvent();
       }
     } finally {
@@ -202,7 +202,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <AdminHeader title="EVENT" />
         
-        {/* Back to events button */}
+        {/* Bouton Back to events */}
         <button
           onClick={() => router.push('/admin/events')}
           className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-md hover:bg-gray-50"
