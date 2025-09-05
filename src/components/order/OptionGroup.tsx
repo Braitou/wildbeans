@@ -4,10 +4,10 @@ import { motion } from 'framer-motion';
 // Function to translate labels to English
 function translateLabel(label: string): string {
   const translations: Record<string, string> = {
-    'Sirops': 'Syrups',
-    'sirops': 'Syrups',
-    'Choix du lait': 'Type of milk',
-    'choix du lait': 'Type of milk',
+    'syrups': 'Syrups',
+    'syrups': 'Syrups',
+    'Type of milkt': 'Type of milk',
+    'Type of milk': 'Type of milk',
     'Toppings': 'Toppings',
   };
   return translations[label] || label;
