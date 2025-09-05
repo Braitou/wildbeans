@@ -4,9 +4,9 @@ import { Toaster } from "sonner";
 import Image from "next/image";
 import "./globals.css";
 
-const maisonNeueMono = localFont({
-  src: "./fonts/Maison_Neue_Mono.ttf",
-  variable: "--font-maison-neue-mono",
+const fragmentMono = localFont({
+  src: "./fonts/FragmentMono-Regular.ttf",
+  variable: "--font-fragmentmono",
   weight: "400",
   style: "normal",
   display: "swap",
@@ -22,7 +22,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr">
-      <body className={`${maisonNeueMono.variable} antialiased bg-white text-black font-sans`}>
+      <body className={`${fragmentMono.variable} antialiased bg-white text-black font-sans`}>
         <header className="border-b border-gray-200">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-center">
             <Image
