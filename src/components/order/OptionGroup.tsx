@@ -49,7 +49,7 @@ export default function OptionGroup({
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 aria-hidden
               />
-              <span className="text-sm">{translateLabel(opt.name)}</span>
+              <span className="text-sm uppercase">{translateLabel(opt.name)}</span>
             </motion.label>
           );
         })}
@@ -94,7 +94,7 @@ export default function OptionGroup({
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               aria-hidden
             />
-            <span className="text-sm">{translateLabel(opt.name)}</span>
+            <span className="text-sm uppercase">{translateLabel(opt.name)}</span>
           </motion.label>
         );
       })}
@@ -122,7 +122,7 @@ export default function OptionGroup({
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             aria-hidden
           />
-          <span className="text-sm italic">None</span>
+          <span className="text-sm italic uppercase">None</span>
         </motion.label>
       )}
     </div>

@@ -321,7 +321,7 @@ export default function Builder({
                 <h2 className="mb-2 text-xs font-semibold tracking-[0.18em] uppercase text-neutral-500">
                   Drink {currentIdx + 1} of {cart.length}
                 </h2>
-                <h3 className="mb-2 text-sm sm:text-base font-semibold leading-tight">
+                <h3 className="mb-2 text-sm sm:text-base font-semibold leading-tight uppercase">
                   {current.item.name} — {optionSteps[optStep].name}
                 </h3>
                 <OptionGroup
