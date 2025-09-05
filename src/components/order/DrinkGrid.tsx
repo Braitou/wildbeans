@@ -14,7 +14,7 @@ interface DrinkGridProps {
 
 export default function DrinkGrid({ categories, onSelectItem }: DrinkGridProps) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 uppercase">
       {categories.map((category) => (
         <div key={category.id}>
           <h2 className="mb-4 text-lg font-semibold uppercase tracking-widest text-muted-foreground">

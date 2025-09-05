@@ -15,7 +15,7 @@ export default function DrinkList({
   onDec,
 }: DrinkListProps) {
   return (
-    <div className="space-y-10 pb-24 font-sans">
+    <div className="space-y-10 pb-24 font-sans uppercase">
       {categories.map(cat => (
         <section key={cat.id}>
           <h2 className="mb-4 text-xs font-semibold tracking-[0.18em] uppercase text-neutral-500">

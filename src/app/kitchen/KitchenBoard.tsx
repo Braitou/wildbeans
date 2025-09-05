@@ -210,7 +210,7 @@ export default function KitchenBoard({
   }
 
   const title = (k: keyof typeof cols) =>
-    k === 'new' ? 'Nouvelles' : k === 'preparing' ? 'En préparation' : 'Prêtes';
+    k === 'new' ? 'New' : k === 'preparing' ? 'Preparing' : 'Ready';
 
   const statusTone = (s: OrderStatus) =>
     s === 'new'
@@ -303,41 +303,41 @@ export default function KitchenBoard({
                       {o.status === 'new' && (
                         <>
                           <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'preparing')}>
-                            Prendre
+                            Take
                           </Button>
                           <Button
                             className="h-12 px-5 text-[15px]"
                             variant="outline"
                             onClick={() => move(o.id, 'cancelled')}
                           >
-                            Annuler
+                            Cancel
                           </Button>
                         </>
                       )}
                       {o.status === 'preparing' && (
                         <>
                           <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'ready')}>
-                            Prêt
+                            Ready
                           </Button>
                           <Button
                             className="h-12 px-5 text-[15px]"
                             variant="outline"
                             onClick={() => move(o.id, 'cancelled')}
                           >
-                            Annuler
+                            Cancel
                           </Button>
                         </>
                       )}
                       {o.status === 'ready' && (
                         <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'served')}>
-                          Servi
+                          Served
                         </Button>
                       )}
                     </div>
                   </CardContent>
                 </Card>
               ))}
-              {!cols[k].length && <div className="text-sm text-neutral-400">Aucune commande ici.</div>}
+              {!cols[k].length && <div className="text-sm text-neutral-400">No orders here.</div>}
             </div>
           </section>
         ))}

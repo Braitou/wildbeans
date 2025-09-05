@@ -219,7 +219,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               disabled={closing}
               className="h-10 px-3 border rounded-md hover:bg-gray-50"
             >
-              {closing ? 'Clôture…' : 'Clôturer l\'event'}
+              {closing ? 'Closing…' : 'Close event'}
             </button>
           )}
         </div>

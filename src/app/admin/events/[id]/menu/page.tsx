@@ -169,7 +169,7 @@ export default function EventMenuPage({ params }: PageProps) {
             href={`/admin/events/${id}`}
             className="h-10 px-3 border rounded-md hover:bg-gray-50 flex items-center"
           >
-            Retour à l&apos;événement
+            Back to event
           </Link>
         </div>
 
