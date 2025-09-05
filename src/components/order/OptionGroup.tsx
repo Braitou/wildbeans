@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 // Fonction pour traduire les labels en anglais
 function translateLabel(label: string): string {
   const translations: Record<string, string> = {
+    'Précédents': 'Previous',
     'Sirops': 'Syrups',
     'Toppings': 'Toppings',
   };
