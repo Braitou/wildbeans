@@ -5,6 +5,9 @@ import { motion } from 'framer-motion';
 function translateLabel(label: string): string {
   const translations: Record<string, string> = {
     'Sirops': 'Syrups',
+    'sirops': 'Syrups',
+    'Choix du lait': 'Type of milk',
+    'choix du lait': 'Type of milk',
     'Toppings': 'Toppings',
   };
   return translations[label] || label;
