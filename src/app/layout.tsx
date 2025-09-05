@@ -4,8 +4,9 @@ import { Toaster } from "sonner";
 import Image from "next/image";
 import "./globals.css";
 
+// Police locale : chemin relatif au fichier courant (src/app/layout.tsx)
 const fragmentMono = localFont({
-  src: "./fonts/FragmentMono-Regular.ttf",
+  src: "./font/FragmentMono-Regular.ttf", // ← si tu as .woff2, mets "./font/FragmentMono-Regular.woff2"
   variable: "--font-fragmentmono",
   weight: "400",
   style: "normal",
@@ -21,8 +22,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="fr">
-      <body className={`${fragmentMono.variable} antialiased bg-white text-black font-sans`}>
+    <html lang="fr" className={fragmentMono.variable}>
+      <body className="antialiased bg-white text-black font-sans">
         <header className="border-b border-gray-200">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-center">
             <Image
@@ -35,16 +36,18 @@ export default function RootLayout({
             />
           </div>
         </header>
+
         <main className="max-w-3xl mx-auto px-4 sm:px-6">
           {children}
         </main>
-        <Toaster 
+
+        <Toaster
           position="top-center"
           toastOptions={{
             style: {
-              background: '#000',
-              color: '#fff',
-              border: '1px solid #333',
+              background: "#000",
+              color: "#fff",
+              border: "1px solid #333",
             },
             duration: 3000,
           }}
