@@ -7,7 +7,7 @@ import "./globals.css";
 const fragmentMono = localFont({
   src: [
     { path: "./fonts/FragmentMono-Regular.ttf", weight: "400", style: "normal" },
-    { path: "./fonts/FragmentMono-Italic.ttf", weight: "400", style: "italic" },
+    { path: "./fonts/FragmentMono-Italic.ttf",  weight: "400", style: "italic" },
   ],
   variable: "--font-fragmentmono",
   display: "swap",
@@ -42,11 +42,7 @@ export default function RootLayout({
         <Toaster
           position="top-center"
           toastOptions={{
-            style: {
-              background: "#000",
-              color: "#fff",
-              border: "1px solid #333",
-            },
+            style: { background: "#000", color: "#fff", border: "1px solid #333" },
             duration: 3000,
           }}
         />
