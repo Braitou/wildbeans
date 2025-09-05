@@ -67,7 +67,7 @@ export default function OptionGroup({
   
   return (
     <div className="flex flex-col gap-2">
-      {/* Options en colonne */}
+      {/* Options in column */}
       {modifier.options.map(opt => {
         const active = selected.has(opt.id);
         return (

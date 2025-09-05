@@ -22,7 +22,7 @@ export default function ReviewList({
         <div key={i} className="border rounded-lg p-4">
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-[15px] font-semibold">BOISSON {i + 1} — {it.name}</div>
+              <div className="text-[15px] font-semibold">DRINK {i + 1} — {it.name}</div>
               <ul className="mt-1 text-sm text-neutral-700 list-disc pl-4">
                 {it.options.map((g, idx) => (
                   <li key={idx}>
@@ -32,8 +32,8 @@ export default function ReviewList({
               </ul>
             </div>
             <div className="flex gap-2">
-              <button className="underline" onClick={() => onEditIndex(i)}>ÉDITER</button>
-              <button className="underline opacity-80" onClick={() => onRemoveIndex(i)}>SUPPRIMER</button>
+              <button className="underline" onClick={() => onEditIndex(i)}>EDIT</button>
+              <button className="underline opacity-80" onClick={() => onRemoveIndex(i)}>REMOVE</button>
             </div>
           </div>
         </div>
@@ -43,7 +43,7 @@ export default function ReviewList({
           onClick={onAddNew}
           className="h-11 px-4 rounded-md border border-gray-300 hover:bg-gray-50"
         >
-          + AJOUTER UNE BOISSON
+          + ADD A DRINK
         </button>
       </div>
     </section>

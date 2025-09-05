@@ -119,9 +119,9 @@ function KitchenPageContent() {
     }
   }, [hasCode, kitchenCode, loadEventByCode, loadActiveEvents]);
 
-  // ---------- Rendus conditionnels ----------
+  // ---------- Conditional renders ----------
 
-  // Avec code – en cours de chargement
+  // With code – loading
   if (hasCode && loading) {
     return (
       <AdminGate>
@@ -136,7 +136,7 @@ function KitchenPageContent() {
     );
   }
 
-  // Avec code – erreur
+  // With code – error
   if (hasCode && errorMsg) {
     return (
       <AdminGate>
@@ -164,7 +164,7 @@ function KitchenPageContent() {
       <AdminGate>
         <main className="py-4">
           <FullBleed>
-            {/* Header plein écran */}
+            {/* Full screen header */}
             <div className="px-6 py-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-col gap-2">
                 <div className="text-3xl font-semibold uppercase tracking-widest">
@@ -198,7 +198,7 @@ function KitchenPageContent() {
               </div>
             </div>
 
-            {/* Board plein écran */}
+            {/* Full screen board */}
             <KitchenBoard eventId={selectedEvent.id} />
           </FullBleed>
         </main>
@@ -206,12 +206,12 @@ function KitchenPageContent() {
     );
   }
 
-  // Sans code – liste des événements actifs
+  // Without code – list of active events
   return (
     <AdminGate>
       <main className="py-4">
         <FullBleed>
-          {/* Header plein écran */}
+          {/* Full screen header */}
           <div className="px-6 py-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="text-3xl font-semibold uppercase tracking-widest">
               Wild Beans — Kitchen
@@ -227,7 +227,7 @@ function KitchenPageContent() {
             </div>
           </div>
 
-          {/* Liste des événements */}
+          {/* Events list */}
           <div className="px-6 pb-16">
             {loading ? (
               <div className="text-lg">LOADING EVENTS…</div>

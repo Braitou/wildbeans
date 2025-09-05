@@ -52,7 +52,7 @@ export default function EventsPage() {
     const { error } = await supabase.rpc('admin_delete_event', { event_id: evId });
     if (error) {
       console.error('ADMIN_DELETE_EVENT ERROR:', error);
-      // Affiche l'erreur réelle (utile si FK bloque la suppression)
+      // Display the real error (useful if FK blocks deletion)
       // @ts-ignore
       const msg = error?.message || error?.hint || error?.details || 'Delete failed';
       toast.error(msg.toUpperCase());
