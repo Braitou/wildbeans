@@ -36,9 +36,11 @@ export default function RootLayout({
             />
           </div>
         </header>
+
         <main className="max-w-3xl mx-auto px-4 sm:px-6">
           {children}
         </main>
+
         <Toaster
           position="top-center"
           toastOptions={{
