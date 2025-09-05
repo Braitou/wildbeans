@@ -4,12 +4,20 @@ import { Toaster } from "sonner";
 import Image from "next/image";
 import "./globals.css";
 
-// Police locale : chemin relatif au fichier courant (src/app/layout.tsx)
 const fragmentMono = localFont({
-  src: "./font/FragmentMono-Regular.ttf", // ← si tu as .woff2, mets "./font/FragmentMono-Regular.woff2"
+  src: [
+    {
+      path: "./fonts/FragmentMono-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/FragmentMono-Italic.ttf",
+      weight: "400",
+      style: "italic",
+    },
+  ],
   variable: "--font-fragmentmono",
-  weight: "400",
-  style: "normal",
   display: "swap",
 });
 
