@@ -14,7 +14,7 @@ interface DrinkGridProps {
 
 export default function DrinkGrid({ categories, onSelectItem }: DrinkGridProps) {
   return (
-    <div className="space-y-8 uppercase">
+    <div className="space-y-8">
       {categories.map((category) => (
         <div key={category.id}>
           <h2 className="mb-4 text-lg font-semibold uppercase tracking-widest text-muted-foreground">
@@ -34,8 +34,8 @@ export default function DrinkGrid({ categories, onSelectItem }: DrinkGridProps) 
                 </CardHeader>
                 <CardContent className="pt-0">
                   {item.modifiers.length > 0 && (
-                    <div className="mt-3 text-xs text-muted-foreground uppercase">
-                      {item.modifiers.length} option{item.modifiers.length > 1 ? 's' : ''} available
+                    <div className="mt-3 text-xs text-muted-foreground">
+                      {item.modifiers.length} option{item.modifiers.length > 1 ? 's' : ''} disponible{item.modifiers.length > 1 ? 's' : ''}
                     </div>
                   )}
                 </CardContent>

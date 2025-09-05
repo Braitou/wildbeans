@@ -28,7 +28,7 @@ export default function CoffeeConfirm({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.98, opacity: 0 }}
             transition={{ duration: reduce ? 0 : 0.25 }}
-            aria-label="Order validated"
+            aria-label="Commande validée"
             role="status"
           >
             <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden>
@@ -77,7 +77,7 @@ export default function CoffeeConfirm({
               />
             </svg>
             <div className="mt-3 text-center text-sm tracking-[0.14em] uppercase text-black">
-              Order sent
+              Commande envoyée
             </div>
           </motion.div>
         </motion.div>

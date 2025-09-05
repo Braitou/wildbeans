@@ -15,7 +15,7 @@ export default function DrinkList({
   onDec,
 }: DrinkListProps) {
   return (
-    <div className="space-y-10 pb-24 font-sans uppercase">
+    <div className="space-y-10 pb-24 font-sans">
       {categories.map(cat => (
         <section key={cat.id}>
           <h2 className="mb-4 text-xs font-semibold tracking-[0.18em] uppercase text-neutral-500">
@@ -30,7 +30,7 @@ export default function DrinkList({
                 <div
                   key={item.id}
                   onClick={() => onInc(item.id)}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 hover:border-gray-300 transition bg-white text-black cursor-pointer uppercase"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 hover:border-gray-300 transition bg-white text-black cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
                     <span className={cn(
@@ -38,20 +38,20 @@ export default function DrinkList({
                       count > 0 ? "bg-black border-black" : "bg-white border-gray-300"
                     )} />
                     <div className="flex-1">
-                      <div className="font-medium uppercase">{item.name}</div>
+                      <div className="font-medium">{item.name}</div>
                     </div>
                     {hasBeenSelected && (
                       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => onDec(item.id)}
                           disabled={count === 0}
-                          className="h-8 w-8 border rounded-md disabled:opacity-40 hover:bg-gray-50 uppercase"
+                          className="h-8 w-8 border rounded-md disabled:opacity-40 hover:bg-gray-50"
                           aria-label="Decrease"
                         >−</button>
-                        <div className="min-w-[2ch] text-center tabular-nums uppercase">{count}</div>
+                        <div className="min-w-[2ch] text-center tabular-nums">{count}</div>
                         <button
                           onClick={() => onInc(item.id)}
-                          className="h-8 w-8 border rounded-md hover:bg-gray-50 uppercase"
+                          className="h-8 w-8 border rounded-md hover:bg-gray-50"
                           aria-label="Increase"
                         >+</button>
                       </div>

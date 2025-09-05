@@ -22,18 +22,18 @@ export default function ReviewList({
         <div key={i} className="border rounded-lg p-4">
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-[15px] font-semibold uppercase">Drink {i + 1} — {it.name}</div>
+              <div className="text-[15px] font-semibold">Boisson {i + 1} — {it.name}</div>
               <ul className="mt-1 text-sm text-neutral-700 list-disc pl-4">
                 {it.options.map((g, idx) => (
                   <li key={idx}>
-                    <span className="uppercase">{g.group}</span>: <span className="uppercase">{g.values.join(', ')}</span>
+                    {g.group}: {g.values.join(', ')}
                   </li>
                 ))}
               </ul>
             </div>
             <div className="flex gap-2">
-              <button className="underline uppercase" onClick={() => onEditIndex(i)}>Edit</button>
-              <button className="underline opacity-80 uppercase" onClick={() => onRemoveIndex(i)}>Remove</button>
+              <button className="underline" onClick={() => onEditIndex(i)}>Éditer</button>
+              <button className="underline opacity-80" onClick={() => onRemoveIndex(i)}>Supprimer</button>
             </div>
           </div>
         </div>
@@ -41,9 +41,9 @@ export default function ReviewList({
       <div>
         <button
           onClick={onAddNew}
-          className="h-11 px-4 rounded-md border border-gray-300 hover:bg-gray-50 uppercase"
+          className="h-11 px-4 rounded-md border border-gray-300 hover:bg-gray-50"
         >
-          <span className="uppercase">+ Add a drink</span>
+          + Ajouter une boisson
         </button>
       </div>
     </section>

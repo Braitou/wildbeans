@@ -141,7 +141,7 @@ export default function EventStatsPage({ params }: PageProps) {
             disabled={closing}
             className="h-10 px-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {closing ? 'Closing…' : "Close event"}
+            {closing ? 'Clôture…' : "Clôturer l'event"}
           </button>
         </div>
 

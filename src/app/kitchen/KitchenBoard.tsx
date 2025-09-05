@@ -5,8 +5,8 @@ import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-type OrderItemOption = { option_name: string; price_delta_cents?: number | null };
-type OrderItem = { id: string; item_name: string; qty: number; options?: OrderItemOption[] | null };
+type OrderItemOption = { option_name: string; price_delta_cents: number };
+type OrderItem = { id: string; item_name: string; qty: number; options: OrderItemOption[] };
 type OrderStatus = 'new' | 'preparing' | 'ready' | 'served' | 'cancelled';
 type Order = {
   id: string;
@@ -210,7 +210,7 @@ export default function KitchenBoard({
   }
 
   const title = (k: keyof typeof cols) =>
-    k === 'new' ? 'New' : k === 'preparing' ? 'Preparing' : 'Ready';
+    k === 'new' ? 'Nouvelles' : k === 'preparing' ? 'En préparation' : 'Prêtes';
 
   const statusTone = (s: OrderStatus) =>
     s === 'new'
@@ -273,25 +273,19 @@ export default function KitchenBoard({
                           <div className="flex-1">
                             <div className="font-medium text-[16px] flex items-center gap-2">
                               {it.item_name}
+                              {it.options && it.options.length > 0 && (
+                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                  {it.options.length} opt.
+                                </span>
+                              )}
                             </div>
-                            {/* Options badges */}
-                            {Array.isArray(it.options) && it.options.filter(o =>
-                              o && typeof o.option_name === 'string' && o.option_name.trim().length > 0 && o.option_name.toLowerCase() !== 'none'
-                            ).length > 0 ? (
-                              <div className="mt-1 flex flex-wrap gap-1">
-                                {it.options!
-                                  .filter(o => o && typeof o.option_name === 'string' && o.option_name.trim().length > 0 && o.option_name.toLowerCase() !== 'none')
-                                  .map((opt, idx) => (
-                                    <span
-                                      key={opt.option_name + '-' + idx}
-                                      className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-2 py-0.5 text-[11px] leading-5 text-neutral-700"
-                                      title={opt.price_delta_cents != null ? `+${(opt.price_delta_cents/100).toFixed(2)}€` : undefined}
-                                    >
-                                      {opt.option_name}
-                                    </span>
-                                  ))}
+                            {it.options && it.options.length > 0 ? (
+                              <div className="text-neutral-600 text-sm mt-1">
+                                {it.options.map((op) => op.option_name).join(', ')}
                               </div>
-                            ) : null}
+                            ) : (
+                              <div className="text-neutral-400 text-sm mt-1">Aucune option</div>
+                            )}
                           </div>
                         </li>
                       ))}
@@ -303,41 +297,41 @@ export default function KitchenBoard({
                       {o.status === 'new' && (
                         <>
                           <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'preparing')}>
-                            Take
+                            Prendre
                           </Button>
                           <Button
                             className="h-12 px-5 text-[15px]"
                             variant="outline"
                             onClick={() => move(o.id, 'cancelled')}
                           >
-                            Cancel
+                            Annuler
                           </Button>
                         </>
                       )}
                       {o.status === 'preparing' && (
                         <>
                           <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'ready')}>
-                            Ready
+                            Prêt
                           </Button>
                           <Button
                             className="h-12 px-5 text-[15px]"
                             variant="outline"
                             onClick={() => move(o.id, 'cancelled')}
                           >
-                            Cancel
+                            Annuler
                           </Button>
                         </>
                       )}
                       {o.status === 'ready' && (
                         <Button className="h-12 px-5 text-[15px]" onClick={() => move(o.id, 'served')}>
-                          Served
+                          Servi
                         </Button>
                       )}
                     </div>
                   </CardContent>
                 </Card>
               ))}
-              {!cols[k].length && <div className="text-sm text-neutral-400">No orders here.</div>}
+              {!cols[k].length && <div className="text-sm text-neutral-400">Aucune commande ici.</div>}
             </div>
           </section>
         ))}

@@ -169,7 +169,7 @@ export default function EventMenuPage({ params }: PageProps) {
             href={`/admin/events/${id}`}
             className="h-10 px-3 border rounded-md hover:bg-gray-50 flex items-center"
           >
-            Back to event
+            Retour à l&apos;événement
           </Link>
         </div>
 
@@ -182,7 +182,7 @@ export default function EventMenuPage({ params }: PageProps) {
             categories.map(category => (
               <div key={category.id} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-medium uppercase">{category.name}</h2>
+                  <h2 className="text-lg font-medium">{category.name}</h2>
                   <div className="flex gap-2">
                     <button
                       onClick={() => toggleCategory(category.id, true)}
@@ -204,7 +204,7 @@ export default function EventMenuPage({ params }: PageProps) {
                 <div className="space-y-2">
                   {category.items.map(item => (
                     <div key={item.id} className="flex items-center justify-between py-2">
-                      <span className="text-sm uppercase">{item.name}</span>
+                      <span className="text-sm">{item.name}</span>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
