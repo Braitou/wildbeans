@@ -68,6 +68,54 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       .replace(/(^-|-$)+/g, '');
   }
 
+  // Fonction pour générer les codes côté client
+  async function generateNextCodes() {
+    try {
+      // Récupérer le dernier événement pour déterminer le prochain numéro
+      const { data: events, error } = await supabase
+        .from('events')
+        .select('join_code, kitchen_code')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Erreur lors de la récupération des codes:', error);
+        return { joinCode: 'WB1001', kitchenCode: 'KITCHEN1001' };
+      }
+
+      let nextJoinNumber = 1;
+      let nextKitchenNumber = 1;
+
+      if (events && events.length > 0) {
+        const lastEvent = events[0];
+        
+        // Extraire le numéro du dernier join_code
+        if (lastEvent.join_code) {
+          const joinMatch = lastEvent.join_code.match(/WB(\d+)/);
+          if (joinMatch) {
+            nextJoinNumber = parseInt(joinMatch[1]) + 1;
+          }
+        }
+        
+        // Extraire le numéro du dernier kitchen_code
+        if (lastEvent.kitchen_code) {
+          const kitchenMatch = lastEvent.kitchen_code.match(/KITCHEN(\d+)/);
+          if (kitchenMatch) {
+            nextKitchenNumber = parseInt(kitchenMatch[1]) + 1;
+          }
+        }
+      }
+
+      return {
+        joinCode: `WB${nextJoinNumber}`,
+        kitchenCode: `KITCHEN${nextKitchenNumber}`
+      };
+    } catch (error) {
+      console.error('Erreur lors de la génération des codes:', error);
+      return { joinCode: 'WB1001', kitchenCode: 'KITCHEN1001' };
+    }
+  }
+
   const loadEvent = useCallback(async () => {
     if (isNew) return;
     setLoading(true);
@@ -119,6 +167,22 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     });
   }, [form.name, isNew, slugTouched]);
 
+  // Pré-remplir les codes pour les nouveaux événements
+  useEffect(() => {
+    if (!isNew) return;
+    
+    const initializeCodes = async () => {
+      const codes = await generateNextCodes();
+      setForm(prev => ({
+        ...prev,
+        join_code: codes.joinCode,
+        kitchen_code: codes.kitchenCode
+      }));
+    };
+    
+    initializeCodes();
+  }, [isNew]);
+
   async function save() {
     if (!form.name || !form.slug) {
       toast.error('NAME AND SLUG ARE REQUIRED');
@@ -133,24 +197,16 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
     setSaving(true);
     try {
-      // Construire le payload de base
+      // Construire le payload avec les codes pré-remplis
       const payload: any = {
         id: isNew ? null : form.id,
         name: form.name,
         slug: form.slug,
+        join_code: form.join_code?.trim() || '',
+        kitchen_code: form.kitchen_code?.trim() || '',
         starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : null,
         ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
       };
-
-      // Ajouter join_code seulement si non vide
-      if (form.join_code?.trim()) {
-        payload.join_code = form.join_code.trim();
-      }
-
-      // Ajouter kitchen_code seulement si non vide
-      if (form.kitchen_code?.trim()) {
-        payload.kitchen_code = form.kitchen_code.trim();
-      }
 
       const { data, error } = await supabase.rpc('admin_upsert_event', payload);
       
@@ -172,11 +228,25 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
       toast.success('SAVED ✅');
 
-      // rediriger sur la page de l'event fraichement créé si c'était "new"
-      if (isNew && data?.id) {
-        router.replace(`/admin/events/${data.id}`);
+      // Mettre à jour le state avec les données retournées (incluant les codes générés)
+      if (data) {
+        setForm(prev => ({
+          ...prev,
+          id: data.id,
+          join_code: data.join_code || '',
+          kitchen_code: data.kitchen_code || '',
+          name: data.name || prev.name,
+          slug: data.slug || prev.slug,
+          starts_at: data.starts_at ? new Date(data.starts_at).toISOString().slice(0, 16) : '',
+          ends_at: data.ends_at ? new Date(data.ends_at).toISOString().slice(0, 16) : ''
+        }));
+        
+        // Si c'était un nouvel événement, rediriger vers la page de l'événement
+        if (isNew && data.id) {
+          router.replace(`/admin/events/${data.id}`);
+        }
       } else {
-        // recharger
+        // Fallback: recharger si pas de données retournées
         loadEvent();
       }
     } finally {
