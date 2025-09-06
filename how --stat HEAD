@@ -1,0 +1,1 @@
+[33mdbdb2e8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m chore(security): enable RLS on event_items with public SELECT; audit env exposure and supabase clients

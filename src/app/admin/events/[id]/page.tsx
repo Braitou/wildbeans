@@ -106,7 +106,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     if (typeof window !== 'undefined') setOrigin(window.location.origin);
   }, []);
 
-  // Auto-générer slug & codes si vides (uniquement pour nouveaux events)
+  // Auto-générer slug si vide (uniquement pour nouveaux events)
   useEffect(() => {
     if (!isNew) return;
     setForm((f) => {
@@ -114,8 +114,6 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       const next = {
         ...f,
         slug: slugify(f.name),
-        join_code: f.join_code || 'WB1',
-        kitchen_code: f.kitchen_code || 'KITCHEN1',
       };
       return next;
     });
@@ -135,15 +133,26 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
     setSaving(true);
     try {
-          const { data, error } = await supabase.rpc('admin_upsert_event', {
-      id: isNew ? null : form.id,
-      name: form.name,
-      slug: form.slug,
-      join_code: form.join_code || 'WB1',
-      kitchen_code: form.kitchen_code || 'KITCHEN1',
-      starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : null,
-      ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
-    });
+      // Construire le payload de base
+      const payload: any = {
+        id: isNew ? null : form.id,
+        name: form.name,
+        slug: form.slug,
+        starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : null,
+        ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
+      };
+
+      // Ajouter join_code seulement si non vide
+      if (form.join_code?.trim()) {
+        payload.join_code = form.join_code.trim();
+      }
+
+      // Ajouter kitchen_code seulement si non vide
+      if (form.kitchen_code?.trim()) {
+        payload.kitchen_code = form.kitchen_code.trim();
+      }
+
+      const { data, error } = await supabase.rpc('admin_upsert_event', payload);
       
       if (error) {
         console.error('admin_upsert_event error:', error);
