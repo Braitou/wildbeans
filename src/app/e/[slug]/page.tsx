@@ -89,4 +89,4 @@ export default async function Page({
       <Builder slug={slug} joinCode={joinCode} categories={cats} />
     </main>
   );
-  
+}
