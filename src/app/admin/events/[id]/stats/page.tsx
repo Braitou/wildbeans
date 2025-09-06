@@ -3,10 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import AdminGate from '@/components/auth/AdminGate';
 import AdminHeader from '@/components/layout/AdminHeader';
 import { StatsClient } from '@/components/admin/StatsClient';
-import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Legend
-} from 'recharts';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -86,11 +82,12 @@ export default async function EventStatsPage({ params }: PageProps) {
   const uniqueCustomers = new Set(
     (orders ?? []).map(o => (o.customer_name ?? o.pickup_code ?? ''))
   ).size;
-  const periodStart = (orders ?? []).length
-    ? new Date(Math.min(...(orders ?? []).map(o => new Date(o.created_at).getTime()))).toISOString()
+  const orderTimes = (orders ?? []).map(o => o.created_at).filter(Boolean);
+  const periodStart = orderTimes.length > 0 
+    ? new Date(Math.min(...orderTimes.map(time => new Date(time).getTime()))).toISOString()
     : null;
-  const periodEnd = (orders ?? []).length
-    ? new Date(Math.max(...(orders ?? []).map(o => new Date(o.created_at).getTime()))).toISOString()
+  const periodEnd = orderTimes.length > 0
+    ? new Date(Math.max(...orderTimes.map(time => new Date(time).getTime()))).toISOString()
     : null;
 
   // Ensure everything is serializable (no BigInt/Map/Date objects):
