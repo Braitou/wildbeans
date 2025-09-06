@@ -11,6 +11,13 @@ export default async function Page({
   const { slug } = await params;
   const { join: joinCode = 'WB1' } = await searchParams;
 
+  // 0) Récupérer les données de l'événement
+  const { data: event } = await supabase
+    .from('events')
+    .select('id, name, slug')
+    .eq('slug', slug)
+    .single();
+
   // 1) Catégories
   const { data: categories } = await supabase
     .from('categories')
@@ -73,6 +80,11 @@ export default async function Page({
       <h1 className="mt-8 mb-6 text-center text-sm font-semibold tracking-[0.22em] uppercase">
         BE WILD… ORDER SOMETHING !
       </h1>
+      {event?.name && (
+        <p className="mt-1 text-base text-muted-foreground text-center">
+          {event.name}
+        </p>
+      )}
       <Builder slug={slug} joinCode={joinCode} categories={cats} />
     </main>
   );
