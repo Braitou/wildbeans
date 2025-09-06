@@ -32,20 +32,103 @@ export default async function EventStatsPage({ params }: PageProps) {
   const supabase = createClient();
   const { id: eventId } = await params;
 
-  // Fetch data server-side
-  const [totalsResult, itemsResult, catsResult, optsResult, tsResult] = await Promise.all([
-    supabase.rpc('admin_event_totals', { event_id: eventId }),
-    supabase.rpc('admin_event_items_breakdown', { event_id: eventId }),
-    supabase.rpc('admin_event_categories_breakdown', { event_id: eventId }),
-    supabase.rpc('admin_event_options_breakdown', { event_id: eventId }),
-    supabase.rpc('admin_event_timeseries', { event_id: eventId }),
-  ]);
+  // A) Orders list (lightweight fields)
+  const { data: orders, error: e1 } = await supabase
+    .from('orders')
+    .select('id, created_at, customer_name, pickup_code')
+    .eq('event_id', eventId);
+  if (e1) { console.error('orders error', e1); }
 
-  const totals = (totalsResult.data as Totals) ?? null;
-  const items = (itemsResult.data as ItemRow[]) ?? [];
-  const cats = (catsResult.data as CatRow[]) ?? [];
-  const opts = ((optsResult.data as OptRow[]) ?? []).slice(0, 5);
-  const ts = (tsResult.data as Point[]) ?? [];
+  // B) Drinks per hour (avoid BigInt: cast in SQL to integer)
+  const { data: perHourRaw, error: e2 } = await supabase
+    .from('orders')
+    .select(`
+      created_at,
+      order_items ( qty )
+    `)
+    .eq('event_id', eventId);
+  if (e2) { console.error('perHour error', e2); }
+  
+  // Aggregate in JS and ensure plain numbers:
+  const perHourMap = new Map<string, number>();
+  for (const o of perHourRaw ?? []) {
+    const hour = new Date(o.created_at);
+    hour.setMinutes(0,0,0);
+    const key = hour.toISOString();
+    const count = (o.order_items ?? []).reduce((a: number, it: { qty: number }) => a + Number(it?.qty ?? 0), 0);
+    perHourMap.set(key, (perHourMap.get(key) ?? 0) + count);
+  }
+  const perHour = Array.from(perHourMap.entries())
+    .map(([hourIso, drinks]) => ({ hour: hourIso, drinks: Number(drinks) }))
+    .sort((a, b) => a.hour.localeCompare(b.hour));
+
+  // C) Top drinks (cast to numeric via JS Numbers)
+  const { data: topRows, error: e3 } = await supabase
+    .from('order_items')
+    .select('item_name, qty, order_id')
+    .in('order_id',
+      (orders ?? []).map(o => o.id)
+    );
+  if (e3) { console.error('topDrinks error', e3); }
+  
+  const topMap = new Map<string, number>();
+  for (const r of topRows ?? []) {
+    topMap.set(r.item_name, (topMap.get(r.item_name) ?? 0) + Number(r.qty ?? 0));
+  }
+  const topDrinks = Array.from(topMap.entries())
+    .map(([item_name, qty]) => ({ item_name, qty: Number(qty) }))
+    .sort((a, b) => b.qty - a.qty)
+    .slice(0, 10);
+
+  // D) KPIs (orders_count, drinks_count, unique_customers, period)
+  const ordersCount = (orders ?? []).length;
+  const drinksCount = (topRows ?? []).reduce((a, r) => a + Number(r.qty ?? 0), 0);
+  const uniqueCustomers = new Set(
+    (orders ?? []).map(o => (o.customer_name ?? o.pickup_code ?? ''))
+  ).size;
+  const periodStart = (orders ?? []).length
+    ? new Date(Math.min(...(orders ?? []).map(o => new Date(o.created_at).getTime()))).toISOString()
+    : null;
+  const periodEnd = (orders ?? []).length
+    ? new Date(Math.max(...(orders ?? []).map(o => new Date(o.created_at).getTime()))).toISOString()
+    : null;
+
+  // Ensure everything is serializable (no BigInt/Map/Date objects):
+  const stats = {
+    kpis: {
+      orders_count: ordersCount,
+      drinks_count: drinksCount,
+      unique_customers: uniqueCustomers,
+      period_start: periodStart,
+      period_end: periodEnd,
+    },
+    perHour,
+    topDrinks,
+  };
+
+  // Convert to the expected format for existing components
+  const totals: Totals = {
+    orders: stats.kpis.orders_count,
+    drinks: stats.kpis.drinks_count,
+    unique_customers: stats.kpis.unique_customers,
+    period: {
+      from: stats.kpis.period_start,
+      to: stats.kpis.period_end,
+    }
+  };
+
+  const items: ItemRow[] = stats.topDrinks.map((item, index) => ({
+    item_id: `item_${index}`,
+    item_name: item.item_name,
+    qty: item.qty,
+  }));
+
+  const cats: CatRow[] = []; // Empty for now, can be populated later if needed
+  const opts: OptRow[] = []; // Empty for now, can be populated later if needed
+  const ts: Point[] = stats.perHour.map(point => ({
+    ts: point.hour,
+    drinks: point.drinks,
+  }));
 
   return (
     <AdminGate>
