@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
@@ -16,7 +16,7 @@ if (!url || !anon) {
 export function createClient() {
   const cookieStore = cookies();
   
-  return createClient(url, anon, {
+  return createSupabaseClient(url, anon, {
     auth: {
       persistSession: false,
     },
