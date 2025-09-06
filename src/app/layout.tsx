@@ -21,10 +21,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={fragmentMono.variable}>
       <body className="antialiased bg-white text-black font-sans">
-        {/* ⬆️ pas de header ici */}
-        <main className="max-w-3xl mx-auto px-4 sm:px-6">
-          {children}
-        </main>
+        {/* Pas de header ni de main ici : chaque sous-layout gère son wrapper */}
+        {children}
 
         <Toaster
           position="top-center"

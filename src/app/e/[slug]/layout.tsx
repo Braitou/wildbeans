@@ -3,17 +3,21 @@ import Image from "next/image";
 export default function ClientOrderLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <header className="border-b border-gray-200">
+      <header className="w-full">
         <Image
           src="/logowbb.svg"
           alt="Wild Beans"
           width={1200}
           height={400}
           priority
-          className="w-full h-auto"
+          className="block w-full h-auto"  /* block => supprime le fin gap; w-full => plein écran */
         />
       </header>
-      <div>{children}</div>
+
+      {/* Le contenu de la page commande peut rester contraint si tu veux */}
+      <main className="max-w-3xl mx-auto px-4 sm:px-6">
+        {children}
+      </main>
     </>
   );
 }
