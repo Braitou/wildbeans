@@ -11,6 +11,7 @@ import OrderTray from '@/components/order/OrderTray';
 import ReviewList from '@/components/order/ReviewList';
 import CoffeeConfirm from '@/components/confirm/CoffeeConfirm';
 import type { Category, Item, Modifier } from '@/types/menu';
+import type { Event } from '@/lib/types';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
 type PendingItem = {
@@ -26,10 +27,12 @@ export default function Builder({
   slug,
   joinCode,
   categories,
+  event,
 }: {
   slug: string;
   joinCode: string;
   categories: Category[];
+  event: Event | null;
 }) {
   const router = useRouter();
   const reduce = useReducedMotion();
