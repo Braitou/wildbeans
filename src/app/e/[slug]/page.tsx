@@ -77,15 +77,16 @@ export default async function Page({
 
   return (
     <main className="font-sans">
-      <h1 className="mt-8 mb-6 text-center text-sm font-semibold tracking-[0.22em] uppercase">
+      <h1 className="mt-8 mb-2 text-center text-sm font-semibold tracking-[0.22em] uppercase">
         BE WILD… ORDER SOMETHING !
       </h1>
       {event?.name && (
-        <p className="mt-1 text-base text-muted-foreground text-center">
+        <p className="mt-4 mb-5 text-base text-muted-foreground text-center">
           {event.name}
         </p>
       )}
+  
       <Builder slug={slug} joinCode={joinCode} categories={cats} />
     </main>
   );
-}
+  
