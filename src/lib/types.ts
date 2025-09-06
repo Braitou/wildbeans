@@ -25,18 +25,3 @@ export type Category = {
   name: string;
   items: Item[];
 };
-
-export type Event = {
-  id: string;
-  name: string;
-  slug: string;
-  join_code: string;
-  kitchen_code: string;
-  starts_at?: string | null;
-  ends_at?: string | null;
-  is_closed?: boolean;
-  display_name?: string | null;
-  logo_url?: string | null;
-  created_at?: string;
-  updated_at?: string;
-};

@@ -7,21 +7,11 @@ export const dynamic = 'force-dynamic';
 export default async function Page({
   params,
   searchParams,
-}: {
-  params: { slug: string };
-  searchParams: { join?: string };
-}) {
-  const { slug } = params;
-  const joinCode = searchParams?.join ?? 'WB1';
+}: { params: Promise<{ slug: string }>, searchParams: Promise<{ join?: string }> }) {
+  const { slug } = await params;
+  const { join: joinCode = 'WB1' } = await searchParams;
 
-  // 0) Event
-  const { data: event } = await supabase
-    .from('events')
-    .select('id, name, slug, display_name, logo_url, join_code, kitchen_code')
-    .eq('slug', slug)
-    .single();
-
-  // 1) Categories
+  // 1) Catégories
   const { data: categories } = await supabase
     .from('categories')
     .select('id, name')
@@ -34,7 +24,7 @@ export default async function Page({
     .eq('is_active', true)
     .order('sort_order', { ascending: true });
 
-  // 3) Links item -> modifiers
+  // 3) Liaisons item -> modifiers
   const { data: itemMods } = await supabase
     .from('item_modifiers')
     .select('item_id, modifier_id');
@@ -49,27 +39,22 @@ export default async function Page({
     .select('id, name, modifier_id, sort_order')
     .order('sort_order', { ascending: true });
 
-  // Build Modifier map with options
-  const modById = new Map(
-    (modifiers ?? []).map((m) => [m.id, { ...m, options: [] as ModifierOption[] }])
-  );
+  // 5) Construction Category[] -> Item[] -> Modifier[] -> Option[]
+  const modById = new Map(modifiers?.map(m => [m.id, { ...m, options: [] as ModifierOption[] }]) ?? []);
   for (const opt of options ?? []) {
     const m = modById.get(opt.modifier_id);
     if (m) m.options.push({ id: opt.id, name: opt.name });
   }
 
-  // Group items by category
   const itemsByCat = new Map<string, Item[]>();
   for (const it of items ?? []) {
     const mods = (itemMods ?? [])
-      .filter((im) => im.item_id === it.id)
-      .map((im) => modById.get(im.modifier_id))
+      .filter(im => im.item_id === it.id)
+      .map(im => modById.get(im.modifier_id))
       .filter(Boolean) as Modifier[];
 
     const itemFull: Item = {
-      id: it.id,
-      name: it.name,
-      description: it.description ?? null,
+      id: it.id, name: it.name, description: it.description ?? null,
       modifiers: mods,
     };
 
@@ -77,10 +62,10 @@ export default async function Page({
     itemsByCat.get(it.category_id)!.push(itemFull);
   }
 
-  const cats = (categories ?? []).map((c) => ({
+  const cats = (categories ?? []).map(c => ({
     id: c.id,
     name: c.name,
-    items: itemsByCat.get(c.id) ?? [],
+    items: (itemsByCat.get(c.id) ?? []),
   }));
 
   return (
@@ -88,32 +73,7 @@ export default async function Page({
       <h1 className="mt-8 mb-6 text-center text-sm font-semibold tracking-[0.22em] uppercase">
         BE WILD… ORDER SOMETHING !
       </h1>
-
-      {/* Event banner */}
-      {event && (
-        <div className="mt-4 flex items-center gap-4 px-4">
-          <div className="relative w-20 h-20 shrink-0 border border-black rounded-none overflow-hidden">
-            {event.logo_url ? (
-              <img
-                src={event.logo_url}
-                alt={event.display_name || event.name || 'Event logo'}
-                className="block w-full h-full object-contain"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-xs uppercase">
-                No logo
-              </div>
-            )}
-          </div>
-          <div className="min-w-0">
-            <div className="text-lg font-semibold leading-6 uppercase truncate">
-              {event.display_name || event.name}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <Builder slug={slug} joinCode={joinCode} categories={cats} event={event} />
+      <Builder slug={slug} joinCode={joinCode} categories={cats} />
     </main>
   );
 }

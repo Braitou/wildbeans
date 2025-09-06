@@ -14,9 +14,7 @@ type EventRow = {
   join_code: string; 
   kitchen_code: string; 
   starts_at: string|null; 
-  ends_at: string|null;
-  display_name: string | null;
-  logo_url: string | null;
+  ends_at: string|null 
 };
 
 export default function EventsPage() {
