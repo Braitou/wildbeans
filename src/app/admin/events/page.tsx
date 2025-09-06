@@ -76,7 +76,7 @@ export default function EventsPage() {
         <div className="mb-6 flex items-center justify-end">
           <Link 
             href="/admin/events/new" 
-            className="h-10 px-3 border rounded-md hover:bg-gray-50 flex items-center"
+            className="h-10 px-3 border rounded-none hover:bg-gray-50 flex items-center"
           >
             CREATE
           </Link>
@@ -126,7 +126,7 @@ export default function EventsPage() {
                       </Link>
                       <button
                         onClick={() => deleteEvent(e.id)}
-                        className="ml-2 h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="ml-2 h-8 w-8 inline-flex items-center justify-center rounded-none border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="DELETE"
                         disabled={deletingId === e.id}
                       >

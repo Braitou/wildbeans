@@ -205,7 +205,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         {/* Bouton Back to events */}
         <button
           onClick={() => router.push('/admin/events')}
-          className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-md hover:bg-gray-50"
+          className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-none hover:bg-gray-50"
         >
           <ArrowLeft className="h-4 w-4" />
           BACK TO EVENTS
@@ -217,7 +217,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
             <button
               onClick={closeEvent}
               disabled={closing}
-              className="h-10 px-3 border rounded-md hover:bg-gray-50"
+              className="h-10 px-3 border rounded-none hover:bg-gray-50"
             >
               {closing ? 'CLOSING…' : 'CLOSE EVENT'}
             </button>
@@ -231,7 +231,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="WEDDING CLAIRE & MAX"
-              className="h-11 px-3 border border-gray-300 rounded-md"
+              className="h-11 px-3 border border-gray-300 rounded-none"
             />
           </div>
 
@@ -244,7 +244,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 setForm({ ...form, slug: e.target.value });
               }}
               placeholder="wedding-claire-max"
-              className="h-11 px-3 border border-gray-300 rounded-md"
+              className="h-11 px-3 border border-gray-300 rounded-none"
             />
             <p className="text-xs text-neutral-500">URL : /e/{'{slug}'}?join={'{code}'}</p>
           </div>
@@ -255,7 +255,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               value={form.join_code}
               onChange={(e) => setForm({ ...form, join_code: e.target.value })}
               placeholder="WB1"
-              className="h-11 px-3 border border-gray-300 rounded-md"
+              className="h-11 px-3 border border-gray-300 rounded-none"
             />
           </div>
 
@@ -265,7 +265,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               value={form.kitchen_code}
               onChange={(e) => setForm({ ...form, kitchen_code: e.target.value })}
               placeholder="KITCHEN1"
-              className="h-11 px-3 border border-gray-300 rounded-md"
+              className="h-11 px-3 border border-gray-300 rounded-none"
             />
           </div>
 
@@ -276,7 +276,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 type="datetime-local"
                 value={form.starts_at ?? ''}
                 onChange={(e) => setForm({ ...form, starts_at: e.target.value || null })}
-                className="h-11 px-3 border border-gray-300 rounded-md"
+                className="h-11 px-3 border border-gray-300 rounded-none"
               />
             </div>
             <div className="grid gap-2">
@@ -285,7 +285,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 type="datetime-local"
                 value={form.ends_at ?? ''}
                 onChange={(e) => setForm({ ...form, ends_at: e.target.value || null })}
-                className="h-11 px-3 border border-gray-300 rounded-md"
+                className="h-11 px-3 border border-gray-300 rounded-none"
               />
             </div>
           </div>
@@ -294,7 +294,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
             <button
               onClick={save}
               disabled={saving}
-              className="h-11 px-5 rounded-md bg-black text-white hover:bg-neutral-800 disabled:opacity-50"
+              className="h-11 px-5 rounded-none bg-black text-white hover:bg-neutral-800 disabled:opacity-50"
             >
               {saving ? 'SAVING…' : 'SAVE'}
             </button>
@@ -302,16 +302,16 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         </section>
 
         {/* QR Code Section */}
-        <section className="mt-6 border rounded-lg p-4">
+        <section className="mt-6 border rounded-none p-4">
           <div className="text-sm font-semibold mb-2">EVENT QR</div>
           {qrUrl ? (
             <div className="flex items-center gap-4">
-              <div className="p-3 border rounded">
+              <div className="p-3 border rounded-none">
                 <QRCodeCanvas value={qrUrl} size={192} includeMargin ref={canvasRef} />
               </div>
               <div className="space-y-2">
                 <div className="text-sm break-all">{qrUrl}</div>
-                <button onClick={downloadQR} className="h-10 px-3 border rounded-md hover:bg-gray-50">
+                <button onClick={downloadQR} className="h-10 px-3 border rounded-none hover:bg-gray-50">
                   DOWNLOAD PNG
                 </button>
               </div>
@@ -322,21 +322,21 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         </section>
 
         {/* Kitchen Link Section */}
-        <section className="mt-6 border rounded-lg p-4">
+        <section className="mt-6 border rounded-none p-4">
           <div className="text-sm font-semibold mb-2">KITCHEN LINK</div>
           {kitchenUrl ? (
             <div className="flex items-center gap-2 flex-wrap">
-              <code className="text-xs bg-neutral-50 border rounded px-2 py-1 break-all">{kitchenUrl}</code>
+              <code className="text-xs bg-neutral-50 border rounded-none px-2 py-1 break-all">{kitchenUrl}</code>
               <button 
                 onClick={() => navigator.clipboard.writeText(kitchenUrl)} 
-                className="h-9 px-3 border rounded-md hover:bg-gray-50"
+                className="h-9 px-3 border rounded-none hover:bg-gray-50"
               >
                 COPY
               </button>
               <a 
                 href={kitchenUrl} 
                 target="_blank" 
-                className="h-9 px-3 border rounded-md hover:bg-gray-50 inline-flex items-center"
+                className="h-9 px-3 border rounded-none hover:bg-gray-50 inline-flex items-center"
               >
                 OPEN
               </a>

@@ -45,7 +45,7 @@ export default function OptionGroup({
               {/* animated visual dot */}
               <motion.span
                 layout
-                className={`inline-block size-3 rounded-full border ${
+                className={`inline-block size-3 rounded-none border ${
                   active ? 'bg-black border-black' : 'border-gray-300'
                 }`}
                 animate={{ scale: active ? 1.15 : 1 }}
@@ -90,7 +90,7 @@ export default function OptionGroup({
             {/* animated visual dot */}
             <motion.span
               layout
-              className={`inline-block size-3 rounded-full border ${
+              className={`inline-block size-3 rounded-none border ${
                 active ? 'bg-black border-black' : 'border-gray-300'
               }`}
               animate={{ scale: active ? 1.15 : 1 }}
@@ -118,7 +118,7 @@ export default function OptionGroup({
           {/* animated visual dot */}
           <motion.span
             layout
-            className={`inline-block size-3 rounded-full border ${
+            className={`inline-block size-3 rounded-none border ${
               isNoneSelected ? 'bg-black border-black' : 'border-gray-300'
             }`}
             animate={{ scale: isNoneSelected ? 1.15 : 1 }}

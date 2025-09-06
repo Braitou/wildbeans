@@ -103,38 +103,38 @@ export default function DebugPage() {
           value={orderId}
           onChange={(e) => setOrderId(e.target.value)}
           placeholder="Enter order ID"
-          className="w-full p-2 border rounded mb-2"
+          className="w-full p-2 border rounded-none mb-2"
         />
       </div>
 
       <div className="flex gap-4 mb-4">
         <button
           onClick={checkOrderStatus}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
+          className="px-4 py-2 bg-blue-500 text-white rounded-none"
         >
           Check Status
         </button>
         <button
           onClick={() => testUpdateStatus('preparing')}
-          className="px-4 py-2 bg-green-500 text-white rounded"
+          className="px-4 py-2 bg-green-500 text-white rounded-none"
         >
           Set to Preparing
         </button>
         <button
           onClick={() => testUpdateStatus('ready')}
-          className="px-4 py-2 bg-orange-500 text-white rounded"
+          className="px-4 py-2 bg-orange-500 text-white rounded-none"
         >
           Set to Ready
         </button>
         <button
           onClick={checkRLSPolicies}
-          className="px-4 py-2 bg-purple-500 text-white rounded"
+          className="px-4 py-2 bg-purple-500 text-white rounded-none"
         >
           Check RLS
         </button>
       </div>
 
-      <div className="border rounded p-4 h-96 overflow-y-auto bg-gray-50">
+      <div className="border rounded-none p-4 h-96 overflow-y-auto bg-gray-50">
         <h3 className="font-bold mb-2">Messages:</h3>
         {messages.map((msg, i) => (
           <div key={i} className="text-sm mb-1 font-mono">{msg}</div>

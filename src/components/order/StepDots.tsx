@@ -9,7 +9,7 @@ export default function StepDots({ total, index }: { total: number; index: numbe
           <motion.span
             key={i}
             layout
-            className="inline-block rounded-full"
+            className="inline-block rounded-none"
             animate={{
               backgroundColor: active ? '#111111' : '#d1d5db',
               width: active ? 8 : 6,

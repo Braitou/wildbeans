@@ -156,7 +156,7 @@ export default function EventMenuPage({ params }: PageProps) {
         {/* Bouton Back to events */}
         <button
           onClick={() => router.push('/admin/events')}
-          className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-md hover:bg-gray-50"
+          className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-none hover:bg-gray-50"
         >
           <ArrowLeft className="h-4 w-4" />
           BACK TO EVENTS
@@ -167,7 +167,7 @@ export default function EventMenuPage({ params }: PageProps) {
         <div className="mb-6 flex items-center justify-end">
           <Link 
             href={`/admin/events/${id}`}
-            className="h-10 px-3 border rounded-md hover:bg-gray-50 flex items-center"
+            className="h-10 px-3 border rounded-none hover:bg-gray-50 flex items-center"
           >
             BACK TO EVENT
           </Link>
@@ -180,21 +180,21 @@ export default function EventMenuPage({ params }: PageProps) {
             </div>
           ) : (
             categories.map(category => (
-              <div key={category.id} className="border border-gray-200 rounded-lg p-4">
+              <div key={category.id} className="border border-gray-200 rounded-none p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-medium">{category.name.toUpperCase()}</h2>
                   <div className="flex gap-2">
                     <button
                       onClick={() => toggleCategory(category.id, true)}
                       disabled={updating === category.id}
-                      className="h-8 px-3 text-sm border rounded-md hover:bg-gray-50 disabled:opacity-50"
+                      className="h-8 px-3 text-sm border rounded-none hover:bg-gray-50 disabled:opacity-50"
                     >
                       ACTIVATE ALL
                     </button>
                     <button
                       onClick={() => toggleCategory(category.id, false)}
                       disabled={updating === category.id}
-                      className="h-8 px-3 text-sm border rounded-md hover:bg-gray-50 disabled:opacity-50"
+                      className="h-8 px-3 text-sm border rounded-none hover:bg-gray-50 disabled:opacity-50"
                     >
                       DEACTIVATE ALL
                     </button>
@@ -213,7 +213,7 @@ export default function EventMenuPage({ params }: PageProps) {
                           disabled={updating === item.id}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-black/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-black/20 rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                       </label>
                     </div>
                   ))}

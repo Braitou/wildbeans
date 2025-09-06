@@ -128,7 +128,7 @@ export default function EventStatsPage({ params }: PageProps) {
         {/* Bouton Back to events */}
         <button
           onClick={() => router.push('/admin/events')}
-          className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-md hover:bg-gray-50"
+          className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-none hover:bg-gray-50"
         >
           <ArrowLeft className="h-4 w-4" />
           BACK TO EVENTS
@@ -139,26 +139,26 @@ export default function EventStatsPage({ params }: PageProps) {
           <button
             onClick={closeEvent}
             disabled={closing}
-            className="h-10 px-3 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-10 px-3 border rounded-none hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {closing ? 'CLOSING…' : "CLOSE EVENT"}
           </button>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-          <div className="border rounded-lg p-4 shadow-sm">
+          <div className="border rounded-none p-4 shadow-sm">
             <div className="text-xs text-neutral-500">ORDERS</div>
             <div className="text-2xl font-semibold">{totals?.orders ?? 0}</div>
           </div>
-          <div className="border rounded-lg p-4 shadow-sm">
+          <div className="border rounded-none p-4 shadow-sm">
             <div className="text-xs text-neutral-500">DRINKS</div>
             <div className="text-2xl font-semibold">{totals?.drinks ?? 0}</div>
           </div>
-          <div className="border rounded-lg p-4 shadow-sm">
+          <div className="border rounded-none p-4 shadow-sm">
             <div className="text-xs text-neutral-500">UNIQUE CUSTOMERS</div>
             <div className="text-2xl font-semibold">{totals?.unique_customers ?? 0}</div>
           </div>
-          <div className="border rounded-lg p-4 shadow-sm">
+          <div className="border rounded-none p-4 shadow-sm">
             <div className="text-xs text-neutral-500">PERIOD</div>
             <div className="text-sm">
               {totals?.period?.from ? totals.period.from.slice(0, 16) : 'N/A'}
@@ -168,7 +168,7 @@ export default function EventStatsPage({ params }: PageProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
-          <div className="border rounded-lg p-4 shadow-sm">
+          <div className="border rounded-none p-4 shadow-sm">
             <div className="text-sm font-semibold mb-2">TOP DRINKS</div>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={items.slice(0, 5)}>
@@ -180,7 +180,7 @@ export default function EventStatsPage({ params }: PageProps) {
             </ResponsiveContainer>
           </div>
 
-          <div className="border rounded-lg p-4 shadow-sm">
+          <div className="border rounded-none p-4 shadow-sm">
             <div className="text-sm font-semibold mb-2">CATEGORIES</div>
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
@@ -196,7 +196,7 @@ export default function EventStatsPage({ params }: PageProps) {
             </ResponsiveContainer>
           </div>
 
-          <div className="border rounded-lg p-4 shadow-sm">
+          <div className="border rounded-none p-4 shadow-sm">
             <div className="text-sm font-semibold mb-2">TOP OPTIONS</div>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={opts}>
@@ -209,7 +209,7 @@ export default function EventStatsPage({ params }: PageProps) {
           </div>
         </div>
 
-        <div className="border rounded-lg p-4 shadow-sm mt-6">
+        <div className="border rounded-none p-4 shadow-sm mt-6">
           <div className="text-sm font-semibold mb-2">DRINKS PER HOUR</div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={ts}>
@@ -221,7 +221,7 @@ export default function EventStatsPage({ params }: PageProps) {
           </ResponsiveContainer>
         </div>
 
-        <div className="mt-6 border rounded-lg p-4 shadow-sm">
+        <div className="mt-6 border rounded-none p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-semibold">DRINKS (QUANTITIES)</div>
             <div className="flex gap-2">
@@ -229,9 +229,9 @@ export default function EventStatsPage({ params }: PageProps) {
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 placeholder="FILTER BY NAME…"
-                className="h-10 px-3 border border-gray-300 rounded-md"
+                className="h-10 px-3 border border-gray-300 rounded-none"
               />
-              <button onClick={exportCSV} className="h-10 px-3 border rounded-md hover:bg-gray-50">
+              <button onClick={exportCSV} className="h-10 px-3 border rounded-none hover:bg-gray-50">
                 EXPORT CSV
               </button>
             </div>

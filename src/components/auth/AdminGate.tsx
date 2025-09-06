@@ -34,7 +34,7 @@ export default function AdminGate({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen flex items-center justify-center">
         <form
           onSubmit={handleSubmit}
-          className="p-6 border rounded-md bg-white shadow-md w-80 space-y-4"
+          className="p-6 border rounded-none bg-white shadow-md w-80 space-y-4"
         >
           <h1 className="text-lg font-semibold text-center">Accès protégé</h1>
           <input
@@ -42,12 +42,12 @@ export default function AdminGate({ children }: { children: React.ReactNode }) {
             placeholder="Mot de passe"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
-            className="w-full h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full h-11 px-3 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-black"
           />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button
             type="submit"
-            className="w-full h-11 rounded-md bg-black text-white hover:bg-neutral-800"
+            className="w-full h-11 rounded-none bg-black text-white hover:bg-neutral-800"
           >
             Entrer
           </button>
@@ -72,7 +72,7 @@ export function AdminLogoutButton() {
         } catch {}
         location.reload();
       }}
-      className="h-11 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
+      className="h-11 px-4 border border-gray-300 rounded-none hover:bg-gray-50"
     >
       Déconnexion
     </button>

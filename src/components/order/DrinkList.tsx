@@ -30,11 +30,11 @@ export default function DrinkList({
                 <div
                   key={item.id}
                   onClick={() => onInc(item.id)}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 hover:border-gray-300 transition bg-white text-black cursor-pointer"
+                  className="w-full border border-gray-200 rounded-none px-4 py-3 hover:border-gray-300 transition bg-white text-black cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
                     <span className={cn(
-                      "inline-block h-3 w-3 rounded-full border",
+                      "inline-block h-3 w-3 rounded-none border",
                       count > 0 ? "bg-black border-black" : "bg-white border-gray-300"
                     )} />
                     <div className="flex-1">
@@ -45,13 +45,13 @@ export default function DrinkList({
                         <button
                           onClick={() => onDec(item.id)}
                           disabled={count === 0}
-                          className="h-8 w-8 border rounded-md disabled:opacity-40 hover:bg-gray-50"
+                          className="h-8 w-8 border rounded-none disabled:opacity-40 hover:bg-gray-50"
                           aria-label="DECREASE"
                         >−</button>
                         <div className="min-w-[2ch] text-center tabular-nums">{count}</div>
                         <button
                           onClick={() => onInc(item.id)}
-                          className="h-8 w-8 border rounded-md hover:bg-gray-50"
+                          className="h-8 w-8 border rounded-none hover:bg-gray-50"
                           aria-label="INCREASE"
                         >+</button>
                       </div>

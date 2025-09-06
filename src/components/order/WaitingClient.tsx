@@ -33,7 +33,7 @@ export function WaitingClientUI({
 
       {/* Thin progress bar */}
       <div className="w-full max-w-xl">
-        <div className="h-[3px] w-full rounded-full bg-neutral-200 overflow-hidden">
+        <div className="h-[3px] w-full rounded-none bg-neutral-200 overflow-hidden">
           <motion.div
             className="h-full bg-neutral-900"
             initial={{ width: 0 }}

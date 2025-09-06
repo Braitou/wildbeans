@@ -365,13 +365,13 @@ export default function Builder({
                       value={firstName}
                       onChange={e => setFirstName(e.target.value)}
                       placeholder="FIRST NAME (OPTIONAL)"
-                      className="h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                      className="h-11 px-3 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-black"
                     />
                     <textarea
                       value={note}
                       onChange={e => setNote(e.target.value)}
                       placeholder="NOTE FOR BARISTA (OPTIONAL)"
-                      className="min-h-[90px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                      className="min-h-[90px] p-3 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-black"
                     />
                   </div>
                 </section>

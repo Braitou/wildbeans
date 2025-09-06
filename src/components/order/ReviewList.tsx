@@ -19,7 +19,7 @@ export default function ReviewList({
   return (
     <section className="py-4 space-y-4">
       {items.map((it, i) => (
-        <div key={i} className="border rounded-lg p-4">
+        <div key={i} className="border rounded-none p-4">
           <div className="flex items-start justify-between">
             <div>
               <div className="text-[15px] font-semibold">BOISSON {i + 1} — {it.name}</div>
@@ -41,7 +41,7 @@ export default function ReviewList({
       <div>
         <button
           onClick={onAddNew}
-          className="h-11 px-4 rounded-md border border-gray-300 hover:bg-gray-50"
+          className="h-11 px-4 rounded-none border border-gray-300 hover:bg-gray-50"
         >
           + AJOUTER UNE BOISSON
         </button>

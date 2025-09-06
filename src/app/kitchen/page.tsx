@@ -174,7 +174,7 @@ function KitchenPageContent() {
                   <div className="text-lg text-neutral-600">
                     Event: {selectedEvent.name}
                   </div>
-                  <span className="inline-flex items-center px-2.5 py-1 text-xs rounded-full bg-neutral-100 text-neutral-700">
+                  <span className="inline-flex items-center px-2.5 py-1 text-xs rounded-none bg-neutral-100 text-neutral-700">
                     code: {selectedEvent.kitchen_code}
                   </span>
                 </div>
@@ -190,7 +190,7 @@ function KitchenPageContent() {
                 </Button>
                 <button
                   onClick={toggleFS}
-                  className="h-11 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="h-11 px-4 border border-gray-300 rounded-none hover:bg-gray-50"
                 >
                   {isFS ? 'EXIT FULL SCREEN' : 'FULL SCREEN'}
                 </button>
@@ -219,7 +219,7 @@ function KitchenPageContent() {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={toggleFS}
-                className="h-11 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="h-11 px-4 border border-gray-300 rounded-none hover:bg-gray-50"
               >
                 {isFS ? 'EXIT FULL SCREEN' : 'FULL SCREEN'}
               </button>

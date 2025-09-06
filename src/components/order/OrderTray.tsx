@@ -31,19 +31,19 @@ export default function OrderTray({
               key={it.id}
               onClick={() => onSelectIndex(i)}
               className={cn(
-                "flex items-center gap-2 px-3 h-9 rounded-full border",
+                "flex items-center gap-2 px-3 h-9 rounded-none border",
                 active ? "border-black bg-black text-white" : "border-gray-300 bg-white"
               )}
               title={it.name}
             >
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-current text-[11px]">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-none border border-current text-[11px]">
                 {i + 1}
               </span>
               <span className="text-sm">{it.name}</span>
               {it.complete ? <span className="text-[11px] opacity-80">✓</span> : null}
               <button
                 onClick={(e) => { e.stopPropagation(); onRemoveIndex(i); }}
-                className="ml-1 inline-flex items-center justify-center h-6 w-6 rounded-full border hover:bg-gray-50"
+                className="ml-1 inline-flex items-center justify-center h-6 w-6 rounded-none border hover:bg-gray-50"
                 aria-label="REMOVE"
                 title="REMOVE"
               >
@@ -54,7 +54,7 @@ export default function OrderTray({
         })}
         <button
           onClick={onAddNew}
-          className="ml-2 h-9 px-3 rounded-full border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm leading-tight truncate"
+          className="ml-2 h-9 px-3 rounded-none border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm leading-tight truncate"
         >
           ADD A DRINK
         </button>

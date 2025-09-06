@@ -251,7 +251,7 @@ export default function KitchenBoard({
                       <div className="flex items-center gap-3">
                         <div className="text-4xl font-semibold tracking-wider">{o.pickup_code}</div>
                         <span
-                          className={`inline-flex items-center px-2.5 py-1.5 text-xs rounded-full ${statusTone(
+                          className={`inline-flex items-center px-2.5 py-1.5 text-xs rounded-none ${statusTone(
                             o.status
                           )}`}
                         >
@@ -274,7 +274,7 @@ export default function KitchenBoard({
                             <div className="font-medium text-[16px] flex items-center gap-2">
                               {it.item_name.toUpperCase()}
                               {it.options && it.options.length > 0 && (
-                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-none">
                                   {it.options.length} opt.
                                 </span>
                               )}

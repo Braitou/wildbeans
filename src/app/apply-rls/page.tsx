@@ -73,7 +73,7 @@ export default function ApplyRLSMigration() {
     <div className="p-8 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Apply RLS Migration</h1>
       
-      <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
+      <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-none">
         <p className="text-sm text-yellow-800">
           <strong>Note:</strong> Cette action active RLS sur la table orders et applique les politiques nécessaires.
           Assurez-vous d'avoir les permissions nécessaires.
@@ -83,7 +83,7 @@ export default function ApplyRLSMigration() {
       <button
         onClick={applyRLSMigration}
         disabled={loading}
-        className="px-6 py-3 bg-red-500 text-white rounded font-semibold disabled:opacity-50 mr-4"
+        className="px-6 py-3 bg-red-500 text-white rounded-none font-semibold disabled:opacity-50 mr-4"
       >
         {loading ? 'Applying...' : 'Step 1: Enable RLS'}
       </button>
@@ -91,13 +91,13 @@ export default function ApplyRLSMigration() {
       <button
         onClick={applyPolicies}
         disabled={loading}
-        className="px-6 py-3 bg-blue-500 text-white rounded font-semibold disabled:opacity-50"
+        className="px-6 py-3 bg-blue-500 text-white rounded-none font-semibold disabled:opacity-50"
       >
         {loading ? 'Applying...' : 'Step 2: Apply Policies'}
       </button>
 
       {status && (
-        <div className="mt-4 p-4 bg-gray-50 border rounded">
+        <div className="mt-4 p-4 bg-gray-50 border rounded-none">
           <h3 className="font-bold mb-2">Status:</h3>
           <p className="text-sm font-mono">{status}</p>
         </div>

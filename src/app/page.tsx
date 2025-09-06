@@ -16,7 +16,7 @@ export default function Home() {
         
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <Link
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-black text-white gap-2 hover:bg-gray-800 font-medium text-sm sm:text-base h-10 sm:h-12 px-6 sm:px-8 sm:w-auto"
+            className="rounded-none border border-solid border-transparent transition-colors flex items-center justify-center bg-black text-white gap-2 hover:bg-gray-800 font-medium text-sm sm:text-base h-10 sm:h-12 px-6 sm:px-8 sm:w-auto"
             href="/admin/events"
           >
             Connect

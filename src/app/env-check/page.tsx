@@ -7,7 +7,7 @@ export default function EnvCheck() {
   return (
     <main className="p-6">
       <h1 className="font-bold mb-4">Env Check</h1>
-      <pre className="bg-gray-100 p-4 rounded">
+      <pre className="bg-gray-100 p-4 rounded-none">
         {JSON.stringify(
           {
             hasUrl: !!url,

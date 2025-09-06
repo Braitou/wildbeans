@@ -41,24 +41,24 @@ export default function QRPage() {
             value={slug} 
             onChange={e => setSlug(e.target.value)} 
             placeholder="slug (ex: demo)" 
-            className="h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black" 
+            className="h-11 px-3 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-black" 
           />
           <input 
             value={join} 
             onChange={e => setJoin(e.target.value)} 
             placeholder="join code (ex: WB1)" 
-            className="h-11 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black" 
+            className="h-11 px-3 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-black" 
           />
         </div>
 
         <div className="mt-6 flex flex-col items-center gap-3">
-          <div className="p-4 border border-gray-200 rounded-lg">
+          <div className="p-4 border border-gray-200 rounded-none">
             {url && <QRCodeCanvas value={url} size={256} includeMargin ref={canvasRef} />}
           </div>
           <button 
             onClick={download} 
             disabled={!url}
-            className="h-11 px-4 rounded-md bg-black text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-11 px-4 rounded-none bg-black text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Download PNG
           </button>
