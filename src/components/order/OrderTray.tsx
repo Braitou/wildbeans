@@ -23,7 +23,7 @@ export default function OrderTray({
 }) {
   return (
     <div className="sticky top-0 z-20 bg-white py-3 border-b border-gray-200 mb-3">
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <div className="flex gap-2 overflow-x-auto overflow-y-hidden whitespace-nowrap snap-x snap-mandatory no-scrollbar">
         {items.map((it, i) => {
           const active = i === activeIndex;
           return (
@@ -31,7 +31,7 @@ export default function OrderTray({
               key={it.id}
               onClick={() => onSelectIndex(i)}
               className={cn(
-                "flex items-center gap-2 px-3 h-9 rounded-none border",
+                "inline-flex items-center gap-2 px-3 py-2 h-9 rounded-none border shrink-0",
                 active ? "border-black bg-black text-white" : "border-gray-300 bg-white"
               )}
               title={it.name}
@@ -39,7 +39,7 @@ export default function OrderTray({
               <span className="inline-flex items-center justify-center w-5 h-5 rounded-none border border-current text-[11px]">
                 {i + 1}
               </span>
-              <span className="text-sm">{it.name}</span>
+              <span className="max-w-[14ch] overflow-hidden text-ellipsis whitespace-nowrap text-sm">{it.name}</span>
               {it.complete ? <span className="text-[11px] opacity-80">✓</span> : null}
               <button
                 onClick={(e) => { e.stopPropagation(); onRemoveIndex(i); }}
@@ -54,7 +54,7 @@ export default function OrderTray({
         })}
         <button
           onClick={onAddNew}
-          className="ml-2 h-9 px-3 rounded-none border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm leading-tight truncate"
+          className="ml-2 h-9 px-3 rounded-none border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm leading-tight shrink-0"
         >
           ADD A DRINK
         </button>

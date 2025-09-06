@@ -96,6 +96,8 @@
 /* Utilitaire opt-in si besoin ponctuel */
 @layer utilities {
   .font-fragmentmono { font-family: var(--font-fragmentmono); }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
 @keyframes flash {
