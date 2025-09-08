@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -136,10 +136,10 @@ export default function KitchenBoard({
     };
   }, [eventId]);
 
-  // REFRESH "TIME AGO" TOUTES LES 30S
-  const [, forceTick] = useState(0);
+  // REFRESH "TIME AGO" ET PASTILLES TOUTES LES 10S
+  const [refreshKey, setRefreshKey] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => forceTick((x) => x + 1), 30000);
+    const id = setInterval(() => setRefreshKey((x) => x + 1), 10000);
     return () => clearInterval(id);
   }, []);
 
@@ -160,7 +160,7 @@ export default function KitchenBoard({
     [filtered]
   );
 
-  function timeAgo(iso: string) {
+  const timeAgo = useCallback((iso: string) => {
     const d = new Date(iso).getTime();
     const diff = Math.max(0, Date.now() - d);
     const m = Math.round(diff / 60000);
@@ -170,7 +170,17 @@ export default function KitchenBoard({
     const h = Math.round(m / 60);
     return h === 1 ? 'IL Y A 1 H' : `IL Y A ${h} H`;
     // (tu peux ajouter les jours si tu veux)
-  }
+  }, [refreshKey]);
+
+  const getTimeIndicatorColor = useCallback((iso: string) => {
+    const d = new Date(iso).getTime();
+    const diff = Math.max(0, Date.now() - d);
+    const minutes = diff / 60000; // Convertir en minutes
+    
+    if (minutes <= 2) return 'bg-green-500'; // 0 à 2 minutes : vert
+    if (minutes <= 4) return 'bg-orange-500'; // 2,01 à 4 minutes : orange
+    return 'bg-red-500'; // Au-delà de 4 minutes : rouge
+  }, [refreshKey]);
 
   async function move(orderId: string, next: OrderStatus) {
     console.log('[KitchenBoard] move →', { orderId, next });
@@ -245,7 +255,10 @@ export default function KitchenBoard({
 
             <div className="mt-2 space-y-8">
               {cols[k].map((o) => (
-                <Card key={o.id} className="shadow-sm border-gray-200">
+                <Card key={o.id} className="shadow-sm border-gray-200 relative">
+                  {/* Pastille colorée en haut à droite */}
+                  <div className={`absolute top-3 right-3 w-4 h-4 rounded-full ${getTimeIndicatorColor(o.created_at)} z-10`}></div>
+                  
                   <CardHeader className={`${pad} pb-0`}>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
