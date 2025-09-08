@@ -197,15 +197,21 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
     setSaving(true);
     try {
-      // Construire le payload avec les codes pré-remplis
-      const payload: any = {
-        id: isNew ? null : form.id,
-        name: form.name,
-        slug: form.slug,
-        join_code: form.join_code?.trim() || '',
-        kitchen_code: form.kitchen_code?.trim() || '',
-        starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : null,
-        ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
+      // Helper pour convertir les dates en ISO ou null
+      const toIsoOrNull = (v: unknown) =>
+        v == null || v === '' ? null : (v instanceof Date ? v.toISOString() : String(v));
+
+      // Construire le payload avec les paramètres p_*
+      const payload = {
+        p_id: isNew ? null : form.id,
+        p_name: form.name,
+        p_slug: form.slug,
+        p_join_code: form.join_code?.trim() || '',
+        p_kitchen_code: form.kitchen_code?.trim() || '',
+        p_starts_at: toIsoOrNull(form.starts_at),
+        p_ends_at: toIsoOrNull(form.ends_at),
+        p_display_name: null,
+        p_logo_url: null,
       };
 
       const { data, error } = await supabase.rpc('admin_upsert_event', payload);
