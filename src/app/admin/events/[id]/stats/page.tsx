@@ -120,8 +120,23 @@ export default async function EventStatsPage({ params }: PageProps) {
     qty: item.qty,
   }));
 
-  const cats: CatRow[] = []; // Empty for now, can be populated later if needed
-  const opts: OptRow[] = []; // Empty for now, can be populated later if needed
+  // E) Get categories and options data using RPC functions
+  const { data: catsRaw, error: e4 } = await supabase.rpc('admin_event_categories_breakdown', { event_id: eventId });
+  if (e4) { console.error('categories error', e4); }
+  
+  const { data: optsRaw, error: e5 } = await supabase.rpc('admin_event_options_breakdown', { event_id: eventId });
+  if (e5) { console.error('options error', e5); }
+
+  const cats: CatRow[] = (catsRaw ?? []).map((cat: any) => ({
+    category_id: `cat_${cat.category_name}`,
+    category_name: cat.category_name,
+    qty: Number(cat.quantity ?? 0)
+  }));
+  
+  const opts: OptRow[] = (optsRaw ?? []).map((opt: any) => ({
+    option_name: opt.option_name,
+    qty: Number(opt.quantity ?? 0)
+  }));
   const ts: Point[] = stats.perHour.map(point => ({
     ts: point.hour,
     drinks: point.drinks,

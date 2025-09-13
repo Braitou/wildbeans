@@ -3,9 +3,10 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import StatsRealtime from './StatsRealtime';
+import * as XLSX from 'xlsx';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Legend
@@ -56,6 +57,41 @@ export function StatsClient({
     [items, filter]
   );
 
+  // Fonction pour formater l'heure
+  function formatHour(isoString: string): string {
+    const date = new Date(isoString);
+    const dateStr = date.toLocaleDateString('fr-FR');
+    const timeStr = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    return `${dateStr} : ${timeStr}`;
+  }
+
+  // Fonction pour formater la période
+  function formatPeriod(isoString: string): string {
+    const date = new Date(isoString);
+    const dateStr = date.toLocaleDateString('fr-FR');
+    const timeStr = date.toLocaleTimeString('fr-FR', { hour: 'numeric', minute: '2-digit' });
+    return `${dateStr} ${timeStr}`;
+  }
+
+  // Données formatées pour les graphiques
+  const chartItems = useMemo(() => 
+    [...items].sort((a, b) => a.qty - b.qty), // Ordre croissant
+    [items]
+  );
+
+  const chartOptions = useMemo(() => 
+    [...opts].sort((a, b) => a.qty - b.qty), // Ordre croissant
+    [opts]
+  );
+
+  const chartTimeSeries = useMemo(() => 
+    ts.map(point => ({
+      ...point,
+      formattedTime: formatHour(point.ts)
+    })),
+    [ts]
+  );
+
   function exportCSV() {
     const rows: (string | number)[][] = [
       ['Item', 'Quantity'],
@@ -71,6 +107,55 @@ export function StatsClient({
     a.download = `wildbeans-items-${eventId}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function exportExcel() {
+    // Créer un nouveau workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Feuille 1: Résumé
+    const summaryData = [
+      ['Métrique', 'Valeur'],
+      ['Nombre de commandes', totals?.orders ?? 0],
+      ['Nombre de boissons', totals?.drinks ?? 0],
+      ['Clients uniques', totals?.unique_customers ?? 0],
+      ['Période début', totals?.period?.from ? new Date(totals.period.from).toLocaleString('fr-FR') : 'N/A'],
+      ['Période fin', totals?.period?.to ? new Date(totals.period.to).toLocaleString('fr-FR') : 'N/A']
+    ];
+    const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, summaryWs, 'Résumé');
+
+    // Feuille 2: Boissons par quantité
+    const itemsData = [
+      ['Boisson', 'Quantité'],
+      ...items.map(item => [item.item_name, item.qty])
+    ];
+    const itemsWs = XLSX.utils.aoa_to_sheet(itemsData);
+    XLSX.utils.book_append_sheet(wb, itemsWs, 'Boissons');
+
+    // Feuille 3: Options
+    if (opts.length > 0) {
+      const optionsData = [
+        ['Option', 'Quantité'],
+        ...opts.map(opt => [opt.option_name, opt.qty])
+      ];
+      const optionsWs = XLSX.utils.aoa_to_sheet(optionsData);
+      XLSX.utils.book_append_sheet(wb, optionsWs, 'Options');
+    }
+
+    // Feuille 4: Boissons par heure
+    if (ts.length > 0) {
+      const timeSeriesData = [
+        ['Heure', 'Boissons'],
+        ...ts.map(point => [formatHour(point.ts), point.drinks])
+      ];
+      const timeSeriesWs = XLSX.utils.aoa_to_sheet(timeSeriesData);
+      XLSX.utils.book_append_sheet(wb, timeSeriesWs, 'Boissons par heure');
+    }
+
+    // Télécharger le fichier
+    const eventName = `wildbeans-rapport-${eventId}-${new Date().toISOString().split('T')[0]}`;
+    XLSX.writeFile(wb, `${eventName}.xlsx`);
   }
 
   async function refreshData() {
@@ -145,13 +230,22 @@ export function StatsClient({
             WILD STATS
           </button>
         </div>
-        <button
-          onClick={closeEvent}
-          disabled={closing}
-          className="h-10 px-3 border rounded-none hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {closing ? 'CLOSING…' : "CLOSE EVENT"}
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={exportExcel} 
+            className="inline-flex items-center gap-2 h-10 px-3 border rounded-none hover:bg-gray-50 bg-green-50 border-green-200"
+          >
+            <Download className="h-4 w-4" />
+            EXPORT RAPPORT COMPLET
+          </button>
+          <button
+            onClick={closeEvent}
+            disabled={closing}
+            className="h-10 px-3 border rounded-none hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {closing ? 'CLOSING…' : "CLOSE EVENT"}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
@@ -170,74 +264,79 @@ export function StatsClient({
         <div className="border rounded-none p-4 shadow-sm">
           <div className="text-xs text-neutral-500">PERIOD</div>
           <div className="text-sm">
-            {totals?.period?.from ? totals.period.from.slice(0, 16) : 'N/A'}
-            {totals?.period?.to && ` → ${totals.period.to.slice(0, 16)}`}
+            {totals?.period?.from ? formatPeriod(totals.period.from) : 'N/A'}
+            {totals?.period?.to && ` → ${formatPeriod(totals.period.to)}`}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
-        <div className="border rounded-none p-4 shadow-sm">
-          <div className="text-sm font-semibold mb-2">TOP DRINKS</div>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={items.slice(0, 5)}>
-              <XAxis dataKey="item_name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="qty" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="border rounded-none p-4 shadow-sm">
-          <div className="text-sm font-semibold mb-2">CATEGORIES</div>
-          <ResponsiveContainer width="100%" height={240}>
-            <PieChart>
-              <Pie
-                dataKey="qty"
-                nameKey="category_name"
-                data={cats}
-                outerRadius={80}
-              />
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="border rounded-none p-4 shadow-sm">
-          <div className="text-sm font-semibold mb-2">TOP OPTIONS</div>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={opts}>
-              <XAxis dataKey="option_name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="qty" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      {/* Graphique principal des boissons (toutes les boissons, ordre croissant) */}
+      <div className="border rounded-none p-4 shadow-sm mt-6">
+        <div className="text-sm font-semibold mb-2">TOUTES LES BOISSONS COMMANDÉES</div>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={chartItems} margin={{ bottom: 60, left: 20, right: 20 }}>
+            <XAxis 
+              dataKey="item_name" 
+              angle={-45}
+              textAnchor="end"
+              height={80}
+              interval={0}
+            />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="qty" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       <div className="border rounded-none p-4 shadow-sm mt-6">
-        <div className="text-sm font-semibold mb-2">DRINKS PER HOUR</div>
-        <ResponsiveContainer width="100%" height={260}>
-          <LineChart data={ts}>
-            <XAxis dataKey="ts" />
+        <div className="text-sm font-semibold mb-2">OPTIONS LES PLUS COMMANDÉES</div>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={chartOptions} margin={{ bottom: 60, left: 20, right: 20 }}>
+            <XAxis 
+              dataKey="option_name" 
+              angle={-45}
+              textAnchor="end"
+              height={80}
+              interval={0}
+            />
             <YAxis />
             <Tooltip />
-            <Line type="monotone" dataKey="drinks" strokeWidth={2} />
+            <Bar dataKey="qty" fill="#82ca9d" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="border rounded-none p-4 shadow-sm mt-6">
+        <div className="text-sm font-semibold mb-2">BOISSONS PAR HEURE</div>
+        <ResponsiveContainer width="100%" height={350}>
+          <LineChart data={chartTimeSeries} margin={{ bottom: 100, left: 20, right: 20, top: 20 }}>
+            <XAxis 
+              dataKey="formattedTime" 
+              angle={-45}
+              textAnchor="end"
+              height={100}
+              interval={0}
+              fontSize={12}
+            />
+            <YAxis />
+            <Tooltip 
+              labelFormatter={(value) => `Heure: ${value}`}
+              formatter={(value) => [`${value} boissons`, 'Boissons']}
+            />
+            <Line type="monotone" dataKey="drinks" strokeWidth={2} stroke="#8884d8" />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       <div className="mt-6 border rounded-none p-4 shadow-sm">
         <div className="flex items-center justify-between mb-3">
-          <div className="text-sm font-semibold">DRINKS (QUANTITIES)</div>
+          <div className="text-sm font-semibold">TABLEAU DES BOISSONS (QUANTITÉS)</div>
           <div className="flex gap-2">
             <input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder="FILTER BY NAME…"
+              placeholder="FILTRER PAR NOM…"
               className="h-10 px-3 border border-gray-300 rounded-none"
             />
             <button onClick={exportCSV} className="h-10 px-3 border rounded-none hover:bg-gray-50">
