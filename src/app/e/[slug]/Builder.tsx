@@ -46,6 +46,7 @@ export default function Builder({
   const [optStep, setOptStep] = useState(0);
   const [firstName, setFirstName] = useState('');
   const [note, setNote] = useState('');
+  const [firstNameError, setFirstNameError] = useState(false);
 
   // 🔥 New: mapping itemId -> count for selection with counters
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -151,6 +152,11 @@ export default function Builder({
     }
 
     if (stage === 'review') {
+      if (firstName.trim().length === 0) {
+        setFirstNameError(true);
+        return;
+      }
+      setFirstNameError(false);
       submitAll();
     }
   }
@@ -193,7 +199,11 @@ export default function Builder({
       return true; // non requis = toujours valide
     }
 
-    return stage === 'review';
+    if (stage === 'review') {
+      return firstName.trim().length > 0;
+    }
+
+    return false;
   }
 
   // Compilation pour l'appel RPC
@@ -361,12 +371,24 @@ export default function Builder({
                 />
                 <section className="py-4 space-y-3">
                   <div className="grid gap-3">
-                    <input
-                      value={firstName}
-                      onChange={e => setFirstName(e.target.value)}
-                      placeholder="FIRST NAME (OPTIONAL)"
-                      className="h-11 px-3 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-black"
-                    />
+                    <div>
+                      <input
+                        value={firstName}
+                        onChange={e => {
+                          setFirstName(e.target.value);
+                          if (firstNameError) setFirstNameError(false);
+                        }}
+                        placeholder="FIRST NAME (REQUIRED)"
+                        className={`h-11 px-3 border rounded-none focus:outline-none focus:ring-2 ${
+                          firstNameError 
+                            ? 'border-red-500 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-black'
+                        }`}
+                      />
+                      {firstNameError && (
+                        <p className="text-red-500 text-sm mt-1">FIRST NAME IS REQUIRED</p>
+                      )}
+                    </div>
                     <textarea
                       value={note}
                       onChange={e => setNote(e.target.value)}
