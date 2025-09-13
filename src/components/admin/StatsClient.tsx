@@ -80,7 +80,7 @@ export function StatsClient({
   );
 
   const chartOptions = useMemo(() => 
-    [...opts].sort((a, b) => a.qty - b.qty), // Ordre croissant
+    [...opts].sort((a, b) => b.qty - a.qty), // Ordre décroissant (plus commandé en premier)
     [opts]
   );
 
@@ -167,6 +167,29 @@ export function StatsClient({
         supabase.rpc('admin_event_options_breakdown', { event_id: eventId }),
         supabase.rpc('admin_event_timeseries', { event_id: eventId }),
       ]);
+
+      // Debug: log les données des options
+      console.log('Options RPC result:', o);
+      console.log('Options data:', o.data);
+      console.log('Options error:', o.error);
+
+      // Debug: requête directe pour voir les données brutes
+      const { data: rawOptions, error: rawError } = await supabase
+        .from('order_item_options')
+        .select(`
+          option_name,
+          order_item_id,
+          order_items (
+            order_id,
+            orders (
+              event_id
+            )
+          )
+        `)
+        .eq('order_items.orders.event_id', eventId);
+      
+      console.log('Raw options data:', rawOptions);
+      console.log('Raw options error:', rawError);
 
       setTotals((t.data as Totals) ?? null);
       setItems((i.data as ItemRow[]) ?? []);
