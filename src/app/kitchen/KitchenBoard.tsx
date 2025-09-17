@@ -241,8 +241,8 @@ export default function KitchenBoard({
 
   return (
     <div className="px-6 pb-16">
-      {/* 1 col mobile, 2 cols ≥1024px (lg), 3 cols ≥1360px (custom), 4 cols ≥1600px */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 [@media(min-width:1360px)]:grid-cols-3 [@media(min-width:1600px)]:grid-cols-4 gap-10">
+      {/* 1 col mobile, 3 cols ≥1024px (lg) pour iPad paysage, 4 cols ≥1600px */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 [@media(min-width:1600px)]:grid-cols-4 gap-10">
         {(Object.keys(cols) as Array<keyof typeof cols>).map((k) => (
           <section key={k} className="flex flex-col min-h-[65vh]">
             {/* header de colonne sticky */}
