@@ -126,10 +126,25 @@ export default function Builder({
           multi: {},
         }));
       });
-      setCart(expanded);
-      setCurrentIdx(0);
-      setOptStep(0);
-      setStage('options');
+      
+      // Si on avait déjà des items dans le panier, on ajoute les nouveaux à la fin
+      // et on se positionne sur le premier nouvel item
+      if (cart.length > 0) {
+        const newCart = [...cart, ...expanded];
+        setCart(newCart);
+        setCurrentIdx(cart.length); // Position sur le premier nouvel item
+        setOptStep(0);
+        setStage('options');
+      } else {
+        // Premier ajout, comportement normal
+        setCart(expanded);
+        setCurrentIdx(0);
+        setOptStep(0);
+        setStage('options');
+      }
+      
+      // Reset des compteurs après ajout
+      setCounts({});
       return;
     }
 

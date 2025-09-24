@@ -27,20 +27,24 @@ export default function OrderTray({
         {items.map((it, i) => {
           const active = i === activeIndex;
           return (
-            <button
+            <div
               key={it.id}
-              onClick={() => onSelectIndex(i)}
               className={cn(
-                "inline-flex items-center gap-2 px-3 py-2 h-9 rounded-none border shrink-0",
+                "inline-flex items-center gap-2 px-3 py-2 h-9 rounded-none border shrink-0 cursor-pointer",
                 active ? "border-black bg-black text-white" : "border-gray-300 bg-white"
               )}
               title={it.name}
             >
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-none border border-current text-[11px]">
-                {i + 1}
-              </span>
-              <span className="max-w-[14ch] overflow-hidden text-ellipsis whitespace-nowrap text-sm">{it.name}</span>
-              {it.complete ? <span className="text-[11px] opacity-80">✓</span> : null}
+              <div
+                onClick={() => onSelectIndex(i)}
+                className="inline-flex items-center gap-2 flex-1"
+              >
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-none border border-current text-[11px]">
+                  {i + 1}
+                </span>
+                <span className="max-w-[14ch] overflow-hidden text-ellipsis whitespace-nowrap text-sm">{it.name}</span>
+                {it.complete ? <span className="text-[11px] opacity-80">✓</span> : null}
+              </div>
               <button
                 onClick={(e) => { e.stopPropagation(); onRemoveIndex(i); }}
                 className="ml-1 inline-flex items-center justify-center h-6 w-6 rounded-none border hover:bg-gray-50"
@@ -49,7 +53,7 @@ export default function OrderTray({
               >
                 <X className="h-3 w-3" />
               </button>
-            </button>
+            </div>
           );
         })}
         <button
