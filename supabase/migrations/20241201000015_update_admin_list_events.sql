@@ -1,6 +1,10 @@
 -- Mise à jour de la fonction admin_list_events pour inclure display_name et logo_url
 
-create or replace function public.admin_list_events()
+-- Supprimer l'ancienne fonction
+drop function if exists public.admin_list_events();
+
+-- Recréer la fonction avec les nouveaux champs
+create function public.admin_list_events()
 returns table(
   id uuid,
   name text,
@@ -34,3 +38,6 @@ begin
   order by e.created_at desc;
 end;
 $$;
+
+-- Redonner les permissions
+grant execute on function public.admin_list_events() to anon, authenticated;

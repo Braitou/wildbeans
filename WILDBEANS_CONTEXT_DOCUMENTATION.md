@@ -384,3 +384,4 @@ npm start
 - **RPC** : Fonctions PostgreSQL pour logique métier
 
 Cette documentation couvre l'ensemble de l'architecture et du fonctionnement de Wild Beans. Elle peut servir de référence complète pour comprendre et développer l'application.
+
