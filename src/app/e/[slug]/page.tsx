@@ -31,6 +31,23 @@ export default async function Page({
     .eq('is_active', true)
     .order('sort_order', { ascending: true });
 
+  // 2b) Récupérer les items activés pour cet événement
+  const { data: eventItems } = event?.id ? await supabase
+    .from('event_items')
+    .select('menu_item_id, enabled')
+    .eq('event_id', event.id)
+    : { data: null };
+
+  // Créer un Set des IDs d'items désactivés pour cet événement
+  const disabledItemIds = new Set(
+    (eventItems || [])
+      .filter(ei => ei.enabled === false)
+      .map(ei => ei.menu_item_id)
+  );
+
+  // Filtrer les items : retirer ceux qui sont désactivés pour cet événement
+  const filteredItems = (items || []).filter(item => !disabledItemIds.has(item.id));
+
   // 3) Liaisons item -> modifiers
   const { data: itemMods } = await supabase
     .from('item_modifiers')
@@ -54,7 +71,7 @@ export default async function Page({
   }
 
   const itemsByCat = new Map<string, Item[]>();
-  for (const it of items ?? []) {
+  for (const it of filteredItems) {
     const mods = (itemMods ?? [])
       .filter(im => im.item_id === it.id)
       .map(im => modById.get(im.modifier_id))
