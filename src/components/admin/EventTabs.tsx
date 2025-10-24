@@ -8,6 +8,7 @@ export default function EventTabs({ id }: { id: string }) {
   const tabs = [
     { href: `${base}`, label: 'DÉTAILS', exact: true },
     { href: `${base}/menu`, label: 'MENU' },
+    { href: `${base}/barista`, label: 'BARISTA' },
     { href: `${base}/stats`, label: 'WILD STATS' },
   ];
 

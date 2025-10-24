@@ -430,6 +430,20 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
             <div className="text-sm text-neutral-500">SET A KITCHEN CODE TO GET THE LINK.</div>
           )}
         </section>
+
+        {/* Barista Order Link Section */}
+        <section className="mt-6 border rounded-none p-4 bg-[#706D54] text-white">
+          <div className="text-sm font-semibold mb-2">🎯 BARISTA ORDER</div>
+          <p className="text-xs mb-3 opacity-90">Saisie rapide des commandes au comptoir</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button 
+              onClick={() => router.push(`/admin/events/${isNew ? 'new' : id}/barista`)}
+              className="h-9 px-4 bg-white text-[#706D54] rounded-none hover:bg-gray-50 font-semibold"
+            >
+              OUVRIR BARISTA ORDER
+            </button>
+          </div>
+        </section>
       </main>
     </AdminGate>
   );

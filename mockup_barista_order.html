@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WildBeans - Barista Order Mockup (INTERACTIF)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Maison Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f0;
+            color: #1a1a1a;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Section principale - Hub des boissons */
+        .main-section {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .header {
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 0.875rem;
+        }
+        
+        .category-section {
+            margin-bottom: 3rem;
+        }
+        
+        .category-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #999;
+            margin-bottom: 1rem;
+        }
+        
+        .drinks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+        
+        .drink-card {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1rem;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            border: 2px solid transparent;
+        }
+        
+        .drink-card.coffee {
+            background: #706D54;
+        }
+        
+        .drink-card.non-coffee {
+            background: #A08963;
+        }
+        
+        .drink-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .drink-card:active {
+            transform: scale(0.98);
+        }
+        
+        /* Sidebar - Commande en cours */
+        .sidebar {
+            width: 400px;
+            background: white;
+            border-left: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+        
+        .sidebar-header h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .sidebar-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .current-item {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .current-item-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            color: #706D54;
+        }
+        
+        .options-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .options-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .required-badge {
+            background: #e74c3c;
+            color: white;
+            font-size: 0.6rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+        }
+        
+        .options-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .option-btn {
+            padding: 0.6rem 1rem;
+            border: 2px solid #d0d0d0;
+            background: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.15s;
+            text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            border-radius: 4px;
+        }
+        
+        .option-btn:hover {
+            background: #f5f5f5;
+            border-color: #999;
+        }
+        
+        .option-btn.selected {
+            background: #706D54;
+            color: white;
+            border-color: #706D54;
+        }
+        
+        .btn-add-to-order {
+            width: 100%;
+            padding: 1rem;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 1rem;
+            letter-spacing: 0.05em;
+            transition: opacity 0.2s;
+            border-radius: 4px;
+        }
+        
+        .btn-add-to-order:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-add-to-order:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .order-list {
+            display: none;
+        }
+        
+        .order-list.has-items {
+            display: block;
+        }
+        
+        .order-list-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .order-item {
+            background: #f9f9f9;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid #706D54;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .order-item.non-coffee-item {
+            border-left-color: #A08963;
+        }
+        
+        .order-item-name {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            color: #333;
+        }
+        
+        .order-item-options {
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        .order-item-remove {
+            margin-top: 0.75rem;
+            padding: 0.35rem 0.75rem;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            border-radius: 3px;
+            transition: opacity 0.2s;
+        }
+        
+        .order-item-remove:hover {
+            opacity: 0.85;
+        }
+        
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 2px solid #e0e0e0;
+            background: #fafafa;
+        }
+        
+        .order-summary {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #333;
+            text-transform: uppercase;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .btn {
+            padding: 1rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: opacity 0.2s;
+            border-radius: 4px;
+        }
+        
+        .btn:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+        
+        .btn-primary {
+            background: #2ecc71;
+            color: white;
+            font-size: 1.125rem;
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+            font-size: 0.875rem;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .success-toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: #2ecc71;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Section principale - Hub des boissons -->
+        <div class="main-section">
+            <div class="header">
+                <h1>🎯 BARISTA ORDER</h1>
+                <p>Cliquez sur une boisson pour commencer une commande • Données en local (mockup)</p>
+            </div>
+            
+            <!-- Catégorie: Cafés -->
+            <div class="category-section">
+                <div class="category-title">☕ CAFÉS</div>
+                <div class="drinks-grid" id="coffeesGrid"></div>
+            </div>
+            
+            <!-- Catégorie: Non-coffee -->
+            <div class="category-section">
+                <div class="category-title">🍵 NON-COFFEE</div>
+                <div class="drinks-grid" id="nonCoffeesGrid"></div>
+            </div>
+        </div>
+        
+        <!-- Sidebar - Commande en cours -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>📋 COMMANDE EN COURS</h2>
+            </div>
+            
+            <div class="sidebar-content" id="sidebarContent">
+                <!-- Contenu généré dynamiquement -->
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="order-summary" id="orderSummary">Total : 0 boisson(s)</div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="submitBtn" onclick="submitOrder()" disabled>
+                        ✓ ENREGISTRER LA COMMANDE
+                    </button>
+                    <button class="btn btn-secondary" id="clearBtn" onclick="clearOrder()" disabled>
+                        ANNULER TOUT
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // DONNÉES EN LOCAL (mockup)
+        const MENU = {
+            coffees: [
+                { id: 1, name: 'Espresso', category: 'coffee' },
+                { id: 2, name: 'Americano', category: 'coffee' },
+                { id: 3, name: 'Cappuccino', category: 'coffee' },
+                { id: 4, name: 'Latte', category: 'coffee' },
+                { id: 5, name: 'Flat White', category: 'coffee' },
+                { id: 6, name: 'Mocha', category: 'coffee' }
+            ],
+            nonCoffees: [
+                { id: 7, name: 'Thé', category: 'non-coffee' },
+                { id: 8, name: 'Chocolat chaud', category: 'non-coffee' },
+                { id: 9, name: 'Chai', category: 'non-coffee' },
+                { id: 10, name: 'Hojicha Latte', category: 'non-coffee' },
+                { id: 11, name: 'Golden Latte', category: 'non-coffee' },
+                { id: 12, name: 'Ube Latte', category: 'non-coffee' }
+            ]
+        };
+        
+        const OPTIONS = {
+            taille: {
+                name: 'Taille',
+                type: 'single',
+                required: true,
+                options: ['Petit', 'Moyen', 'Grand']
+            },
+            lait: {
+                name: 'Type de lait',
+                type: 'single',
+                required: false,
+                options: ['Entier', 'Écrémé', 'Amande', 'Avoine', 'Coco']
+            },
+            sucre: {
+                name: 'Sucre',
+                type: 'single',
+                required: false,
+                options: ['Sans sucre', '1 sucre', '2 sucres', 'Édulcorant']
+            },
+            extras: {
+                name: 'Extras',
+                type: 'multi',
+                required: false,
+                options: ['Chantilly', 'Cannelle', 'Chocolat', 'Caramel']
+            }
+        };
+        
+        // État global
+        let currentDrink = null;
+        let currentSelections = {};
+        let orderItems = [];
+        
+        // Initialisation
+        function init() {
+            renderDrinks();
+            renderSidebar();
+        }
+        
+        // Afficher les boissons
+        function renderDrinks() {
+            const coffeesGrid = document.getElementById('coffeesGrid');
+            const nonCoffeesGrid = document.getElementById('nonCoffeesGrid');
+            
+            MENU.coffees.forEach(drink => {
+                const card = createDrinkCard(drink);
+                coffeesGrid.appendChild(card);
+            });
+            
+            MENU.nonCoffees.forEach(drink => {
+                const card = createDrinkCard(drink);
+                nonCoffeesGrid.appendChild(card);
+            });
+        }
+        
+        function createDrinkCard(drink) {
+            const card = document.createElement('div');
+            card.className = `drink-card ${drink.category}`;
+            card.innerHTML = `<span>${drink.name.toUpperCase()}</span>`;
+            card.onclick = () => selectDrink(drink);
+            return card;
+        }
+        
+        // Sélectionner une boisson
+        function selectDrink(drink) {
+            currentDrink = drink;
+            currentSelections = {
+                taille: 'Moyen', // Valeur par défaut
+                lait: null,
+                sucre: null,
+                extras: []
+            };
+            renderSidebar();
+        }
+        
+        // Afficher la sidebar
+        function renderSidebar() {
+            const content = document.getElementById('sidebarContent');
+            
+            if (currentDrink) {
+                content.innerHTML = `
+                    <div class="current-item">
+                        <div class="current-item-name">${currentDrink.name.toUpperCase()}</div>
+                        ${renderOptions()}
+                        <button class="btn-add-to-order" onclick="addToOrder()">
+                            ✓ AJOUTER À LA COMMANDE
+                        </button>
+                    </div>
+                    ${renderOrderList()}
+                `;
+            } else if (orderItems.length > 0) {
+                content.innerHTML = renderOrderList();
+            } else {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">☕</div>
+                        <p><strong>Aucune boisson</strong><br>Cliquez sur une boisson pour commencer</p>
+                    </div>
+                `;
+            }
+            
+            updateFooter();
+        }
+        
+        // Afficher les options
+        function renderOptions() {
+            return Object.entries(OPTIONS).map(([key, option]) => `
+                <div class="options-group">
+                    <div class="options-label">
+                        ${option.name.toUpperCase()}
+                        ${option.required ? '<span class="required-badge">REQUIS</span>' : ''}
+                    </div>
+                    <div class="options-buttons">
+                        ${option.options.map(opt => `
+                            <button 
+                                class="option-btn ${isSelected(key, opt) ? 'selected' : ''}" 
+                                onclick="toggleOption('${key}', '${opt}', '${option.type}')"
+                            >
+                                ${opt.toUpperCase()}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function isSelected(optionKey, value) {
+            const sel = currentSelections[optionKey];
+            if (Array.isArray(sel)) {
+                return sel.includes(value);
+            }
+            return sel === value;
+        }
+        
+        // Basculer une option
+        function toggleOption(optionKey, value, type) {
+            if (type === 'single') {
+                currentSelections[optionKey] = value;
+            } else {
+                if (!currentSelections[optionKey]) {
+                    currentSelections[optionKey] = [];
+                }
+                const index = currentSelections[optionKey].indexOf(value);
+                if (index > -1) {
+                    currentSelections[optionKey].splice(index, 1);
+                } else {
+                    currentSelections[optionKey].push(value);
+                }
+            }
+            renderSidebar();
+        }
+        
+        // Ajouter à la commande
+        function addToOrder() {
+            if (!currentDrink || !currentSelections.taille) {
+                alert('Veuillez sélectionner au moins la taille (requis)');
+                return;
+            }
+            
+            orderItems.push({
+                id: Date.now(),
+                drink: currentDrink,
+                selections: { ...currentSelections }
+            });
+            
+            showToast(`${currentDrink.name} ajouté à la commande !`);
+            
+            // Réinitialiser
+            currentDrink = null;
+            currentSelections = {};
+            renderSidebar();
+        }
+        
+        // Afficher la liste des commandes
+        function renderOrderList() {
+            if (orderItems.length === 0) return '';
+            
+            return `
+                <div class="order-list has-items">
+                    <div class="order-list-title">BOISSONS (${orderItems.length})</div>
+                    ${orderItems.map(item => `
+                        <div class="order-item ${item.drink.category === 'non-coffee' ? 'non-coffee-item' : ''}">
+                            <div class="order-item-name">${item.drink.name.toUpperCase()}</div>
+                            <div class="order-item-options">
+                                ${formatSelections(item.selections)}
+                            </div>
+                            <button class="order-item-remove" onclick="removeItem(${item.id})">
+                                ✕ RETIRER
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        function formatSelections(selections) {
+            const lines = [];
+            if (selections.taille) lines.push(`• ${selections.taille}`);
+            if (selections.lait) lines.push(`• Lait ${selections.lait.toLowerCase()}`);
+            if (selections.sucre) lines.push(`• ${selections.sucre}`);
+            if (selections.extras && selections.extras.length > 0) {
+                lines.push(`• ${selections.extras.join(', ')}`);
+            }
+            return lines.join('<br>');
+        }
+        
+        // Retirer un item
+        function removeItem(id) {
+            orderItems = orderItems.filter(item => item.id !== id);
+            renderSidebar();
+        }
+        
+        // Mettre à jour le footer
+        function updateFooter() {
+            document.getElementById('orderSummary').textContent = 
+                `Total : ${orderItems.length} boisson(s)`;
+            
+            const hasItems = orderItems.length > 0;
+            document.getElementById('submitBtn').disabled = !hasItems;
+            document.getElementById('clearBtn').disabled = !hasItems;
+        }
+        
+        // Enregistrer la commande
+        function submitOrder() {
+            if (orderItems.length === 0) return;
+            
+            const confirmed = confirm(
+                `Enregistrer cette commande de ${orderItems.length} boisson(s) ?\n\n` +
+                `Les boissons seront directement marquées comme SERVIES et envoyées dans les statistiques.`
+            );
+            
+            if (confirmed) {
+                console.log('📊 COMMANDE ENREGISTRÉE:', orderItems);
+                showToast(`✓ Commande de ${orderItems.length} boisson(s) enregistrée !`, 3000);
+                
+                // Réinitialiser
+                orderItems = [];
+                currentDrink = null;
+                currentSelections = {};
+                renderSidebar();
+            }
+        }
+        
+        // Annuler tout
+        function clearOrder() {
+            if (orderItems.length === 0) return;
+            
+            const confirmed = confirm('Annuler toute la commande en cours ?');
+            if (confirmed) {
+                orderItems = [];
+                currentDrink = null;
+                currentSelections = {};
+                renderSidebar();
+                showToast('Commande annulée');
+            }
+        }
+        
+        // Toast notification
+        function showToast(message, duration = 2000) {
+            const toast = document.createElement('div');
+            toast.className = 'success-toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+        
+        // Démarrer l'app
+        init();
+    </script>
+</body>
+</html>
