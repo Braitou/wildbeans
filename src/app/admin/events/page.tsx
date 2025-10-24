@@ -73,7 +73,14 @@ export default function EventsPage() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <AdminHeader title="Events" />
         
-        <div className="mb-6 flex items-center justify-end">
+        <div className="mb-6 flex items-center justify-between">
+          <Link 
+            href="/admin/stats" 
+            className="h-10 px-6 bg-black text-white rounded-none hover:bg-gray-800 flex items-center gap-2 font-semibold"
+          >
+            STATS GLOBALES
+          </Link>
+          
           <Link 
             href="/admin/events/new" 
             className="h-10 px-3 border rounded-none hover:bg-gray-50 flex items-center"

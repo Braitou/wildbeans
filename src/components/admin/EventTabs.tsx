@@ -2,9 +2,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export default function EventTabs({ id }: { id: string }) {
+export default function EventTabs({ eventId, id }: { eventId?: string; id?: string }) {
   const pathname = usePathname();
-  const base = `/admin/events/${id}`;
+  const base = `/admin/events/${eventId || id}`;
   const tabs = [
     { href: `${base}`, label: 'DÉTAILS', exact: true },
     { href: `${base}/menu`, label: 'MENU' },

@@ -1,5 +1,7 @@
 'use client';
 
+import { Coffee, ClipboardList, Check, X } from 'lucide-react';
+
 type ModifierOption = {
   id: string;
   name: string;
@@ -87,9 +89,12 @@ export default function BaristaOrderSidebar({
     <div className="w-[380px] bg-white border-l border-gray-200 flex flex-col">
       {/* Header */}
       <div className="p-4 border-b border-gray-200 bg-gray-50">
-        <h2 className="text-base font-bold uppercase tracking-wide">
-          📋 COMMANDE
-        </h2>
+        <div className="flex items-center gap-2">
+          <ClipboardList className="h-5 w-5 text-black" />
+          <h2 className="text-base font-bold uppercase tracking-wide">
+            COMMANDE
+          </h2>
+        </div>
       </div>
 
       {/* Content */}
@@ -137,9 +142,10 @@ export default function BaristaOrderSidebar({
 
             <button
               onClick={onAddToOrder}
-              className="w-full py-3 bg-green-500 active:bg-green-600 text-white font-bold text-sm uppercase tracking-wide rounded transition-all touch-manipulation"
+              className="w-full py-3 bg-green-500 active:bg-green-600 text-white font-bold text-sm uppercase tracking-wide rounded transition-all touch-manipulation flex items-center justify-center gap-2"
             >
-              ✓ AJOUTER
+              <Check className="h-5 w-5" />
+              AJOUTER
             </button>
           </div>
         )}
@@ -173,9 +179,10 @@ export default function BaristaOrderSidebar({
                 </div>
                 <button
                   onClick={() => onRemoveItem(item.id)}
-                  className="mt-2 px-2 py-1 bg-red-500 active:bg-red-600 text-white text-[0.7rem] font-bold uppercase rounded transition-all touch-manipulation"
+                  className="mt-2 px-2 py-1 bg-red-500 active:bg-red-600 text-white text-[0.7rem] font-bold uppercase rounded transition-all touch-manipulation flex items-center justify-center gap-1"
                 >
-                  ✕ RETIRER
+                  <X className="h-3 w-3" />
+                  RETIRER
                 </button>
               </div>
             ))}
@@ -185,7 +192,7 @@ export default function BaristaOrderSidebar({
         {/* État vide */}
         {!currentDrink && orderItems.length === 0 && (
           <div className="text-center py-12 text-gray-400">
-            <div className="text-5xl mb-3">☕</div>
+            <Coffee className="h-16 w-16 mx-auto mb-3 text-gray-300" />
             <p className="font-semibold text-sm">Aucune boisson</p>
             <p className="text-xs">Tapez sur une boisson</p>
           </div>
@@ -202,9 +209,16 @@ export default function BaristaOrderSidebar({
           <button
             onClick={onSubmitOrder}
             disabled={orderItems.length === 0 || submitting}
-            className="w-full py-3 bg-green-500 active:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold text-base uppercase tracking-wide rounded transition-all touch-manipulation"
+            className="w-full py-3 bg-green-500 active:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold text-base uppercase tracking-wide rounded transition-all touch-manipulation flex items-center justify-center gap-2"
           >
-            {submitting ? 'ENREGISTREMENT...' : '✓ ENREGISTRER'}
+            {submitting ? (
+              'ENREGISTREMENT...'
+            ) : (
+              <>
+                <Check className="h-5 w-5" />
+                ENREGISTRER
+              </>
+            )}
           </button>
 
           <button

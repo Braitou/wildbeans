@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WildBeans - Stats Événement (Mockup)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Fragment Mono';
+            src: url('src/app/fonts/FragmentMono-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Fragment Mono', 'Courier New', monospace;
+            background: #fafafa;
+            color: #1a1a1a;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .header-left h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .event-badge {
+            display: inline-block;
+            padding: 0.35rem 1rem;
+            background: #2ecc71;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .period-info {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .btn {
+            padding: 0.65rem 1.25rem;
+            border: 2px solid #1a1a1a;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .btn:hover {
+            background: #1a1a1a;
+            color: white;
+        }
+        
+        .btn-primary {
+            background: #2ecc71;
+            border-color: #2ecc71;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            border-color: #e74c3c;
+            color: white;
+        }
+        
+        /* Quick Stats Bar */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .quick-stat {
+            background: white;
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .quick-stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .quick-stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        
+        /* Main Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-full {
+            grid-column: 1 / -1;
+        }
+        
+        /* Top Drinks */
+        .top-drinks-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+        
+        .drink-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-left: 4px solid #706D54;
+        }
+        
+        .drink-rank {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ccc;
+            margin-right: 1rem;
+            min-width: 40px;
+        }
+        
+        .drink-rank.gold { color: #FFD700; }
+        .drink-rank.silver { color: #C0C0C0; }
+        .drink-rank.bronze { color: #CD7F32; }
+        
+        .drink-info {
+            flex: 1;
+        }
+        
+        .drink-name {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .drink-category {
+            font-size: 0.75rem;
+            color: #666;
+        }
+        
+        .drink-count {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #706D54;
+        }
+        
+        /* Options List */
+        .options-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+        
+        .option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: #f9f9f9;
+            border-left: 3px solid #A08963;
+        }
+        
+        .option-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .option-count {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #A08963;
+        }
+        
+        /* Realtime Indicator */
+        .realtime-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #2ecc71;
+            font-weight: 600;
+        }
+        
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        
+        /* Stats Details Table */
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        
+        .stats-table th {
+            text-align: left;
+            padding: 0.75rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+            border-bottom: 2px solid #e0e0e0;
+            font-weight: 600;
+        }
+        
+        .stats-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .stats-table tr:hover {
+            background: #f9f9f9;
+        }
+        
+        /* Heatmap */
+        .heatmap {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 0.25rem;
+        }
+        
+        .heatmap-cell {
+            aspect-ratio: 1;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .heatmap-cell.high { background: #2ecc71; }
+        .heatmap-cell.medium { background: #f39c12; }
+        .heatmap-cell.low { background: #95a5a6; }
+        
+        /* Comparison Bars */
+        .comparison-bar {
+            height: 24px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+            margin: 0.5rem 0;
+        }
+        
+        .comparison-fill {
+            height: 100%;
+            background: #706D54;
+            transition: width 0.3s;
+        }
+        
+        .comparison-label {
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+            mix-blend-mode: difference;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h1>📊 MARIAGE CLAIRE & MAX</h1>
+                <div>
+                    <span class="event-badge">EN COURS</span>
+                    <div class="period-info">
+                        15 novembre 2024, 14h30 - 22h00 • 
+                        <span class="realtime-indicator">
+                            <span class="pulse"></span>
+                            Mise à jour en temps réel
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn" onclick="alert('Retour à l\'événement')">← RETOUR</button>
+                <button class="btn btn-primary" onclick="alert('Export Excel')">📥 EXPORT</button>
+                <button class="btn btn-danger" onclick="alert('Clôturer l\'événement')">🔒 CLÔTURER</button>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="quick-stat">
+                <div class="quick-stat-label">Commandes</div>
+                <div class="quick-stat-value">234</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-label">Boissons</div>
+                <div class="quick-stat-value">487</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-label">Clients Uniques</div>
+                <div class="quick-stat-value">156</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-label">Moy/Commande</div>
+                <div class="quick-stat-value">2.08</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-label">Options/Boisson</div>
+                <div class="quick-stat-value">2.4</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-label">Personnalisées</div>
+                <div class="quick-stat-value">89%</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-label">Heure de Pointe</div>
+                <div class="quick-stat-value">18h</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-label">Vitesse Moy</div>
+                <div class="quick-stat-value">3.2min</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-label">Barista/Client</div>
+                <div class="quick-stat-value">38/62</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="stats-grid">
+            <!-- Top Drinks -->
+            <div class="card">
+                <div class="card-title">
+                    <span>🏆 TOP 10 BOISSONS</span>
+                </div>
+                <div class="top-drinks-list">
+                    <div class="drink-item">
+                        <span class="drink-rank gold">1</span>
+                        <div class="drink-info">
+                            <div class="drink-name">Cappuccino</div>
+                            <div class="drink-category">☕ Coffee</div>
+                        </div>
+                        <div class="drink-count">89</div>
+                    </div>
+                    <div class="drink-item">
+                        <span class="drink-rank silver">2</span>
+                        <div class="drink-info">
+                            <div class="drink-name">Latte</div>
+                            <div class="drink-category">☕ Coffee</div>
+                        </div>
+                        <div class="drink-count">76</div>
+                    </div>
+                    <div class="drink-item">
+                        <span class="drink-rank bronze">3</span>
+                        <div class="drink-info">
+                            <div class="drink-name">Americano</div>
+                            <div class="drink-category">☕ Coffee</div>
+                        </div>
+                        <div class="drink-count">64</div>
+                    </div>
+                    <div class="drink-item">
+                        <span class="drink-rank">4</span>
+                        <div class="drink-info">
+                            <div class="drink-name">Chai</div>
+                            <div class="drink-category">🍵 Non-Coffee</div>
+                        </div>
+                        <div class="drink-count">52</div>
+                    </div>
+                    <div class="drink-item">
+                        <span class="drink-rank">5</span>
+                        <div class="drink-info">
+                            <div class="drink-name">Espresso</div>
+                            <div class="drink-category">☕ Coffee</div>
+                        </div>
+                        <div class="drink-count">47</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Options & Category -->
+            <div style="display: grid; gap: 1.5rem;">
+                <!-- Top Options -->
+                <div class="card">
+                    <div class="card-title">⭐ TOP OPTIONS</div>
+                    <div class="options-list">
+                        <div class="option-item">
+                            <div class="option-name">Moyen</div>
+                            <div class="option-count">234</div>
+                        </div>
+                        <div class="option-item">
+                            <div class="option-name">Lait Avoine</div>
+                            <div class="option-count">198</div>
+                        </div>
+                        <div class="option-item">
+                            <div class="option-name">1 sucre</div>
+                            <div class="option-count">176</div>
+                        </div>
+                        <div class="option-item">
+                            <div class="option-name">Grand</div>
+                            <div class="option-count">145</div>
+                        </div>
+                        <div class="option-item">
+                            <div class="option-name">Chantilly</div>
+                            <div class="option-count">123</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Distribution -->
+                <div class="card">
+                    <div class="card-title">☕ DISTRIBUTION</div>
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="font-weight: 600; font-size: 0.875rem;">Coffee</span>
+                            <span style="font-weight: 700; font-size: 1rem;">312 (64%)</span>
+                        </div>
+                        <div class="comparison-bar">
+                            <div class="comparison-fill" style="width: 64%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="font-weight: 600; font-size: 0.875rem;">Non-Coffee</span>
+                            <span style="font-weight: 700; font-size: 1rem;">175 (36%)</span>
+                        </div>
+                        <div class="comparison-bar">
+                            <div class="comparison-fill" style="width: 36%; background: #A08963;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Chart -->
+        <div class="card card-full">
+            <div class="card-title">📈 COMMANDES PAR HEURE</div>
+            <canvas id="timelineChart" height="150"></canvas>
+        </div>
+
+        <!-- Heatmap -->
+        <div class="card card-full">
+            <div class="card-title">🔥 HEATMAP HORAIRE (Intensité des commandes)</div>
+            <div style="display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: center;">
+                <div style="font-size: 0.7rem; text-align: right; color: #666;">
+                    <div style="height: 40px; display: flex; align-items: center;">8h-10h</div>
+                    <div style="height: 40px; display: flex; align-items: center;">10h-12h</div>
+                    <div style="height: 40px; display: flex; align-items: center;">12h-14h</div>
+                    <div style="height: 40px; display: flex; align-items: center;">14h-16h</div>
+                    <div style="height: 40px; display: flex; align-items: center;">16h-18h</div>
+                    <div style="height: 40px; display: flex; align-items: center;">18h-20h</div>
+                </div>
+                <div style="display: grid; grid-template-rows: repeat(6, 40px); gap: 0.25rem;">
+                    <div class="heatmap">
+                        <div class="heatmap-cell low">8</div>
+                        <div class="heatmap-cell low">12</div>
+                        <div class="heatmap-cell medium">23</div>
+                        <div class="heatmap-cell medium">34</div>
+                        <div class="heatmap-cell high">45</div>
+                    </div>
+                    <div class="heatmap">
+                        <div class="heatmap-cell medium">34</div>
+                        <div class="heatmap-cell high">56</div>
+                        <div class="heatmap-cell high">67</div>
+                        <div class="heatmap-cell high">54</div>
+                        <div class="heatmap-cell medium">43</div>
+                    </div>
+                    <div class="heatmap">
+                        <div class="heatmap-cell medium">32</div>
+                        <div class="heatmap-cell medium">28</div>
+                        <div class="heatmap-cell low">19</div>
+                        <div class="heatmap-cell low">15</div>
+                        <div class="heatmap-cell low">12</div>
+                    </div>
+                    <div class="heatmap">
+                        <div class="heatmap-cell low">15</div>
+                        <div class="heatmap-cell medium">24</div>
+                        <div class="heatmap-cell medium">31</div>
+                        <div class="heatmap-cell medium">38</div>
+                        <div class="heatmap-cell high">42</div>
+                    </div>
+                    <div class="heatmap">
+                        <div class="heatmap-cell high">45</div>
+                        <div class="heatmap-cell high">52</div>
+                        <div class="heatmap-cell high">48</div>
+                        <div class="heatmap-cell medium">36</div>
+                        <div class="heatmap-cell medium">29</div>
+                    </div>
+                    <div class="heatmap">
+                        <div class="heatmap-cell medium">22</div>
+                        <div class="heatmap-cell low">18</div>
+                        <div class="heatmap-cell low">14</div>
+                        <div class="heatmap-cell low">9</div>
+                        <div class="heatmap-cell low">5</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Drinks Table -->
+        <div class="card card-full">
+            <div class="card-title">
+                <span>📋 TOUTES LES BOISSONS</span>
+                <input type="search" placeholder="Rechercher..." style="padding: 0.5rem; border: 1px solid #e0e0e0; width: 250px;">
+            </div>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Boisson</th>
+                        <th>Catégorie</th>
+                        <th>Quantité</th>
+                        <th>% du Total</th>
+                        <th>Options Populaires</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Cappuccino</strong></td>
+                        <td>☕ Coffee</td>
+                        <td>89</td>
+                        <td>18.3%</td>
+                        <td>Moyen (45), Lait Avoine (32), Chantilly (28)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Latte</strong></td>
+                        <td>☕ Coffee</td>
+                        <td>76</td>
+                        <td>15.6%</td>
+                        <td>Grand (38), Lait Écrémé (29), 1 sucre (24)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Americano</strong></td>
+                        <td>☕ Coffee</td>
+                        <td>64</td>
+                        <td>13.1%</td>
+                        <td>Grand (42), Sans sucre (38)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Chai</strong></td>
+                        <td>🍵 Non-Coffee</td>
+                        <td>52</td>
+                        <td>10.7%</td>
+                        <td>Moyen (28), Lait Avoine (22), 1 sucre (18)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Espresso</strong></td>
+                        <td>☕ Coffee</td>
+                        <td>47</td>
+                        <td>9.7%</td>
+                        <td>Double (32), Sans sucre (28)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Timeline Chart
+        new Chart(document.getElementById('timelineChart'), {
+            type: 'line',
+            data: {
+                labels: ['14h', '15h', '16h', '17h', '18h', '19h', '20h', '21h', '22h'],
+                datasets: [{
+                    label: 'Commandes',
+                    data: [12, 28, 45, 62, 78, 54, 42, 28, 15],
+                    borderColor: '#2ecc71',
+                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

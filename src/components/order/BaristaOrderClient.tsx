@@ -136,7 +136,7 @@ export default function BaristaOrderClient({
         options: item.selections
       }));
 
-      console.log('📊 Envoi de la commande barista:', {
+      console.log('Envoi de la commande barista:', {
         event_id: eventId,
         items: itemsData
       });
@@ -154,7 +154,7 @@ export default function BaristaOrderClient({
       }
 
       console.log('✅ Réponse de la fonction RPC:', data);
-      toast.success(`✓ Commande de ${data.orders_created} boisson(s) enregistrée !`, {
+      toast.success(`Commande de ${data.orders_created} boisson(s) enregistrée !`, {
         duration: 3000,
       });
       
@@ -194,7 +194,7 @@ export default function BaristaOrderClient({
           </button>
           
           <h1 className="text-xl md:text-2xl font-bold uppercase tracking-wide mb-1">
-            🎯 BARISTA ORDER
+            BARISTA ORDER
           </h1>
           <p className="text-xs text-gray-600">
             {categories.reduce((acc, cat) => acc + cat.items.length, 0)} boissons disponibles

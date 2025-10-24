@@ -1,6 +1,6 @@
 'use client';
 import { cn } from '@/lib/utils';
-import { X } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 
 type TrayItem = {
   id: string;           // tempId (uuid)
@@ -43,7 +43,7 @@ export default function OrderTray({
                   {i + 1}
                 </span>
                 <span className="max-w-[14ch] overflow-hidden text-ellipsis whitespace-nowrap text-sm">{it.name}</span>
-                {it.complete ? <span className="text-[11px] opacity-80">✓</span> : null}
+                {it.complete ? <Check className="h-3 w-3 opacity-80" /> : null}
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); onRemoveIndex(i); }}

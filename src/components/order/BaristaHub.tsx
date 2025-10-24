@@ -36,10 +36,9 @@ export default function BaristaHub({ categories, onSelectDrink }: BaristaHubProp
     <div className="space-y-6">
       {categories.map((category) => (
         <div key={category.id}>
-          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-gray-500">
-            {category.name.toLowerCase().includes('café') || category.name.toLowerCase().includes('coffee') ? '☕ ' : '🍵 '}
-            {category.name.toUpperCase()}
-          </h2>
+                <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-gray-500">
+                  {category.name.toUpperCase()}
+                </h2>
           
           {/* Optimisé pour iPad mini landscape: 5 colonnes, cartes compactes et tactiles */}
           <div className="grid grid-cols-5 gap-2">
