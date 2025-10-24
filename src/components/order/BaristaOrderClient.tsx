@@ -8,12 +8,6 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 
-type DrinkItem = {
-  id: string;
-  name: string;
-  category: string;
-};
-
 type ModifierOption = {
   id: string;
   name: string;
@@ -25,6 +19,13 @@ type Modifier = {
   type: 'single' | 'multi';
   required: boolean;
   options: ModifierOption[];
+};
+
+type DrinkItem = {
+  id: string;
+  name: string;
+  category: string;
+  modifiers: Modifier[];
 };
 
 type Category = {
@@ -42,13 +43,11 @@ type OrderItem = {
 interface BaristaOrderClientProps {
   eventId: string;
   categories: Category[];
-  modifiers: Modifier[];
 }
 
 export default function BaristaOrderClient({
   eventId,
   categories,
-  modifiers,
 }: BaristaOrderClientProps) {
   const router = useRouter();
 
@@ -63,7 +62,7 @@ export default function BaristaOrderClient({
     
     // Initialiser les sélections avec des valeurs par défaut
     const defaultSelections: Record<string, string | string[]> = {};
-    modifiers.forEach(mod => {
+    drink.modifiers.forEach(mod => {
       if (mod.type === 'single') {
         // Sélectionner la première option par défaut pour les options requises
         defaultSelections[mod.id] = mod.required && mod.options.length > 0 
@@ -99,7 +98,7 @@ export default function BaristaOrderClient({
     if (!currentDrink) return;
 
     // Vérifier que les options requises sont sélectionnées
-    const missingRequired = modifiers.find(m => m.required && !currentSelections[m.id]);
+    const missingRequired = currentDrink.modifiers.find(m => m.required && !currentSelections[m.id]);
     if (missingRequired) {
       toast.error(`Veuillez sélectionner ${missingRequired.name}`);
       return;
@@ -182,23 +181,23 @@ export default function BaristaOrderClient({
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
       {/* Section principale - Hub des boissons */}
-      <div className="flex-1 overflow-y-auto bg-[#f5f5f0] p-8">
-        <div className="mb-6">
+      <div className="flex-1 overflow-y-auto bg-[#f5f5f0] p-4 md:p-6">
+        <div className="mb-4">
           <button
             onClick={() => router.push(`/admin/events/${eventId}`)}
-            className="mb-4 inline-flex items-center gap-2 h-10 px-3 border rounded-none hover:bg-gray-50 bg-white"
+            className="mb-3 inline-flex items-center gap-2 h-9 px-3 border rounded hover:bg-gray-50 bg-white text-sm"
           >
-            <ArrowLeft className="h-4 w-4" />
-            RETOUR À L'ÉVÉNEMENT
+            <ArrowLeft className="h-3 w-3" />
+            RETOUR
           </button>
           
-          <h1 className="text-2xl font-bold uppercase tracking-wide mb-2">
+          <h1 className="text-xl md:text-2xl font-bold uppercase tracking-wide mb-1">
             🎯 BARISTA ORDER
           </h1>
-          <p className="text-sm text-gray-600">
-            Cliquez sur une boisson pour commencer une commande • {categories.length} catégories, {categories.reduce((acc, cat) => acc + cat.items.length, 0)} boissons
+          <p className="text-xs text-gray-600">
+            {categories.reduce((acc, cat) => acc + cat.items.length, 0)} boissons disponibles
           </p>
         </div>
 
@@ -213,7 +212,6 @@ export default function BaristaOrderClient({
         currentDrink={currentDrink}
         currentSelections={currentSelections}
         orderItems={orderItems}
-        modifiers={modifiers}
         submitting={submitting}
         onToggleOption={handleToggleOption}
         onAddToOrder={handleAddToOrder}
